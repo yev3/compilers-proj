@@ -1,6 +1,6 @@
 %namespace ASTBuilder
 %scannertype TCCLScanner
-%visibility internal
+%visibility public
 %tokentype Token 
 
 %option stack, minimize, parser, verbose, persistbuffer, noembedbuffers 
