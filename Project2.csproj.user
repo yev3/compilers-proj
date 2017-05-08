@@ -3,5 +3,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartWorkingDirectory>$(SolutionDir)</StartWorkingDirectory>
     <StartArguments>good1p.txt</StartArguments>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
 </Project>

@@ -3,10 +3,10 @@
 // (see accompanying GPPGcopyright.rtf)
 
 // GPPG version 1.5.2
-// Machine:  RJL-SURFACE4
-// DateTime: 5/6/2017 4:09:42 PM
-// UserName: Richard LeBlanc
-// Input file <TCCL.grammar.y - 5/6/2017 3:50:18 PM>
+// Machine:  YK-PC
+// DateTime: 5/8/2017 4:06:03 PM
+// UserName: YK
+// Input file <TCCL.grammar.y - 5/8/2017 4:06:02 PM>
 
 // options: no-lines gplex
 
@@ -19,7 +19,7 @@ using QUT.Gppg;
 
 namespace ASTBuilder
 {
-internal enum Token {error=2,EOF=3,STATIC=4,STRUCT=5,QUESTION=6,
+public enum Token {error=2,EOF=3,STATIC=4,STRUCT=5,QUESTION=6,
     RSLASH=7,MINUSOP=8,NULL=9,INT=10,OP_EQ=11,OP_LT=12,
     COLON=13,OP_LOR=14,ELSE=15,PERCENT=16,THIS=17,CLASS=18,
     PIPE=19,PUBLIC=20,PERIOD=21,HAT=22,COMMA=23,VOID=24,
@@ -31,7 +31,7 @@ internal enum Token {error=2,EOF=3,STATIC=4,STRUCT=5,QUESTION=6,
 
 // Abstract base class for GPLEX scanners
 [GeneratedCodeAttribute( "Gardens Point Parser Generator", "1.5.2")]
-internal abstract class ScanBase : AbstractScanner<AbstractNode,LexLocation> {
+public abstract class ScanBase : AbstractScanner<AbstractNode,LexLocation> {
   private LexLocation __yylloc = new LexLocation();
   public override LexLocation yylloc { get { return __yylloc; } set { __yylloc = value; } }
   protected virtual bool yywrap() { return true; }
@@ -39,7 +39,7 @@ internal abstract class ScanBase : AbstractScanner<AbstractNode,LexLocation> {
 
 // Utility class for encapsulating token information
 [GeneratedCodeAttribute( "Gardens Point Parser Generator", "1.5.2")]
-internal class ScanObj {
+public class ScanObj {
   public int token;
   public AbstractNode yylval;
   public LexLocation yylloc;
@@ -49,7 +49,7 @@ internal class ScanObj {
 }
 
 [GeneratedCodeAttribute( "Gardens Point Parser Generator", "1.5.2")]
-internal partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
+public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 {
 #pragma warning disable 649
   private static Dictionary<int, string> aliases;
@@ -375,6 +375,27 @@ internal partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 #pragma warning disable 162, 1522
     switch (action)
     {
+      case 3: // ClassDeclaration -> Modifiers, CLASS, Identifier, ClassBody
+{CurrentSemanticValue = new ClassDeclaration(ValueStack[ValueStack.Depth-4], ValueStack[ValueStack.Depth-2], ValueStack[ValueStack.Depth-1]);}
+        break;
+      case 4: // Modifiers -> PUBLIC
+{CurrentSemanticValue = new Modifiers(Token.PUBLIC);}
+        break;
+      case 5: // Modifiers -> PRIVATE
+{CurrentSemanticValue = new Modifiers(Token.PUBLIC);}
+        break;
+      case 6: // Modifiers -> STATIC
+{CurrentSemanticValue = new Modifiers(Token.PUBLIC);}
+        break;
+      case 7: // Modifiers -> Modifiers, PUBLIC
+{/*((Modifiers)($1)).ModifierTokens.Add(Token.PUBLIC);*/ CurrentSemanticValue = ValueStack[ValueStack.Depth-2];}
+        break;
+      case 8: // Modifiers -> Modifiers, PRIVATE
+{/*((Modifiers)($1)).ModifierTokens.Add(Token.PRIVATE);*/ CurrentSemanticValue = ValueStack[ValueStack.Depth-2];}
+        break;
+      case 9: // Modifiers -> Modifiers, STATIC
+{/*((Modifiers)($1)).ModifierTokens.Add(Token.STATIC);*/ CurrentSemanticValue = ValueStack[ValueStack.Depth-2];}
+        break;
     }
 #pragma warning restore 162, 1522
   }

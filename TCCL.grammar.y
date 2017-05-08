@@ -1,9 +1,10 @@
 %namespace ASTBuilder
 %partial
 %parsertype TCCLParser
-%visibility internal
+%visibility public
 %tokentype Token
 %YYSTYPE AbstractNode
+
 
 
 %start CompilationUnit
@@ -31,15 +32,15 @@
 CompilationUnit		:	ClassDeclaration
 					;
 
-ClassDeclaration	:	Modifiers CLASS Identifier ClassBody
+ClassDeclaration	:	Modifiers CLASS Identifier ClassBody {$$ = new ClassDeclaration($1, $3, $4);}
 					;
 
-Modifiers			:	PUBLIC
-					|	PRIVATE
-					|	STATIC
-					|	Modifiers PUBLIC
-					|	Modifiers PRIVATE
-					|	Modifiers STATIC
+Modifiers			:	PUBLIC				{$$ = new Modifiers(Token.PUBLIC);}
+					|	PRIVATE				{$$ = new Modifiers(Token.PUBLIC);}
+					|	STATIC				{$$ = new Modifiers(Token.PUBLIC);}
+					|	Modifiers PUBLIC	{/*((Modifiers)($1)).ModifierTokens.Add(Token.PUBLIC);*/ $$ = $1;}
+					|	Modifiers PRIVATE	{/*((Modifiers)($1)).ModifierTokens.Add(Token.PRIVATE);*/ $$ = $1;}
+					|	Modifiers STATIC	{/*((Modifiers)($1)).ModifierTokens.Add(Token.STATIC);*/ $$ = $1;}
 					;
 ClassBody			:	LBRACE FieldDeclarations RBRACE
 					|	LBRACE RBRACE

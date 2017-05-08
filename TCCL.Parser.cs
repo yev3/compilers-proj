@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ASTBuilder
 {
-    internal partial class TCCLParser
+    public partial class TCCLParser
     {
         public TCCLParser() : base(null) { }
 
@@ -14,5 +14,13 @@ namespace ASTBuilder
             this.Scanner = new TCCLScanner(File.OpenRead(filename));
             this.Parse();
         }
+        public void Parse(Stream strm)
+        {
+            this.Scanner = new TCCLScanner(strm);
+            this.Parse();
+        }
+
+
+
     }
 }

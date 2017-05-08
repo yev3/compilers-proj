@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ASTBuilder
 {
-    internal partial class TCCLScanner
+    public partial class TCCLScanner
     {
 
 		public override void yyerror(string format, params object[] args)
