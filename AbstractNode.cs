@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -12,17 +13,26 @@ namespace ASTBuilder
     /// link itself with other siblings and adopt children.
     /// Each node gets a node number to help identify it distinctly in an AST.
     /// </summary>
-    public abstract class AbstractNode : LinkedList<AbstractNode>, ReflectiveVisitable
+    public abstract class AbstractNode : LinkedList<AbstractNode>, IReflectiveVisitable
     {
-        private LinkedListNode<AbstractNode> _nodeThatContainsMe;
+        public LinkedListNode<AbstractNode> LinkedListNodeContainer { get; set; }
+
         // these are accessible:
         // Count	
         // First	
         // Last	
 
+        public void AddChild(AbstractNode child)
+        {
+            if (child == null) throw new Exception("Error: tried to add a null child to the linked list.");
+            LinkedListNode<AbstractNode> newNode = new LinkedListNode<AbstractNode>(child);
+            child.LinkedListNodeContainer = newNode;
+            this.AddFirst(child);
+        }
+
         public virtual AbstractNode Parent
         {
-            get { return (_nodeThatContainsMe.List as AbstractNode); }
+            get { return (LinkedListNodeContainer.List as AbstractNode); }
         }
 
         public virtual AbstractNode LeftMostChild
@@ -32,12 +42,12 @@ namespace ASTBuilder
 
         public virtual AbstractNode NextSibling
         {
-            get { return _nodeThatContainsMe.Next?.Value; }
+            get { return LinkedListNodeContainer.Next?.Value; }
         }
 
         public virtual AbstractNode LeftMostSibling
         {
-            get { return _nodeThatContainsMe.List.First?.Value; }
+            get { return LinkedListNodeContainer.List.First?.Value; }
         }
 
         private AbstractNode nextSibling;
@@ -45,7 +55,12 @@ namespace ASTBuilder
 
         public AbstractNode(LinkedListNode<AbstractNode> nodeIBelongTo)
         {
-            _nodeThatContainsMe = nodeIBelongTo;
+            LinkedListNodeContainer = nodeIBelongTo;
+        }
+
+        public AbstractNode()
+        {
+
         }
 
         public virtual string Name { get; protected set; }
@@ -133,10 +148,6 @@ namespace ASTBuilder
 
         /// <summary>
         /// Reflective visitor pattern </summary>
-        public void accept(ReflectiveVisitable v)
-        {
-            v.accept(this);
-        }
 
         /// <summary>
         /// Obsolete, do not use! </summary>
@@ -144,6 +155,7 @@ namespace ASTBuilder
         //{
         //internWalk(0, v);
         //}
+        public abstract void Accept(INodeVisitor myVisitor);
     }
 
 }

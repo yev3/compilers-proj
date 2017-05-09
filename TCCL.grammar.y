@@ -5,14 +5,37 @@
 %tokentype Token
 %YYSTYPE AbstractNode
 
+/* %union{
+    public Token token;
+    public AbstractNode abstractNode;
+} */
+
+%{
+    public string yytext
+    {
+        get { return ((TCCLScanner)Scanner).yytext; }
+    }
+
+%}
 
 %start CompilationUnit
 
-%token STATIC, STRUCT, QUESTION, RSLASH, MINUSOP, NULL, INT, OP_EQ, OP_LT, COLON, OP_LOR
-%token ELSE, PERCENT, THIS, CLASS, PIPE, PUBLIC, PERIOD, HAT, COMMA, VOID, TILDE
-%token LPAREN, RPAREN, OP_GE, SEMICOLON, IF, NEW, WHILE, PRIVATE, BANG, OP_LE, AND 
-%token LBRACE, RBRACE, LBRACKET, RBRACKET, BOOLEAN, INSTANCEOF, ASTERISK, EQUALS, PLUSOP
-%token RETURN, OP_GT, OP_NE, OP_LAND, INT_NUMBER, IDENTIFIER, LITERAL, SUPER
+// %token STATIC, STRUCT, QUESTION, RSLASH, MINUSOP, NULL, INT, OP_EQ, OP_LT, COLON, OP_LOR
+// %token ELSE, PERCENT, THIS, CLASS, PIPE, PUBLIC, PERIOD, HAT, COMMA, VOID, TILDE
+// %token LPAREN, RPAREN, OP_GE, SEMICOLON, IF, NEW, WHILE, PRIVATE, BANG, OP_LE, AND 
+// %token LBRACE, RBRACE, LBRACKET, RBRACKET, BOOLEAN, INSTANCEOF, ASTERISK, EQUALS, PLUSOP
+// %token RETURN, OP_GT, OP_NE, OP_LAND, INT_NUMBER, IDENTIFIER, LITERAL, SUPER
+
+%token AND ASTERISK BANG BOOLEAN CLASS
+%token COLON COMMA ELSE EQUALS HAT
+%token IDENTIFIER IF INSTANCEOF INT INT_NUMBER
+%token LBRACE LBRACKET LITERAL LPAREN MINUSOP
+%token NEW NULL OP_EQ OP_GE OP_GT
+%token OP_LAND OP_LE OP_LOR OP_LT OP_NE
+%token PERCENT PERIOD PIPE PLUSOP PRIVATE
+%token PUBLIC QUESTION RBRACE RBRACKET RETURN
+%token RPAREN RSLASH SEMICOLON STATIC STRUCT
+%token SUPER THIS TILDE VOID WHILE
 
 %right EQUALS
 %left  OP_LOR
@@ -28,37 +51,37 @@
 
 %%
 
+CompilationUnit     :   ClassDeclaration                    {$$ = new CompilationUnit($1);}
+                    ;
 
-CompilationUnit		:	ClassDeclaration
-					;
+ClassDeclaration    :   Modifiers CLASS Identifier ClassBody {$$ = new ClassDeclaration($1, $3, $4);}
+                    ;
 
-ClassDeclaration	:	Modifiers CLASS Identifier ClassBody
-					;
+Modifiers           :   PUBLIC                              { $$ = new Modifiers(Token.PUBLIC);}
+                    |   PRIVATE                             { $$ = new Modifiers(Token.PRIVATE);}
+                    |   STATIC                              { $$ = new Modifiers(Token.STATIC);}
+                    |   Modifiers PUBLIC                    { ((Modifiers)($1)).ModifierTokens.Add(Token.PUBLIC); $$ = $1;}
+                    |   Modifiers PRIVATE                   { ((Modifiers)($1)).ModifierTokens.Add(Token.PRIVATE); $$ = $1;}
+                    |   Modifiers STATIC                    { ((Modifiers)($1)).ModifierTokens.Add(Token.STATIC); $$ = $1;}
+                    ;
 
-Modifiers			:	PUBLIC
-					|	PRIVATE
-					|	STATIC
-					|	Modifiers PUBLIC
-					|	Modifiers PRIVATE
-					|	Modifiers STATIC
-					;
-ClassBody			:	LBRACE FieldDeclarations RBRACE
-					|	LBRACE RBRACE
-					;
+ClassBody           :   LBRACE FieldDeclarations RBRACE     { $$ = new ClassBody($2);}
+                    |   LBRACE RBRACE                       { $$ = new ClassBody();}
+                    ;
 
-FieldDeclarations	:	FieldDeclaration
-					|	FieldDeclarations FieldDeclaration
-					;
+FieldDeclarations   :   FieldDeclaration                    { $$ = new FieldDeclarations($1); }
+                    |   FieldDeclarations FieldDeclaration  { $1.AddChild($2); $$ = $1;}
+                    ;
 
-FieldDeclaration	:	FieldVariableDeclaration SEMICOLON
-					|	MethodDeclaration
-					|	ConstructorDeclaration
-					|	StaticInitializer
-					|	StructDeclaration
-					;
+FieldDeclaration    :   FieldVariableDeclaration SEMICOLON  {Console.WriteLine("field var decl");           }
+                    |   MethodDeclaration                   {Console.WriteLine("field method decl");        }
+                    |   ConstructorDeclaration              {Console.WriteLine("field ctor decl");          }
+                    |   StaticInitializer                   {Console.WriteLine("field static init decl");   }
+                    |   StructDeclaration                   {Console.WriteLine("field struct decl");        }
+                    ;
 
-StructDeclaration	:	Modifiers STRUCT Identifier ClassBody
-					;
+StructDeclaration   :   Modifiers STRUCT Identifier ClassBody   {}
+                    ;
 
 
 
@@ -69,108 +92,108 @@ StructDeclaration	:	Modifiers STRUCT Identifier ClassBody
  * here to get the information where you want it, so that the declarations can
  * be suitably annotated with their type and modifier information.
  */
-FieldVariableDeclaration	:	Modifiers TypeSpecifier FieldVariableDeclarators
-							;
+FieldVariableDeclaration    :   Modifiers TypeSpecifier FieldVariableDeclarators            {}
+                            ;
 
-TypeSpecifier				:	TypeName
-							| 	ArraySpecifier
-							;
+TypeSpecifier               :   TypeName                                                    {}
+                            |   ArraySpecifier                                              {}
+                            ;
 
-TypeName					:	PrimitiveType
-							|   QualifiedName
-							;
+TypeName                    :   PrimitiveType                                               {}
+                            |   QualifiedName                                               {}
+                            ;
 
-ArraySpecifier				: 	TypeName LBRACKET RBRACKET
-							;
-							
-PrimitiveType				:	BOOLEAN
-							|	INT
-							|	VOID 
-							;
+ArraySpecifier              :   TypeName LBRACKET RBRACKET                                  {}
+                            ;
+                            
+PrimitiveType               :   BOOLEAN                                                     {}
+                            |   INT                                                         {}
+                            |   VOID                                                        {}
+                            ;
 
-FieldVariableDeclarators	:	FieldVariableDeclaratorName
-							|   FieldVariableDeclarators COMMA FieldVariableDeclaratorName
-							;
+FieldVariableDeclarators    :   FieldVariableDeclaratorName                                 {}
+                            |   FieldVariableDeclarators COMMA FieldVariableDeclaratorName  {}
+                            ;
 
 
-MethodDeclaration			:	Modifiers TypeSpecifier MethodDeclarator MethodBody
-							;
+MethodDeclaration           :   Modifiers TypeSpecifier MethodDeclarator MethodBody         {}
+                            ;
 
-MethodDeclarator			:	MethodDeclaratorName LPAREN ParameterList RPAREN
-							|   MethodDeclaratorName LPAREN RPAREN
-							;
+MethodDeclarator            :   MethodDeclaratorName LPAREN ParameterList RPAREN            {}
+                            |   MethodDeclaratorName LPAREN RPAREN                          {}
+                            ;
 
-ParameterList				:	Parameter
-							|   ParameterList COMMA Parameter	
-							;
+ParameterList               :   Parameter                                                   {}
+                            |   ParameterList COMMA Parameter                               {}  
+                            ;
 
-Parameter					:	TypeSpecifier DeclaratorName
-							;
+Parameter                   :   TypeSpecifier DeclaratorName                                {}
+                            ;
 
-QualifiedName				:	Identifier
-							|	QualifiedName PERIOD Identifier
-							;
+QualifiedName               :   Identifier                                                  {}
+                            |   QualifiedName PERIOD Identifier                             {}
+                            ;
 
-DeclaratorName				:	Identifier
-							;
+DeclaratorName              :   Identifier                                                  {}
+                            ;
 
-MethodDeclaratorName		:	Identifier
-							;
+MethodDeclaratorName        :   Identifier                                                  {}
+                            ;
 
-FieldVariableDeclaratorName	:	Identifier
-							;
+FieldVariableDeclaratorName :   Identifier                                                  {}
+                            ;
 
-LocalVariableDeclaratorName	:	Identifier
-							;
+LocalVariableDeclaratorName :   Identifier                                                  {}
+                            ;
 
-MethodBody					:	Block
-							;
+MethodBody                  :   Block                                                       {}
+                            ;
 
-ConstructorDeclaration		:	Modifiers MethodDeclarator Block
-							;
+ConstructorDeclaration      :   Modifiers MethodDeclarator Block                            {}
+                            ;
 
-StaticInitializer			:	STATIC Block
-							;
-		
+StaticInitializer           :   STATIC Block                                                {}
+                            ;
+        
 /*
  * These can't be reorganized, because the order matters.
  * For example:  int i;  i = 5;  int j = i;
  */
-Block						:	LBRACE LocalVariableDeclarationsAndStatements RBRACE
-							|   LBRACE RBRACE
-							;
+Block                       :   LBRACE LocalVariableDeclarationsAndStatements RBRACE
+                            |   LBRACE RBRACE
+                            ;
 
-LocalVariableDeclarationsAndStatements	:	LocalVariableDeclarationOrStatement
-										|   LocalVariableDeclarationsAndStatements LocalVariableDeclarationOrStatement
-										;
+LocalVariableDeclarationsAndStatements  :   LocalVariableDeclarationOrStatement
+                                        |   LocalVariableDeclarationsAndStatements LocalVariableDeclarationOrStatement
+                                        ;
 
-LocalVariableDeclarationOrStatement	:	LocalVariableDeclarationStatement
-									|   Statement
-									;
+LocalVariableDeclarationOrStatement :   LocalVariableDeclarationStatement
+                                    |   Statement
+                                    ;
 
-LocalVariableDeclarationStatement	:	TypeSpecifier LocalVariableDeclarators SEMICOLON
-									|   StructDeclaration                      						
-									;
+LocalVariableDeclarationStatement   :   TypeSpecifier LocalVariableDeclarators SEMICOLON
+                                    |   StructDeclaration                                           
+                                    ;
 
-LocalVariableDeclarators	:	LocalVariableDeclaratorName
-							|   LocalVariableDeclarators COMMA LocalVariableDeclaratorName
-							;
+LocalVariableDeclarators    :   LocalVariableDeclaratorName
+                            |   LocalVariableDeclarators COMMA LocalVariableDeclaratorName
+                            ;
 
-							
+                            
 
-Statement					:	EmptyStatement
-							|	ExpressionStatement SEMICOLON
-							|	SelectionStatement
-							|	IterationStatement
-							|	ReturnStatement
-							|   Block
-							;
+Statement                   :   EmptyStatement
+                            |   ExpressionStatement SEMICOLON
+                            |   SelectionStatement
+                            |   IterationStatement
+                            |   ReturnStatement
+                            |   Block
+                            ;
 
-EmptyStatement				:	SEMICOLON
-							;
+EmptyStatement              :   SEMICOLON
+                            ;
 
-ExpressionStatement			:	Expression
-							;
+ExpressionStatement         :   Expression
+                            ;
 
 /*
  *  You will eventually have to address the shift/reduce error that
@@ -178,87 +201,87 @@ ExpressionStatement			:	Expression
  *
  */
 
-SelectionStatement			:	IF LPAREN Expression RPAREN Statement ELSE Statement
-//							|   IF LPAREN Expression RPAREN Statement
-							;
+SelectionStatement          :   IF LPAREN Expression RPAREN Statement ELSE Statement
+//                          |   IF LPAREN Expression RPAREN Statement
+                            ;
 
 
-IterationStatement			:	WHILE LPAREN Expression RPAREN Statement
-							;
+IterationStatement          :   WHILE LPAREN Expression RPAREN Statement
+                            ;
 
-ReturnStatement				:	RETURN Expression SEMICOLON
-							|   RETURN            SEMICOLON
-							;
+ReturnStatement             :   RETURN Expression SEMICOLON
+                            |   RETURN            SEMICOLON
+                            ;
 
-ArgumentList				:	Expression
-							|   ArgumentList COMMA Expression
-							;
+ArgumentList                :   Expression
+                            |   ArgumentList COMMA Expression
+                            ;
 
 
-Expression					:	QualifiedName EQUALS Expression
-							|   Expression OP_LOR Expression   /* short-circuit OR */
-							|   Expression OP_LAND Expression   /* short-circuit AND */
-							|   Expression PIPE Expression
-							|   Expression HAT Expression
-							|   Expression AND Expression
-							|	Expression OP_EQ Expression
-							|   Expression OP_NE Expression
-							|	Expression OP_GT Expression
-							|	Expression OP_LT Expression
-							|	Expression OP_LE Expression
-							|	Expression OP_GE Expression
-							|   Expression PLUSOP Expression
-							|   Expression MINUSOP Expression
-							|	Expression ASTERISK Expression
-							|	Expression RSLASH Expression
-							|   Expression PERCENT Expression	/* remainder */
-							|	ArithmeticUnaryOperator Expression  %prec UNARY
-							|	PrimaryExpression
-							;
+Expression                  :   QualifiedName EQUALS Expression
+                            |   Expression OP_LOR Expression   /* short-circuit OR */
+                            |   Expression OP_LAND Expression   /* short-circuit AND */
+                            |   Expression PIPE Expression
+                            |   Expression HAT Expression
+                            |   Expression AND Expression
+                            |   Expression OP_EQ Expression
+                            |   Expression OP_NE Expression
+                            |   Expression OP_GT Expression
+                            |   Expression OP_LT Expression
+                            |   Expression OP_LE Expression
+                            |   Expression OP_GE Expression
+                            |   Expression PLUSOP Expression
+                            |   Expression MINUSOP Expression
+                            |   Expression ASTERISK Expression
+                            |   Expression RSLASH Expression
+                            |   Expression PERCENT Expression   /* remainder */
+                            |   ArithmeticUnaryOperator Expression  %prec UNARY
+                            |   PrimaryExpression
+                            ;
 
-ArithmeticUnaryOperator		:	PLUSOP
-							|   MINUSOP
-							;
-							
-PrimaryExpression			:	QualifiedName
-							|   NotJustName
-							;
+ArithmeticUnaryOperator     :   PLUSOP
+                            |   MINUSOP
+                            ;
+                            
+PrimaryExpression           :   QualifiedName
+                            |   NotJustName
+                            ;
 
-NotJustName					:	SpecialName
-							|   ComplexPrimary
-							;
+NotJustName                 :   SpecialName
+                            |   ComplexPrimary
+                            ;
 
-ComplexPrimary				:	LPAREN Expression RPAREN
-							|   ComplexPrimaryNoParenthesis
-							;
+ComplexPrimary              :   LPAREN Expression RPAREN
+                            |   ComplexPrimaryNoParenthesis
+                            ;
 
-ComplexPrimaryNoParenthesis	:	LITERAL
-							|   Number
-							|	FieldAccess
-							|	MethodCall
-							;
+ComplexPrimaryNoParenthesis :   LITERAL
+                            |   Number
+                            |   FieldAccess
+                            |   MethodCall
+                            ;
 
-FieldAccess					:	NotJustName PERIOD Identifier
-							;		
+FieldAccess                 :   NotJustName PERIOD Identifier
+                            ;       
 
-MethodCall					:	MethodReference LPAREN ArgumentList RPAREN
-							|   MethodReference LPAREN RPAREN
-							;
+MethodCall                  :   MethodReference LPAREN ArgumentList RPAREN
+                            |   MethodReference LPAREN RPAREN
+                            ;
 
-MethodReference				:	ComplexPrimaryNoParenthesis
-							|	QualifiedName
-							|   SpecialName
-							;
+MethodReference             :   ComplexPrimaryNoParenthesis
+                            |   QualifiedName
+                            |   SpecialName
+                            ;
 
-SpecialName					:	THIS
-							|	NULL
-							;
+SpecialName                 :   THIS
+                            |   NULL
+                            ;
 
-Identifier					:	IDENTIFIER
-							;
+Identifier                  :   IDENTIFIER      {$$ = new Identifier(yytext);}
+                            ;
 
-Number						:	INT_NUMBER
-							;
+Number                      :   INT_NUMBER
+                            ;
 
 %%
 
