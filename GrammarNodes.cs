@@ -35,10 +35,11 @@ namespace ASTBuilder
     public class ClassDeclaration : AbstractNode
     {
         public ClassDeclaration(
-            AbstractNode modifiers, 
-            AbstractNode className, 
+            AbstractNode modifiers,
+            AbstractNode className,
             AbstractNode classBody)
         {
+            
             Modifiers = modifiers as Modifiers;
             ClassName = className as Identifier;
             ClassBody = classBody as ClassBody;
@@ -51,22 +52,25 @@ namespace ASTBuilder
 
     public class Modifiers : AbstractNode
     {
-        //public List<Token> ModifierTokens { get; set; }
+        public List<Token> ModifierTokens { get; set; } = new List<Token>();
 
         public Modifiers(Token t)
         {
 
-            Console.WriteLine("In mod ctor");
-            //if (t != PUBLIC || t != STATIC || t != PRIVATE)
-            //{
-            //    throw new Exception("not one of the valid tokens");
-            //}
-            //ModifierTokens.Add(t);
+            if (t != PUBLIC && t != STATIC && t != PRIVATE)
+            {
+                throw new Exception("not one of the valid tokens");
+            }
+            ModifierTokens.Add(t);
         }
 
     }
     public class Identifier : AbstractNode
     {
+        public Identifier(string s)
+        {
+            Name = s;
+        }
 
     }
 

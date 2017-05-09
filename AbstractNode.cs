@@ -37,6 +37,7 @@ namespace ASTBuilder
                 throw new Exception("Call to makeSibling supplied null-valued parameter");
             }
             AbstractNode appendAt = this;
+
             while (appendAt.nextSibling != null)
             {
                 appendAt = appendAt.nextSibling;
@@ -46,6 +47,7 @@ namespace ASTBuilder
 
             AbstractNode ans = sib.leftmostSibling;
             ans.leftmostSibling = appendAt.leftmostSibling;
+
             while (ans.nextSibling != null)
             {
                 ans = ans.nextSibling;
@@ -140,20 +142,17 @@ namespace ASTBuilder
 
         public virtual string Name
         {
-            get
-            {
-                return "";
-            }
+            get; protected set;
         }
 
 
-        public override string ToString()
-        {
-            Type t = NodeType;
-            string tString = (t != null) ? ("<" + t.ToString() + "> ") : "";
+        //public override string ToString()
+        //{
+            //Type t = NodeType;
+            //string tString = (t != null) ? ("<" + t.ToString() + "> ") : "";
 
-            return "" + NodeNum + ": " + tString + whatAmI() + "  \"" + ToString() + "\"";
-        }
+            //return "" + NodeNum + ": " + tString + whatAmI() + "  \"" + ToString() + "\"";
+        //}
 
 
         public virtual int NodeNum
