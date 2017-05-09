@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace ASTBuilder
 {
-    public class AbstractNodeLinkedList : LinkedList<AbstractNode>
-    {
-        public AbstractNode Parent { get; set; }
-        
-    }
 
 
     /// <summary>
@@ -16,90 +12,51 @@ namespace ASTBuilder
     /// link itself with other siblings and adopt children.
     /// Each node gets a node number to help identify it distinctly in an AST.
     /// </summary>
-    public abstract class AbstractNode : ReflectiveVisitable
+    public abstract class AbstractNode : LinkedList<AbstractNode>, ReflectiveVisitable
     {
-        private AbstractNodeLinkedList _children = null;
-        private LinkedListNode<AbstractNode> _myEnclosedNode;
+        private LinkedListNode<AbstractNode> _nodeThatContainsMe;
+        // these are accessible:
+        // Count	
+        // First	
+        // Last	
 
+        public virtual AbstractNode Parent
+        {
+            get { return (_nodeThatContainsMe.List as AbstractNode); }
+        }
 
-        private static int nodeNums = 0;
-        private int nodeNum;
+        public virtual AbstractNode LeftMostChild
+        {
+            get { return First.Value; }
+        }
+
+        public virtual AbstractNode NextSibling
+        {
+            get { return _nodeThatContainsMe.Next?.Value; }
+        }
+
+        public virtual AbstractNode LeftMostSibling
+        {
+            get { return _nodeThatContainsMe.List.First?.Value; }
+        }
+
         private AbstractNode nextSibling;
         private AbstractNode leftmostSibling;
 
         public AbstractNode(LinkedListNode<AbstractNode> nodeIBelongTo)
         {
-            _myEnclosedNode = nodeIBelongTo;
-            nextSibling = null;
-            leftmostSibling = this;
-            nodeNum = ++nodeNums;
+            _nodeThatContainsMe = nodeIBelongTo;
         }
 
-        /// <summary>
-        /// Join the end of this sibling's list with the supplied sibling's list </summary>
-        public virtual AbstractNode AppendSiblings(AbstractNode sib)
-        {
-            if (sib == null)
-            {
-                throw new Exception("Call to makeSibling supplied null-valued parameter");
-            }
-            AbstractNode appendAt = this;
-
-            while (appendAt.nextSibling != null)
-            {
-                appendAt = appendAt.nextSibling;
-            }
-            appendAt.nextSibling = sib.leftmostSibling;
-
-
-            AbstractNode ans = sib.leftmostSibling;
-            ans.leftmostSibling = appendAt.leftmostSibling;
-
-            while (ans.nextSibling != null)
-            {
-                ans = ans.nextSibling;
-                ans.leftmostSibling = appendAt.leftmostSibling;
-            }
-            return (ans);
-        }
-
-        /// <summary>
-        /// Adopt the linked list of children</summary>
-        public virtual void AdoptChildren(AbstractNodeLinkedList children)
-        {
-            _children = children;
-        }
-
-        public virtual AbstractNode orphan()
-        {
-            leftmostSibling = this;
-            return this;
-        }
-
-        public virtual AbstractNode AbandonChildren()
-        {
-            LeftChild = null;
-            return this;
-        }
-
-        //public virtual AbstractNode Parent {
-        //    get
-        //    {
-        //        _myEnclosedNode.   
-        //    }
-        //}
-        public virtual AbstractNode NextSibling { get; set; }
-        public virtual AbstractNode LeftChild { get; set; }
-        public virtual AbstractNode LeftMostSibling { get; set; }
         public virtual string Name { get; protected set; }
 
 
         //public override string ToString()
         //{
-            //Type t = NodeType;
-            //string tString = (t != null) ? ("<" + t.ToString() + "> ") : "";
+        //Type t = NodeType;
+        //string tString = (t != null) ? ("<" + t.ToString() + "> ") : "";
 
-            //return "" + NodeNum + ": " + tString + whatAmI() + "  \"" + ToString() + "\"";
+        //return "" + NodeNum + ": " + tString + whatAmI() + "  \"" + ToString() + "\"";
         //}
 
 
