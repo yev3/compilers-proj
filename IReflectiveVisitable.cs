@@ -15,6 +15,10 @@
         void Visit(Identifier node);
         void Visit(ClassBody node);
         void Visit(FieldDeclarations node);
+        void Visit(PrimitiveType node);
+        void Visit(TypeName node);
+        void Visit(TypeSpecifier node);
+        void Visit(MethodDeclaration node);
     }
 
 }

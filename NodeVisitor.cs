@@ -8,13 +8,6 @@ namespace ASTBuilder
 {
     class NodeVisitor : INodeVisitor
     {
-        public void PreOrderWalk(AbstractNode node)
-        {
-            if (node == null) return;
-            node.Accept(this);
-            PreOrderWalk(node.LeftMostChild);
-            PreOrderWalk(node.NextSibling);
-        }
         public void Visit(CompilationUnit node)
         {
             Console.WriteLine("Visiting CompilationUnit.");
@@ -27,7 +20,9 @@ namespace ASTBuilder
 
         public void Visit(Modifiers node)
         {
-            Console.WriteLine("Visiting Modifier.");
+            Console.Write("Visiting Modifier: ");
+            var stringEnums = node.ModifierTokens.Select(x => x.ToString());
+            Console.WriteLine(string.Join(", ", stringEnums));
         }
 
         public void Visit(Identifier node)
@@ -43,6 +38,26 @@ namespace ASTBuilder
         public void Visit(FieldDeclarations node)
         {
             Console.WriteLine("Visiting FieldDecls.");
+        }
+
+        public void Visit(PrimitiveType node)
+        {
+            Console.WriteLine("Visiting PrimitiveType.");
+        }
+
+        public void Visit(TypeName node)
+        {
+            Console.WriteLine("Visiting PrimitiveType.");
+        }
+
+        public void Visit(TypeSpecifier node)
+        {
+            Console.WriteLine("Visiting PrimitiveType.");
+        }
+
+        public void Visit(MethodDeclaration node)
+        {
+            Console.WriteLine("Visiting PrimitiveType.");
         }
     }
 }

@@ -41,6 +41,12 @@ public class good1p {
             //var name = "good1p.txt";
             //Console.WriteLine("Parsing file " + name);
 
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(test_input);
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.ResetColor();
+
             Stream strm = new MemoryStream(Encoding.ASCII.GetBytes(test_input));
             parser.Parse(strm);
             Console.WriteLine("Parsing complete");
