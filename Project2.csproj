@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="GplexBuffers.cs" />
     <Compile Include="GrammarNodes.cs" />
+    <Compile Include="NodeTraverser.cs" />
     <Compile Include="NodeVisitor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

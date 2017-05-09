@@ -2,6 +2,7 @@
 using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace ASTBuilder
@@ -13,8 +14,11 @@ namespace ASTBuilder
     /// link itself with other siblings and adopt children.
     /// Each node gets a node number to help identify it distinctly in an AST.
     /// </summary>
+    [DebuggerDisplay("AbstrNodeType: {DebugDisp}")]
     public abstract class AbstractNode : LinkedList<AbstractNode>, IReflectiveVisitable
     {
+        public string DebugDisp => this.ToString();
+
         public LinkedListNode<AbstractNode> LinkedListNodeContainer { get; set; }
 
         // these are accessible:
@@ -24,10 +28,15 @@ namespace ASTBuilder
 
         public void AddChild(AbstractNode child)
         {
-            if (child == null) throw new Exception("Error: tried to add a null child to the linked list.");
+            if (child == null)
+            {
+                Console.WriteLine("INFO: Not implemented - tried to add a null child.");
+                return;
+                //throw new Exception("Error: tried to add a null child to the linked list.");
+            }
             LinkedListNode<AbstractNode> newNode = new LinkedListNode<AbstractNode>(child);
             child.LinkedListNodeContainer = newNode;
-            this.AddFirst(child);
+            this.AddLast(newNode);
         }
 
         public virtual AbstractNode Parent
@@ -37,7 +46,7 @@ namespace ASTBuilder
 
         public virtual AbstractNode LeftMostChild
         {
-            get { return First.Value; }
+            get { return First?.Value; }
         }
 
         public virtual AbstractNode NextSibling
@@ -50,22 +59,13 @@ namespace ASTBuilder
             get { return LinkedListNodeContainer.List.First?.Value; }
         }
 
-        private AbstractNode nextSibling;
-        private AbstractNode leftmostSibling;
-
-        public AbstractNode(LinkedListNode<AbstractNode> nodeIBelongTo)
-        {
-            LinkedListNodeContainer = nodeIBelongTo;
-        }
-
-        public AbstractNode()
-        {
-
-        }
 
         public virtual string Name { get; protected set; }
 
-
+        public override string ToString()
+        {
+            return this.GetType().FullName;
+        }
         //public override string ToString()
         //{
         //Type t = NodeType;

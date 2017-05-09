@@ -29,6 +29,10 @@ namespace ASTBuilder
 
     public class CompilationUnit : AbstractNode
     {
+        // just for the compilation unit because it's the top node
+        public override AbstractNode LeftMostSibling => this;
+        public override AbstractNode NextSibling => null;
+
         public CompilationUnit(AbstractNode classDecl)
         {
             AddChild(classDecl);
@@ -115,6 +119,55 @@ namespace ASTBuilder
             AddChild(fieldDecl);
         }
 
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+    public class MethodDeclaration : AbstractNode
+    {
+        public MethodDeclaration(AbstractNode abstractNode, 
+            AbstractNode abstractNode1, AbstractNode abstractNode2, AbstractNode abstractNode3)
+        {
+            AddChild(abstractNode);
+        }
+
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+
+    public class PrimitiveType : AbstractNode
+    {
+        public PrimitiveType(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+
+    public class TypeName : AbstractNode
+    {
+        public TypeName(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+
+    public class TypeSpecifier : AbstractNode
+    {
+        public TypeSpecifier(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
         public override void Accept(INodeVisitor myVisitor)
         {
             myVisitor.Visit(this);

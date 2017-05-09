@@ -73,11 +73,11 @@ FieldDeclarations   :   FieldDeclaration                    { $$ = new FieldDecl
                     |   FieldDeclarations FieldDeclaration  { $1.AddChild($2); $$ = $1;}
                     ;
 
-FieldDeclaration    :   FieldVariableDeclaration SEMICOLON  {Console.WriteLine("field var decl");           }
-                    |   MethodDeclaration                   {Console.WriteLine("field method decl");        }
-                    |   ConstructorDeclaration              {Console.WriteLine("field ctor decl");          }
-                    |   StaticInitializer                   {Console.WriteLine("field static init decl");   }
-                    |   StructDeclaration                   {Console.WriteLine("field struct decl");        }
+FieldDeclaration    :   FieldVariableDeclaration SEMICOLON  { $$ = new Identifier("fake var decl"); }
+                    |   MethodDeclaration                   { $$ = new Identifier("field method decl");        }
+                    |   ConstructorDeclaration              { $$ = new Identifier("field ctor decl");          }
+                    |   StaticInitializer                   { $$ = new Identifier("field static init decl");   }
+                    |   StructDeclaration                   { $$ = new Identifier("field struct decl");        }
                     ;
 
 StructDeclaration   :   Modifiers STRUCT Identifier ClassBody   {}
@@ -95,20 +95,20 @@ StructDeclaration   :   Modifiers STRUCT Identifier ClassBody   {}
 FieldVariableDeclaration    :   Modifiers TypeSpecifier FieldVariableDeclarators            {}
                             ;
 
-TypeSpecifier               :   TypeName                                                    {}
+TypeSpecifier               :   TypeName                                                    { $$ = new TypeSpecifier($1); }
                             |   ArraySpecifier                                              {}
                             ;
 
-TypeName                    :   PrimitiveType                                               {}
-                            |   QualifiedName                                               {}
+TypeName                    :   PrimitiveType                                               { $$ = new TypeName($1); }
+                            |   QualifiedName                                               { $$ = new TypeName($1); }
                             ;
 
 ArraySpecifier              :   TypeName LBRACKET RBRACKET                                  {}
                             ;
                             
-PrimitiveType               :   BOOLEAN                                                     {}
-                            |   INT                                                         {}
-                            |   VOID                                                        {}
+PrimitiveType               :   BOOLEAN                                                     { $$ = new PrimitiveType($1); }
+                            |   INT                                                         { $$ = new PrimitiveType($1); }
+                            |   VOID                                                        { $$ = new PrimitiveType($1); }
                             ;
 
 FieldVariableDeclarators    :   FieldVariableDeclaratorName                                 {}
@@ -116,7 +116,7 @@ FieldVariableDeclarators    :   FieldVariableDeclaratorName                     
                             ;
 
 
-MethodDeclaration           :   Modifiers TypeSpecifier MethodDeclarator MethodBody         {}
+MethodDeclaration           :   Modifiers TypeSpecifier MethodDeclarator MethodBody         {$$ = new MethodDeclaration($1, $2, $3, $4); }
                             ;
 
 MethodDeclarator            :   MethodDeclaratorName LPAREN ParameterList RPAREN            {}
