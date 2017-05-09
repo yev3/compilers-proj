@@ -7,7 +7,7 @@ using ASTBuilder;
 
 namespace ASTBuilder
 {
-    //using static Token;
+    using static Token;
 
     // What we're trying to parse
     // =================================
