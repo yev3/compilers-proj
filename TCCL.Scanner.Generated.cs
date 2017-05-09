@@ -6,9 +6,9 @@
 //
 //  GPLEX Version:  1.2.2
 //  Machine:  YK-PC
-//  DateTime: 5/8/2017 4:06:02 PM
+//  DateTime: 5/8/2017 7:51:58 PM
 //  UserName: YK
-//  GPLEX input file <TCCL.analyzer.lex - 5/8/2017 3:03:57 PM>
+//  GPLEX input file <TCCL.analyzer.lex - 5/8/2017 7:48:45 PM>
 //  GPLEX frame file <embedded resource>
 //
 //  Option settings: verbose, parser, stack, minimize
@@ -135,7 +135,7 @@ namespace ASTBuilder
 
 #region user code
 public string yystringval;
-	private StringBuilder stringval = new StringBuilder();
+    private StringBuilder stringval = new StringBuilder();
 /* comments */
 #endregion user code
 
@@ -1421,8 +1421,8 @@ stringval.Append(yytext);
             break;
         case 113: // In <STRING> Recognized '\"',	Shortest string "\""
 BEGIN(INITIAL); 
-								   yystringval = stringval.ToString();
-                                   return (int)Token.LITERAL;
+                      yystringval = stringval.ToString();
+                      return (int)Token.LITERAL;
             break;
         case 114: // In <STRING> Recognized '\\',	Shortest string "\\"
 stringval.Append('\\');

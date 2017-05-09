@@ -4,9 +4,9 @@
 
 // GPPG version 1.5.2
 // Machine:  YK-PC
-// DateTime: 5/8/2017 4:06:03 PM
+// DateTime: 5/8/2017 7:51:58 PM
 // UserName: YK
-// Input file <TCCL.grammar.y - 5/8/2017 4:06:02 PM>
+// Input file <TCCL.grammar.y - 5/8/2017 7:51:53 PM>
 
 // options: no-lines gplex
 
@@ -51,6 +51,14 @@ public class ScanObj {
 [GeneratedCodeAttribute( "Gardens Point Parser Generator", "1.5.2")]
 public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 {
+  // Verbatim content from TCCL.grammar.y - 5/8/2017 7:51:53 PM
+    public string yytext
+    {
+        get { return ((TCCLScanner)Scanner).yytext; }
+    }
+
+  // End verbatim content from TCCL.grammar.y - 5/8/2017 7:51:53 PM
+
 #pragma warning disable 649
   private static Dictionary<int, string> aliases;
 #pragma warning restore 649
@@ -382,19 +390,131 @@ public partial class TCCLParser: ShiftReduceParser<AbstractNode, LexLocation>
 {CurrentSemanticValue = new Modifiers(Token.PUBLIC);}
         break;
       case 5: // Modifiers -> PRIVATE
-{CurrentSemanticValue = new Modifiers(Token.PUBLIC);}
+{CurrentSemanticValue = new Modifiers(Token.PRIVATE);}
         break;
       case 6: // Modifiers -> STATIC
-{CurrentSemanticValue = new Modifiers(Token.PUBLIC);}
+{CurrentSemanticValue = new Modifiers(Token.STATIC);}
         break;
       case 7: // Modifiers -> Modifiers, PUBLIC
-{/*((Modifiers)($1)).ModifierTokens.Add(Token.PUBLIC);*/ CurrentSemanticValue = ValueStack[ValueStack.Depth-2];}
+{((Modifiers)(ValueStack[ValueStack.Depth-2])).ModifierTokens.Add(Token.PUBLIC); CurrentSemanticValue = ValueStack[ValueStack.Depth-2];}
         break;
       case 8: // Modifiers -> Modifiers, PRIVATE
-{/*((Modifiers)($1)).ModifierTokens.Add(Token.PRIVATE);*/ CurrentSemanticValue = ValueStack[ValueStack.Depth-2];}
+{((Modifiers)(ValueStack[ValueStack.Depth-2])).ModifierTokens.Add(Token.PRIVATE); CurrentSemanticValue = ValueStack[ValueStack.Depth-2];}
         break;
       case 9: // Modifiers -> Modifiers, STATIC
-{/*((Modifiers)($1)).ModifierTokens.Add(Token.STATIC);*/ CurrentSemanticValue = ValueStack[ValueStack.Depth-2];}
+{((Modifiers)(ValueStack[ValueStack.Depth-2])).ModifierTokens.Add(Token.STATIC); CurrentSemanticValue = ValueStack[ValueStack.Depth-2];}
+        break;
+      case 10: // ClassBody -> LBRACE, FieldDeclarations, RBRACE
+{CurrentSemanticValue = null;}
+        break;
+      case 11: // ClassBody -> LBRACE, RBRACE
+{CurrentSemanticValue = null;}
+        break;
+      case 12: // FieldDeclarations -> FieldDeclaration
+{}
+        break;
+      case 13: // FieldDeclarations -> FieldDeclarations, FieldDeclaration
+{}
+        break;
+      case 14: // FieldDeclaration -> FieldVariableDeclaration, SEMICOLON
+{Console.WriteLine("field var decl");}
+        break;
+      case 15: // FieldDeclaration -> MethodDeclaration
+{Console.WriteLine("field method decl");}
+        break;
+      case 16: // FieldDeclaration -> ConstructorDeclaration
+{Console.WriteLine("field ctor decl");}
+        break;
+      case 17: // FieldDeclaration -> StaticInitializer
+{Console.WriteLine("field static init decl");}
+        break;
+      case 18: // FieldDeclaration -> StructDeclaration
+{Console.WriteLine("field struct decl");}
+        break;
+      case 19: // StructDeclaration -> Modifiers, STRUCT, Identifier, ClassBody
+{}
+        break;
+      case 20: // FieldVariableDeclaration -> Modifiers, TypeSpecifier, FieldVariableDeclarators
+{}
+        break;
+      case 21: // TypeSpecifier -> TypeName
+{}
+        break;
+      case 22: // TypeSpecifier -> ArraySpecifier
+{}
+        break;
+      case 23: // TypeName -> PrimitiveType
+{}
+        break;
+      case 24: // TypeName -> QualifiedName
+{}
+        break;
+      case 25: // ArraySpecifier -> TypeName, LBRACKET, RBRACKET
+{}
+        break;
+      case 26: // PrimitiveType -> BOOLEAN
+{}
+        break;
+      case 27: // PrimitiveType -> INT
+{}
+        break;
+      case 28: // PrimitiveType -> VOID
+{}
+        break;
+      case 29: // FieldVariableDeclarators -> FieldVariableDeclaratorName
+{}
+        break;
+      case 30: // FieldVariableDeclarators -> FieldVariableDeclarators, COMMA, 
+               //                             FieldVariableDeclaratorName
+{}
+        break;
+      case 31: // MethodDeclaration -> Modifiers, TypeSpecifier, MethodDeclarator, MethodBody
+{}
+        break;
+      case 32: // MethodDeclarator -> MethodDeclaratorName, LPAREN, ParameterList, RPAREN
+{}
+        break;
+      case 33: // MethodDeclarator -> MethodDeclaratorName, LPAREN, RPAREN
+{}
+        break;
+      case 34: // ParameterList -> Parameter
+{}
+        break;
+      case 35: // ParameterList -> ParameterList, COMMA, Parameter
+{}
+        break;
+      case 36: // Parameter -> TypeSpecifier, DeclaratorName
+{}
+        break;
+      case 37: // QualifiedName -> Identifier
+{}
+        break;
+      case 38: // QualifiedName -> QualifiedName, PERIOD, Identifier
+{}
+        break;
+      case 39: // DeclaratorName -> Identifier
+{}
+        break;
+      case 40: // MethodDeclaratorName -> Identifier
+{}
+        break;
+      case 41: // FieldVariableDeclaratorName -> Identifier
+{}
+        break;
+      case 42: // LocalVariableDeclaratorName -> Identifier
+{}
+        break;
+      case 43: // MethodBody -> Block
+{}
+        break;
+      case 44: // ConstructorDeclaration -> Modifiers, MethodDeclarator, Block
+{}
+        break;
+      case 45: // StaticInitializer -> STATIC, Block
+{}
+        break;
+      case 109: // Identifier -> IDENTIFIER
+{CurrentSemanticValue = new Identifier(yytext);}
         break;
     }
 #pragma warning restore 162, 1522
