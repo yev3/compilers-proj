@@ -7,7 +7,7 @@ using ASTBuilder;
 
 namespace ASTBuilder
 {
-    using static Token;
+    //using static Token;
 
     // What we're trying to parse
     // =================================
@@ -27,56 +27,56 @@ namespace ASTBuilder
     //   }
     //}
 
-    public class CompilationUnit : AbstractNode
-    {
-        public ClassDeclaration ClassDeclaration { get; set; }
-    }
+    //public class CompilationUnit : AbstractNode
+    //{
+    //    public ClassDeclaration ClassDeclaration { get; set; }
+    //}
 
-    public class ClassDeclaration : AbstractNode
-    {
-        public ClassDeclaration(
-            AbstractNode modifiers,
-            AbstractNode className,
-            AbstractNode classBody)
-        {
-            
-            Modifiers = modifiers as Modifiers;
-            ClassName = className as Identifier;
-            ClassBody = classBody as ClassBody;
-        }
+    //    public class ClassDeclaration : AbstractNode
+    //    {
+    //        public ClassDeclaration(
+    //            AbstractNode modifiers,
+    //            AbstractNode className,
+    //            AbstractNode classBody)
+    //        {
 
-        public Modifiers Modifiers { get; set; }
-        public Identifier ClassName { get; set; }
-        public ClassBody ClassBody { get; set; }
-    }
+    //            Modifiers = modifiers as Modifiers;
+    //            ClassName = className as Identifier;
+    //            ClassBody = classBody as ClassBody;
+    //        }
 
-    public class Modifiers : AbstractNode
-    {
-        public List<Token> ModifierTokens { get; set; } = new List<Token>();
+    //        public Modifiers Modifiers { get; set; }
+    //        public Identifier ClassName { get; set; }
+    //        public ClassBody ClassBody { get; set; }
+    //    }
 
-        public Modifiers(Token t)
-        {
+    //    public class Modifiers : AbstractNode
+    //    {
+    //        public List<Token> ModifierTokens { get; set; } = new List<Token>();
 
-            if (t != PUBLIC && t != STATIC && t != PRIVATE)
-            {
-                throw new Exception("not one of the valid tokens");
-            }
-            ModifierTokens.Add(t);
-        }
+    //        public Modifiers(Token t)
+    //        {
 
-    }
-    public class Identifier : AbstractNode
-    {
-        public Identifier(string s)
-        {
-            Name = s;
-        }
+    //            if (t != PUBLIC && t != STATIC && t != PRIVATE)
+    //            {
+    //                throw new Exception("not one of the valid tokens");
+    //            }
+    //            ModifierTokens.Add(t);
+    //        }
 
-    }
+    //    }
+    //    public class Identifier : AbstractNode
+    //    {
+    //        public Identifier(string s)
+    //        {
+    //            Name = s;
+    //        }
 
-    public class ClassBody : AbstractNode
-    {
+    //    }
 
-    }
+    //    public class ClassBody : AbstractNode
+    //    {
+
+    //    }
 
 }

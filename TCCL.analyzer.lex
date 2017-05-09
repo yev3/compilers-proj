@@ -6,6 +6,7 @@
 %option stack, minimize, parser, verbose, persistbuffer, noembedbuffers 
 
 
+
 %{
     public string yystringval;
     private StringBuilder stringval = new StringBuilder();

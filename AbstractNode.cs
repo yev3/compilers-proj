@@ -1,8 +1,15 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace ASTBuilder
 {
+    public class AbstractNodeLinkedList : LinkedList<AbstractNode>
+    {
+        public AbstractNode Parent { get; set; }
+        
+    }
+
 
     /// <summary>
     /// All AST nodes are subclasses of this node.  This node knows how to
@@ -11,26 +18,26 @@ namespace ASTBuilder
     /// </summary>
     public abstract class AbstractNode : ReflectiveVisitable
     {
+        private AbstractNodeLinkedList _children = null;
+        private LinkedListNode<AbstractNode> _myEnclosedNode;
+
+
         private static int nodeNums = 0;
         private int nodeNum;
         private AbstractNode nextSibling;
-        private AbstractNode parent;
-        private AbstractNode leftmostChild;
         private AbstractNode leftmostSibling;
-        private Type type;
 
-        public AbstractNode()
+        public AbstractNode(LinkedListNode<AbstractNode> nodeIBelongTo)
         {
-            parent = null;
+            _myEnclosedNode = nodeIBelongTo;
             nextSibling = null;
             leftmostSibling = this;
-            leftmostChild = null;
             nodeNum = ++nodeNums;
         }
 
         /// <summary>
         /// Join the end of this sibling's list with the supplied sibling's list </summary>
-        public virtual AbstractNode makeSibling(AbstractNode sib)
+        public virtual AbstractNode AppendSiblings(AbstractNode sib)
         {
             if (sib == null)
             {
@@ -57,93 +64,34 @@ namespace ASTBuilder
         }
 
         /// <summary>
-        /// Adopt the supplied node and all of its siblings under this node </summary>
-        public virtual AbstractNode adoptChildren(AbstractNode n)
+        /// Adopt the linked list of children</summary>
+        public virtual void AdoptChildren(AbstractNodeLinkedList children)
         {
-            if (n != null)
-            {
-                if (this.leftmostChild == null)
-                {
-                    this.leftmostChild = n.leftmostSibling;
-                }
-                else
-                {
-                    this.leftmostChild.makeSibling(n);
-                }
-            }
-            for (AbstractNode c = this.leftmostChild; c != null; c = c.nextSibling)
-            {
-                c.parent = this;
-            }
-            return this;
+            _children = children;
         }
 
         public virtual AbstractNode orphan()
         {
-            nextSibling = parent = null;
             leftmostSibling = this;
             return this;
         }
 
-        public virtual AbstractNode abandonChildren()
+        public virtual AbstractNode AbandonChildren()
         {
-            leftmostChild = null;
+            LeftChild = null;
             return this;
         }
 
-        private AbstractNode Parent
-        {
-            set
-            {
-                this.parent = value;
-            }
-            get
-            {
-                return (parent);
-            }
-        }
-
-
-        public virtual AbstractNode Sib
-        {
-            get
-            {
-                return (nextSibling);
-            }
-        }
-
-        public virtual AbstractNode Child
-        {
-            get
-            {
-                return (leftmostChild);
-            }
-        }
-
-        public virtual AbstractNode First
-        {
-            get
-            {
-                return (leftmostSibling);
-            }
-        }
-
-        public virtual Type NodeType
-        {
-            get
-            {
-                return type;
-            }
-            set
-            {
-                this.type = value;
-            }
-        }
-
-        public virtual string Name
-        {
-            get; protected set;
-        }
+        //public virtual AbstractNode Parent {
+        //    get
+        //    {
+        //        _myEnclosedNode.   
+        //    }
+        //}
+        public virtual AbstractNode NextSibling { get; set; }
+        public virtual AbstractNode LeftChild { get; set; }
+        public virtual AbstractNode LeftMostSibling { get; set; }
+        public virtual string Name { get; protected set; }
 
 
         //public override string ToString()
@@ -154,14 +102,6 @@ namespace ASTBuilder
             //return "" + NodeNum + ": " + tString + whatAmI() + "  \"" + ToString() + "\"";
         //}
 
-
-        public virtual int NodeNum
-        {
-            get
-            {
-                return nodeNum;
-            }
-        }
 
         private static string trimClass(string cl)
         {
