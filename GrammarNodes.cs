@@ -27,56 +27,98 @@ namespace ASTBuilder
     //   }
     //}
 
-    //public class CompilationUnit : AbstractNode
-    //{
-    //    public ClassDeclaration ClassDeclaration { get; set; }
-    //}
+    public class CompilationUnit : AbstractNode
+    {
+        public CompilationUnit(AbstractNode classDecl)
+        {
+            AddChild(classDecl);
+        }
 
-    //    public class ClassDeclaration : AbstractNode
-    //    {
-    //        public ClassDeclaration(
-    //            AbstractNode modifiers,
-    //            AbstractNode className,
-    //            AbstractNode classBody)
-    //        {
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
 
-    //            Modifiers = modifiers as Modifiers;
-    //            ClassName = className as Identifier;
-    //            ClassBody = classBody as ClassBody;
-    //        }
+    public class ClassDeclaration : AbstractNode
+    {
+        public ClassDeclaration(
+            AbstractNode modifiers,
+            AbstractNode className,
+            AbstractNode classBody)
+        {
+            AddChild(modifiers);
+            AddChild(className);
+            AddChild(classBody);
+        }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
 
-    //        public Modifiers Modifiers { get; set; }
-    //        public Identifier ClassName { get; set; }
-    //        public ClassBody ClassBody { get; set; }
-    //    }
+    }
 
-    //    public class Modifiers : AbstractNode
-    //    {
-    //        public List<Token> ModifierTokens { get; set; } = new List<Token>();
+    public class Modifiers : AbstractNode
+    {
+        public List<Token> ModifierTokens { get; set; } = new List<Token>();
 
-    //        public Modifiers(Token t)
-    //        {
+        public Modifiers(Token t)
+        {
 
-    //            if (t != PUBLIC && t != STATIC && t != PRIVATE)
-    //            {
-    //                throw new Exception("not one of the valid tokens");
-    //            }
-    //            ModifierTokens.Add(t);
-    //        }
+            if (t != PUBLIC && t != STATIC && t != PRIVATE)
+            {
+                throw new Exception("not one of the valid tokens");
+            }
+            ModifierTokens.Add(t);
+        }
 
-    //    }
-    //    public class Identifier : AbstractNode
-    //    {
-    //        public Identifier(string s)
-    //        {
-    //            Name = s;
-    //        }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+    public class Identifier : AbstractNode
+    {
+        public Identifier(string s)
+        {
+            Name = s;
+        }
 
-    //    }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
 
-    //    public class ClassBody : AbstractNode
-    //    {
+    public class ClassBody : AbstractNode
+    {
+        public ClassBody()
+        {
+            Console.WriteLine("Class body is empty!");
+        }
 
-    //    }
+        public ClassBody(AbstractNode c)
+        {
+            AddChild(c);
+        }
+
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+
+    public class FieldDeclarations : AbstractNode
+    {
+        public FieldDeclarations(AbstractNode fieldDecl)
+        {
+            AddChild(fieldDecl);
+        }
+
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
 
 }
