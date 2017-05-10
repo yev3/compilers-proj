@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -68,9 +69,14 @@ namespace ASTBuilder
     {
         public List<ModifierType> ModifierTokens { get; set; } = new List<ModifierType>();
 
-        public Modifiers(ModifierType type)
+        public void AddModType(ModifierType type)
         {
             ModifierTokens.Add(type);
+        }
+
+        public Modifiers(ModifierType type)
+        {
+            AddModType(type);
         }
         public override void Accept(INodeVisitor myVisitor)
         {
@@ -122,10 +128,16 @@ namespace ASTBuilder
     }
     public class MethodDeclaration : AbstractNode
     {
-        public MethodDeclaration(AbstractNode abstractNode,
-            AbstractNode abstractNode1, AbstractNode abstractNode2, AbstractNode abstractNode3)
+        public MethodDeclaration(
+            AbstractNode modifiers,
+            AbstractNode typeSpecifier, 
+            AbstractNode methodDeclarator, 
+            AbstractNode methodBody)
         {
-            AddChild(abstractNode);
+            AddChild(modifiers);
+            AddChild(typeSpecifier);
+            AddChild(methodDeclarator);
+            AddChild(methodBody);
         }
 
         public override void Accept(INodeVisitor myVisitor)
@@ -149,7 +161,7 @@ namespace ASTBuilder
 
     public class TypeSpecifier : AbstractNode
     {
-        public TypeSpecifier(AbstractNode abstractNode, bool isArrType = false)
+        public TypeSpecifier(AbstractNode abstractNode)
         {
             AddChild(abstractNode);
         }
@@ -165,8 +177,124 @@ namespace ASTBuilder
         public PrimitiveType(EnumPrimitiveType type)
         {
             Type = type;
-            Console.WriteLine("Primitive Type Ctor: " + type.ToString());
         }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+    public class LocalVariableDeclarationsAndStatements : AbstractNode
+    {
+        public LocalVariableDeclarationsAndStatements(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+
+    public class Block : AbstractNode
+    {
+        public Block() { }
+
+        public Block(AbstractNode declsAndStaments)
+        {
+            AddChild(declsAndStaments);
+        }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+
+    public class MethodBody : AbstractNode
+    {
+        public MethodBody(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+
+    public class MethodDeclaratorName : AbstractNode
+    {
+        public MethodDeclaratorName(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+
+    public class DeclaratorName : AbstractNode
+    {
+        public DeclaratorName(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+
+    public class Parameter : AbstractNode
+    {
+        public Parameter(AbstractNode typeSpec, AbstractNode declName)
+        {
+            AddChild(typeSpec);
+            AddChild(declName);
+        }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+
+    public class ParameterList : AbstractNode
+    {
+        public ParameterList(AbstractNode parameter)
+        {
+            AddChild(parameter);
+        }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+
+    public class MethodDeclarator : AbstractNode
+    {
+
+        public MethodDeclarator(AbstractNode name)
+        {
+            AddChild(name);
+        }
+
+        public MethodDeclarator(AbstractNode name, AbstractNode paramList)
+        {
+            AddChild(name);
+            AddChild(paramList);
+        }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+    public class FieldDeclaration : AbstractNode
+    {
+        public FieldDeclaration(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+
         public override void Accept(INodeVisitor myVisitor)
         {
             myVisitor.Visit(this);

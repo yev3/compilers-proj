@@ -61,9 +61,9 @@ ClassDeclaration    :   Modifiers CLASS Identifier ClassBody {$$ = new ClassDecl
 Modifiers           :   PUBLIC                              { $$ = new Modifiers(ModifierType.PUBLIC);}
                     |   PRIVATE                             { $$ = new Modifiers(ModifierType.PRIVATE);}
                     |   STATIC                              { $$ = new Modifiers(ModifierType.STATIC);}
-                    |   Modifiers PUBLIC                    { $1.AddChild($2); $$ = $1;}
-                    |   Modifiers PRIVATE                   { $1.AddChild($2); $$ = $1;}
-                    |   Modifiers STATIC                    { $1.AddChild($2); $$ = $1;}
+                    |   Modifiers PUBLIC                    { ((Modifiers)$1).AddModType(ModifierType.PUBLIC); $$ = $1;}
+                    |   Modifiers PRIVATE                   { ((Modifiers)$1).AddModType(ModifierType.PRIVATE); $$ = $1;}
+                    |   Modifiers STATIC                    { ((Modifiers)$1).AddModType(ModifierType.STATIC); $$ = $1;}
                     ;
 
 ClassBody           :   LBRACE FieldDeclarations RBRACE     { $$ = new ClassBody($2);}
@@ -75,7 +75,7 @@ FieldDeclarations   :   FieldDeclaration                    { $$ = new FieldDecl
                     ;
 
 FieldDeclaration    :   FieldVariableDeclaration SEMICOLON  { $$ = new Identifier("fake var decl"); }
-                    |   MethodDeclaration                   { $$ = new Identifier("***** DOING RIGHT NOW *****");        }
+                    |   MethodDeclaration                   { $$ = new FieldDeclaration($1);        }
                     |   ConstructorDeclaration              { $$ = new Identifier("field ctor decl");          }
                     |   StaticInitializer                   { $$ = new Identifier("field static init decl");   }
                     |   StructDeclaration                   { $$ = new Identifier("field struct decl");        }
