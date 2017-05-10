@@ -1,0 +1,37 @@
+﻿/* Simple comparisons:  tests method calls, if, assignment */
+
+public class iftest {
+
+   
+public static void outStrln(java.lang.String s) {
+     
+	java.io.PrintStream ps;
+     
+	ps = java.lang.System.out;
+     
+	ps.println(s);
+   
+}
+
+   
+
+public static void main() {
+     
+	int i, j;
+     i = 0;
+     j = 1;
+     
+	iftest.outStrln(“TCCL if test");
+     
+	if ( i < 10 ) 
+        
+	iftest.outStrln("In then part");
+     
+	else  i = j; 
+     if ( i == 10 ) j = i;
+     
+	else  iftest.outStrln("In else part"); 
+   
+}
+
+}
