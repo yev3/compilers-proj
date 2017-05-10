@@ -45,23 +45,44 @@ namespace ASTBuilder
         };
         static void Main(string[] args)
         {
-            var parser = new TCCLParser();
-            //var name = "good1p.txt";
-            //Console.WriteLine("Parsing file " + name);
+            string dir = Environment.CurrentDirectory;
+            StreamReader testFile1 = File.OpenText(dir+@"\TestFiles\good1p.txt");
+            StreamReader testFile2 = File.OpenText(dir+@"\TestFiles\iftest.txt");
+            StreamReader testFile3 = File.OpenText(dir+@"\TestFiles\logictest.txt");
 
-            foreach (string test_input in test_cases)
+            StreamReader[] fileArray = {testFile1, testFile2, testFile3};
+            
+
+            var testNbr = 1;
+            foreach (var file in fileArray)
             {
-                Console.WriteLine("Test case:");
+                var parser = new TCCLParser();
+                string s = file.ReadToEnd();
+
+                Console.WriteLine("Test case {0}:", testNbr);
                 Console.WriteLine("========================================\n");
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine(test_input);
+                Console.WriteLine(s);
                 Console.ResetColor();
                 Console.WriteLine();
-                Console.WriteLine();
-
-                Stream strm = new MemoryStream(Encoding.ASCII.GetBytes(test_input));
+                Stream strm = new MemoryStream(Encoding.ASCII.GetBytes(s));
                 parser.Parse(strm);
+                ++testNbr;
             }
+       
+            //foreach (string test_input in test_cases)
+            //{
+            //    Console.WriteLine("Test case:");
+            //    Console.WriteLine("========================================\n");
+            //    Console.ForegroundColor = ConsoleColor.Cyan;
+            //    Console.WriteLine(test_input);
+            //    Console.ResetColor();
+            //    Console.WriteLine();
+            //    Console.WriteLine();
+
+            //    Stream strm = new MemoryStream(Encoding.ASCII.GetBytes(test_input));
+            //    parser.Parse(strm);
+            //}
 
 
             Console.ReadKey();
