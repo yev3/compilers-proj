@@ -19,6 +19,15 @@
         void Visit(TypeName node);
         void Visit(TypeSpecifier node);
         void Visit(MethodDeclaration node);
+        void Visit(LocalVariableDeclarationsAndStatements node);
+        void Visit(Block node);
+        void Visit(MethodBody node);
+        void Visit(MethodDeclaratorName node);
+        void Visit(DeclaratorName node);
+        void Visit(Parameter node);
+        void Visit(ParameterList node);
+        void Visit(MethodDeclarator node);
+        void Visit(FieldDeclaration node);
     }
 
 }
