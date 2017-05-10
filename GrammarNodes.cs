@@ -39,10 +39,6 @@ namespace ASTBuilder
             AddChild(classDecl);
         }
 
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
 
     public class ClassDeclaration : AbstractNode
@@ -55,10 +51,6 @@ namespace ASTBuilder
             AddChild(modifiers);
             AddChild(className);
             AddChild(classBody);
-        }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
         }
 
     }
@@ -102,15 +94,9 @@ namespace ASTBuilder
         {
             Console.WriteLine("Class body is empty!");
         }
-
         public ClassBody(AbstractNode c)
         {
             AddChild(c);
-        }
-
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
         }
     }
 
@@ -121,17 +107,13 @@ namespace ASTBuilder
             AddChild(fieldDecl);
         }
 
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
     public class MethodDeclaration : AbstractNode
     {
         public MethodDeclaration(
             AbstractNode modifiers,
-            AbstractNode typeSpecifier, 
-            AbstractNode methodDeclarator, 
+            AbstractNode typeSpecifier,
+            AbstractNode methodDeclarator,
             AbstractNode methodBody)
         {
             AddChild(modifiers);
@@ -140,10 +122,6 @@ namespace ASTBuilder
             AddChild(methodBody);
         }
 
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
 
 
@@ -153,10 +131,6 @@ namespace ASTBuilder
         {
             AddChild(abstractNode);
         }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
 
     public class TypeSpecifier : AbstractNode
@@ -164,10 +138,6 @@ namespace ASTBuilder
         public TypeSpecifier(AbstractNode abstractNode)
         {
             AddChild(abstractNode);
-        }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
         }
     }
     public enum EnumPrimitiveType { BOOLEAN, INT, VOID }
@@ -189,10 +159,6 @@ namespace ASTBuilder
         {
             AddChild(abstractNode);
         }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
 
     public class Block : AbstractNode
@@ -203,10 +169,6 @@ namespace ASTBuilder
         {
             AddChild(declsAndStaments);
         }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
 
     public class MethodBody : AbstractNode
@@ -214,10 +176,6 @@ namespace ASTBuilder
         public MethodBody(AbstractNode abstractNode)
         {
             AddChild(abstractNode);
-        }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
         }
     }
 
@@ -227,10 +185,6 @@ namespace ASTBuilder
         {
             AddChild(abstractNode);
         }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
 
     public class DeclaratorName : AbstractNode
@@ -238,10 +192,6 @@ namespace ASTBuilder
         public DeclaratorName(AbstractNode abstractNode)
         {
             AddChild(abstractNode);
-        }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
         }
     }
 
@@ -252,10 +202,6 @@ namespace ASTBuilder
             AddChild(typeSpec);
             AddChild(declName);
         }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
 
     public class ParameterList : AbstractNode
@@ -264,15 +210,10 @@ namespace ASTBuilder
         {
             AddChild(parameter);
         }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
 
     public class MethodDeclarator : AbstractNode
     {
-
         public MethodDeclarator(AbstractNode name)
         {
             AddChild(name);
@@ -283,10 +224,6 @@ namespace ASTBuilder
             AddChild(name);
             AddChild(paramList);
         }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
     public class FieldDeclaration : AbstractNode
     {
@@ -294,10 +231,98 @@ namespace ASTBuilder
         {
             AddChild(abstractNode);
         }
+    }
+    public class LocalVariableDeclarationOrStatement : AbstractNode
+    {
+        public LocalVariableDeclarationOrStatement(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
+
+    public class LocalVariableDeclarationStatement : AbstractNode
+    {
+        public LocalVariableDeclarationStatement(AbstractNode typeSpecifier, AbstractNode localVarDecls)
+        {
+            AddChild(typeSpecifier);
+            AddChild(localVarDecls);
+        }
+    }
+
+    public class LocalVariableDeclarators : AbstractNode
+    {
+        public LocalVariableDeclarators(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
+
+    public class Statement : AbstractNode
+    {
+        public Statement(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
+
+    public class ExpressionStatement : AbstractNode
+    {
+        public ExpressionStatement(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
+
+    public class EmptyStatement : AbstractNode
+    {
+    }
+
+    public class LocalVariableDeclaratorName : AbstractNode
+    {
+        public LocalVariableDeclaratorName(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
+
+    public class QualifiedName : AbstractNode
+    {
+        public QualifiedName(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
+    public enum ExprType
+    {
+        EQUALS, OP_LOR, OP_LAND, PIPE, HAT, AND, OP_EQ,
+        OP_NE, OP_GT, OP_LT, OP_LE, OP_GE, PLUSOP, MINUSOP,
+        ASTERISK, RSLASH, PERCENT, UNARY, PRIMARY
+    }
+    public class Expression : AbstractNode
+    {
+        public ExprType ExprType { get; set; }
+        public Expression(AbstractNode expr, ExprType type)
+        {
+            AddChild(expr);
+            ExprType = type;
+        }
+        public Expression(AbstractNode lhs, ExprType type, AbstractNode rhs)
+        {
+            AddChild(lhs);
+            AddChild(rhs);
+            ExprType = type;
+        }
 
         public override void Accept(INodeVisitor myVisitor)
         {
             myVisitor.Visit(this);
+        }
+    }
+    public class PrimaryExpression : AbstractNode
+    {
+        public PrimaryExpression(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
         }
     }
 

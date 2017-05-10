@@ -7,8 +7,6 @@ using System.Runtime.CompilerServices;
 
 namespace ASTBuilder
 {
-
-
     /// <summary>
     /// All AST nodes are subclasses of this node.  This node knows how to
     /// link itself with other siblings and adopt children.
@@ -117,46 +115,15 @@ namespace ASTBuilder
         //  return v.elements();
         //  }
 
-        /// <summary>
-        /// Reflectively indicate the class of "this" node </summary>
-        public virtual string whatAmI()
+        public virtual string ClassName()
         {
-            string ans = trimClass(this.GetType().ToString());
-            return ans;  /* temporary until remainder is fixed */
-            //ISet s = new HashSet();
-            //System.Collections.IEnumerator e = interfaces(this.GetType());
-            //while (e.MoveNext())
-            //{
-            //    Type c = (Type)e.Current;
-            //    string str = trimClass(c.ToString());
-            //    if (!(str.Equals("DontPrintMe") || str.Equals("ReflectiveVisitable")))
-            //    {
-            //        s.Add(trimClass(c.ToString()));
-            //    }
-            //}
-            //return ans + s.ToString();
+            return this.GetType().Name;
         }
 
-        //private void internWalk(int level, Visitable v)
-        //{
-        //v.pre(level, this);
-        //for (AbstractNode c = child; c != null; c = c.mysib)
-        //{
-        //c.internWalk(level + 1, v);
-        //}
-        //v.post(level, this);
-        //}
-
-        /// <summary>
-        /// Reflective visitor pattern </summary>
-
-        /// <summary>
-        /// Obsolete, do not use! </summary>
-        //public virtual void walkTree(Visitable v)
-        //{
-        //internWalk(0, v);
-        //}
-        public abstract void Accept(INodeVisitor myVisitor);
+        public virtual void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);  
+        }
     }
 
 }

@@ -15,13 +15,23 @@ namespace ASTBuilder
             this._visitor = visitor;
         }
 
-        public void PreOrderWalk(AbstractNode node, int depth = 0)
+        public void PreOrderWalk(AbstractNode node, string prefix = "")
         {
+            //string s = @"├│└─";
             if (node == null) return;
-            for (int i = 0; i < depth; i++) { Console.Write("  "); }
+
+            bool isLastChild = (node.NextSibling == null);
+
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.Write(prefix);
+            Console.Write(isLastChild ? "└─ " : "├─ ");
+            Console.ResetColor();
             node.Accept(_visitor);
-            PreOrderWalk(node.LeftMostChild, depth + 1);
-            PreOrderWalk(node.NextSibling, depth);
+
+            PreOrderWalk(node.LeftMostChild, prefix + (isLastChild ? "   " : "│  "));
+
+            if (!isLastChild)
+                PreOrderWalk(node.NextSibling, prefix);
         }
     }
 }
