@@ -37,6 +37,7 @@
 %token RPAREN RSLASH SEMICOLON STATIC STRUCT
 %token SUPER THIS TILDE VOID WHILE
 
+
 %right EQUALS
 %left  OP_LOR
 %left  OP_LAND
@@ -57,12 +58,12 @@ CompilationUnit     :   ClassDeclaration                    {$$ = new Compilatio
 ClassDeclaration    :   Modifiers CLASS Identifier ClassBody {$$ = new ClassDeclaration($1, $3, $4);}
                     ;
 
-Modifiers           :   PUBLIC                              { $$ = new Modifiers(Token.PUBLIC);}
-                    |   PRIVATE                             { $$ = new Modifiers(Token.PRIVATE);}
-                    |   STATIC                              { $$ = new Modifiers(Token.STATIC);}
-                    |   Modifiers PUBLIC                    { ((Modifiers)($1)).ModifierTokens.Add(Token.PUBLIC); $$ = $1;}
-                    |   Modifiers PRIVATE                   { ((Modifiers)($1)).ModifierTokens.Add(Token.PRIVATE); $$ = $1;}
-                    |   Modifiers STATIC                    { ((Modifiers)($1)).ModifierTokens.Add(Token.STATIC); $$ = $1;}
+Modifiers           :   PUBLIC                              { $$ = new Modifiers(ModifierType.PUBLIC);}
+                    |   PRIVATE                             { $$ = new Modifiers(ModifierType.PRIVATE);}
+                    |   STATIC                              { $$ = new Modifiers(ModifierType.STATIC);}
+                    |   Modifiers PUBLIC                    { $1.AddChild($2); $$ = $1;}
+                    |   Modifiers PRIVATE                   { $1.AddChild($2); $$ = $1;}
+                    |   Modifiers STATIC                    { $1.AddChild($2); $$ = $1;}
                     ;
 
 ClassBody           :   LBRACE FieldDeclarations RBRACE     { $$ = new ClassBody($2);}
@@ -74,7 +75,7 @@ FieldDeclarations   :   FieldDeclaration                    { $$ = new FieldDecl
                     ;
 
 FieldDeclaration    :   FieldVariableDeclaration SEMICOLON  { $$ = new Identifier("fake var decl"); }
-                    |   MethodDeclaration                   { $$ = new Identifier("field method decl");        }
+                    |   MethodDeclaration                   { $$ = new Identifier("***** DOING RIGHT NOW *****");        }
                     |   ConstructorDeclaration              { $$ = new Identifier("field ctor decl");          }
                     |   StaticInitializer                   { $$ = new Identifier("field static init decl");   }
                     |   StructDeclaration                   { $$ = new Identifier("field struct decl");        }
@@ -96,7 +97,7 @@ FieldVariableDeclaration    :   Modifiers TypeSpecifier FieldVariableDeclarators
                             ;
 
 TypeSpecifier               :   TypeName                                                    { $$ = new TypeSpecifier($1); }
-                            |   ArraySpecifier                                              {}
+                            |   ArraySpecifier                                              { $$ = new TypeSpecifier($1); }
                             ;
 
 TypeName                    :   PrimitiveType                                               { $$ = new TypeName($1); }
@@ -106,9 +107,9 @@ TypeName                    :   PrimitiveType                                   
 ArraySpecifier              :   TypeName LBRACKET RBRACKET                                  {}
                             ;
                             
-PrimitiveType               :   BOOLEAN                                                     { $$ = new PrimitiveType($1); }
-                            |   INT                                                         { $$ = new PrimitiveType($1); }
-                            |   VOID                                                        { $$ = new PrimitiveType($1); }
+PrimitiveType               :   BOOLEAN                                                     { $$ = new PrimitiveType(EnumPrimitiveType.BOOLEAN); }
+                            |   INT                                                         { $$ = new PrimitiveType(EnumPrimitiveType.INT); }
+                            |   VOID                                                        { $$ = new PrimitiveType(EnumPrimitiveType.VOID); }
                             ;
 
 FieldVariableDeclarators    :   FieldVariableDeclaratorName                                 {}
@@ -119,25 +120,25 @@ FieldVariableDeclarators    :   FieldVariableDeclaratorName                     
 MethodDeclaration           :   Modifiers TypeSpecifier MethodDeclarator MethodBody         {$$ = new MethodDeclaration($1, $2, $3, $4); }
                             ;
 
-MethodDeclarator            :   MethodDeclaratorName LPAREN ParameterList RPAREN            {}
-                            |   MethodDeclaratorName LPAREN RPAREN                          {}
+MethodDeclarator            :   MethodDeclaratorName LPAREN ParameterList RPAREN            { $$ = new MethodDeclarator($1, $3); }
+                            |   MethodDeclaratorName LPAREN RPAREN                          { $$ = new MethodDeclarator($1); }
                             ;
 
-ParameterList               :   Parameter                                                   {}
-                            |   ParameterList COMMA Parameter                               {}  
+ParameterList               :   Parameter                                                   { $$ = new ParameterList($1); }
+                            |   ParameterList COMMA Parameter                               { $1.AddChild($2); $$ = $1;}  
                             ;
 
-Parameter                   :   TypeSpecifier DeclaratorName                                {}
+Parameter                   :   TypeSpecifier DeclaratorName                                { $$ = new Parameter($1, $2); }
                             ;
 
 QualifiedName               :   Identifier                                                  {}
                             |   QualifiedName PERIOD Identifier                             {}
                             ;
 
-DeclaratorName              :   Identifier                                                  {}
+DeclaratorName              :   Identifier                                                  { $$ = new DeclaratorName($1); }
                             ;
 
-MethodDeclaratorName        :   Identifier                                                  {}
+MethodDeclaratorName        :   Identifier                                                  { $$ = new MethodDeclaratorName($1); }
                             ;
 
 FieldVariableDeclaratorName :   Identifier                                                  {}
@@ -146,7 +147,7 @@ FieldVariableDeclaratorName :   Identifier                                      
 LocalVariableDeclaratorName :   Identifier                                                  {}
                             ;
 
-MethodBody                  :   Block                                                       {}
+MethodBody                  :   Block                                                       { $$ = new MethodBody($1); }
                             ;
 
 ConstructorDeclaration      :   Modifiers MethodDeclarator Block                            {}
@@ -159,16 +160,19 @@ StaticInitializer           :   STATIC Block                                    
  * These can't be reorganized, because the order matters.
  * For example:  int i;  i = 5;  int j = i;
  */
-Block                       :   LBRACE LocalVariableDeclarationsAndStatements RBRACE
-                            |   LBRACE RBRACE
+
+Block                       :   LBRACE LocalVariableDeclarationsAndStatements RBRACE        { $$ = new Block($1); }
+                            |   LBRACE RBRACE                                               { $$ = new Block(); }
                             ;
 
-LocalVariableDeclarationsAndStatements  :   LocalVariableDeclarationOrStatement
+LocalVariableDeclarationsAndStatements  :   LocalVariableDeclarationOrStatement             { $$ = new LocalVariableDeclarationsAndStatements($1);}
                                         |   LocalVariableDeclarationsAndStatements LocalVariableDeclarationOrStatement
+                                                                                            { $1.AddChild($2); $$ = $1; }
                                         ;
 
-LocalVariableDeclarationOrStatement :   LocalVariableDeclarationStatement
-                                    |   Statement
+// FIXME
+LocalVariableDeclarationOrStatement :   LocalVariableDeclarationStatement                   { $$ = new Identifier("FIXME: local var decl statement");}
+                                    |   Statement                                           { $$ = new Identifier("FIXME: statement");}
                                     ;
 
 LocalVariableDeclarationStatement   :   TypeSpecifier LocalVariableDeclarators SEMICOLON

@@ -62,20 +62,16 @@ namespace ASTBuilder
 
     }
 
+    public enum ModifierType { PUBLIC, STATIC, PRIVATE }
+
     public class Modifiers : AbstractNode
     {
-        public List<Token> ModifierTokens { get; set; } = new List<Token>();
+        public List<ModifierType> ModifierTokens { get; set; } = new List<ModifierType>();
 
-        public Modifiers(Token t)
+        public Modifiers(ModifierType type)
         {
-
-            if (t != PUBLIC && t != STATIC && t != PRIVATE)
-            {
-                throw new Exception("not one of the valid tokens");
-            }
-            ModifierTokens.Add(t);
+            ModifierTokens.Add(type);
         }
-
         public override void Accept(INodeVisitor myVisitor)
         {
             myVisitor.Visit(this);
@@ -126,7 +122,7 @@ namespace ASTBuilder
     }
     public class MethodDeclaration : AbstractNode
     {
-        public MethodDeclaration(AbstractNode abstractNode, 
+        public MethodDeclaration(AbstractNode abstractNode,
             AbstractNode abstractNode1, AbstractNode abstractNode2, AbstractNode abstractNode3)
         {
             AddChild(abstractNode);
@@ -138,17 +134,6 @@ namespace ASTBuilder
         }
     }
 
-    public class PrimitiveType : AbstractNode
-    {
-        public PrimitiveType(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
-    }
 
     public class TypeName : AbstractNode
     {
@@ -164,9 +149,23 @@ namespace ASTBuilder
 
     public class TypeSpecifier : AbstractNode
     {
-        public TypeSpecifier(AbstractNode abstractNode)
+        public TypeSpecifier(AbstractNode abstractNode, bool isArrType = false)
         {
             AddChild(abstractNode);
+        }
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+    public enum EnumPrimitiveType { BOOLEAN, INT, VOID }
+    public class PrimitiveType : AbstractNode
+    {
+        public EnumPrimitiveType Type { get; set; }
+        public PrimitiveType(EnumPrimitiveType type)
+        {
+            Type = type;
+            Console.WriteLine("Primitive Type Ctor: " + type.ToString());
         }
         public override void Accept(INodeVisitor myVisitor)
         {
