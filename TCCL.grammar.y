@@ -241,43 +241,44 @@ ArithmeticUnaryOperator     :   PLUSOP
                             ;
                             
 PrimaryExpression           :   QualifiedName                   { $$ = new PrimaryExpression($1);}   
-                            |   NotJustName                     { $$ = new Identifier("Not implemented: NotJustName"); }
+                            |   NotJustName                     { $$ = new PrimaryExpression($1);}
                             ;
 
-NotJustName                 :   SpecialName
-                            |   ComplexPrimary
+NotJustName                 :   SpecialName                     { $$ = new NotJustName($1);}
+                            |   ComplexPrimary                  { $$ = new NotJustName($1);}
                             ;
 
-ComplexPrimary              :   LPAREN Expression RPAREN
-                            |   ComplexPrimaryNoParenthesis
+ComplexPrimary              :   LPAREN Expression RPAREN        { $$ = new ComplexPrimary($2);}
+                            |   ComplexPrimaryNoParenthesis     { $$ = new ComplexPrimary($1);}
                             ;
 
-ComplexPrimaryNoParenthesis :   LITERAL
-                            |   Number
-                            |   FieldAccess
-                            |   MethodCall
+ComplexPrimaryNoParenthesis :   LITERAL                         { $$ = new ComplexPrimaryNoParenthesis($1);}
+                            |   Number                          { $$ = new ComplexPrimaryNoParenthesis($1);}
+                            |   FieldAccess                     { $$ = new ComplexPrimaryNoParenthesis($1);}    
+                            |   MethodCall                      { $$ = new ComplexPrimaryNoParenthesis($1);}    
                             ;
 
-FieldAccess                 :   NotJustName PERIOD Identifier
+FieldAccess                 :   NotJustName PERIOD Identifier   { $$ = new Identifier("Not Implemented: Number");}   
                             ;       
 
 MethodCall                  :   MethodReference LPAREN ArgumentList RPAREN
-                            |   MethodReference LPAREN RPAREN
+                                                                { $$ = new MethodCall($1, $3);}
+                            |   MethodReference LPAREN RPAREN   { $$ = new Identifier("Not Implemented: MethodRef()");}
                             ;
 
-MethodReference             :   ComplexPrimaryNoParenthesis
-                            |   QualifiedName
-                            |   SpecialName
+MethodReference             :   ComplexPrimaryNoParenthesis     { $$ = new MethodReference($1);}
+                            |   QualifiedName                   { $$ = new MethodReference($1);}
+                            |   SpecialName                     { $$ = new MethodReference($1);}
                             ;
 
-SpecialName                 :   THIS
-                            |   NULL
+SpecialName                 :   THIS                            { $$ = new SpecialName(SpecialNameType.THIS);}
+                            |   NULL                            { $$ = new SpecialName(SpecialNameType.NULL);}
                             ;
 
-Identifier                  :   IDENTIFIER      {$$ = new Identifier(yytext);}
+Identifier                  :   IDENTIFIER                      {$$ = new Identifier(yytext);}
                             ;
 
-Number                      :   INT_NUMBER
+Number                      :   INT_NUMBER                      { $$ = new Identifier("Not Implemented: Number");}
                             ;
 
 %%

@@ -325,5 +325,60 @@ namespace ASTBuilder
             AddChild(abstractNode);
         }
     }
+    public enum SpecialNameType { THIS, NULL }
+
+    public class SpecialName : AbstractNode
+    {
+        public SpecialNameType SpecialType { get; set; }
+        public SpecialName(SpecialNameType specialType)
+        {
+            SpecialType = specialType;
+        }
+
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+    }
+
+    public class NotJustName : AbstractNode
+    {
+        public NotJustName(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
+
+    public class ComplexPrimaryNoParenthesis : AbstractNode
+    {
+        public ComplexPrimaryNoParenthesis(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
+
+    public class MethodReference : AbstractNode
+    {
+        public MethodReference(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
+
+    public class ComplexPrimary : AbstractNode
+    {
+        public ComplexPrimary(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
+    public class MethodCall : AbstractNode
+    {
+        public MethodCall(AbstractNode methodRef, AbstractNode argList)
+        {
+            AddChild(methodRef);
+            AddChild(argList);
+        }
+    }
 
 }

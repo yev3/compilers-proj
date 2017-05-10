@@ -43,5 +43,13 @@ namespace ASTBuilder
             Console.WriteLine(node.ExprType);
             Console.ResetColor();
         }
+
+        public void Visit(SpecialName node)
+        {
+            Console.Write("<" + node.ClassName() + ">: ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(node.SpecialType);
+            Console.ResetColor();
+        }
     }
 }
