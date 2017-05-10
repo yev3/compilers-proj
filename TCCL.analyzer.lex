@@ -18,7 +18,7 @@ WhiteSpace      ({LineTerminator}|[ \t\f])
 
 /* comments */
 //CommentContent     ( [^*] | \*+ [^/*] )*
-TraditionalComment   ("/*"[^*]~"*/"|"/*"("*")+"/")
+TraditionalComment   ("/*"[^*]*"*/"|"/*"("*")+"/")
 EndOfLineComment    (("//")({InputCharacter})*{LineTerminator})
 //DocumentationComment ("/**" {CommentContent} "*"+ "/")
 Comment  ({TraditionalComment}|{EndOfLineComment}) // | {DocumentationComment})

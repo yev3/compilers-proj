@@ -65,6 +65,7 @@ namespace ASTBuilder
         {
             return this.GetType().FullName;
         }
+
         //public override string ToString()
         //{
         //Type t = NodeType;
@@ -122,7 +123,7 @@ namespace ASTBuilder
 
         public virtual void Accept(INodeVisitor myVisitor)
         {
-            myVisitor.Visit(this);  
+            myVisitor.Visit(this);
         }
     }
 
