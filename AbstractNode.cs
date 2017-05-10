@@ -20,6 +20,7 @@ namespace ASTBuilder
         public string DebugDisp => this.ToString();
 
         public LinkedListNode<AbstractNode> LinkedListNodeContainer { get; set; }
+        public Token Token { get; set; }
 
         // these are accessible:
         // Count	
