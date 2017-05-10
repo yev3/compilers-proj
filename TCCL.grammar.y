@@ -20,12 +20,6 @@
 
 %start CompilationUnit
 
-// %token STATIC, STRUCT, QUESTION, RSLASH, MINUSOP, NULL, INT, OP_EQ, OP_LT, COLON, OP_LOR
-// %token ELSE, PERCENT, THIS, CLASS, PIPE, PUBLIC, PERIOD, HAT, COMMA, VOID, TILDE
-// %token LPAREN, RPAREN, OP_GE, SEMICOLON, IF, NEW, WHILE, PRIVATE, BANG, OP_LE, AND 
-// %token LBRACE, RBRACE, LBRACKET, RBRACKET, BOOLEAN, INSTANCEOF, ASTERISK, EQUALS, PLUSOP
-// %token RETURN, OP_GT, OP_NE, OP_LAND, INT_NUMBER, IDENTIFIER, LITERAL, SUPER
-
 %token AND ASTERISK BANG BOOLEAN CLASS
 %token COLON COMMA ELSE EQUALS HAT
 %token IDENTIFIER IF INSTANCEOF INT INT_NUMBER
@@ -74,11 +68,11 @@ FieldDeclarations   :   FieldDeclaration                    { $$ = new FieldDecl
                     |   FieldDeclarations FieldDeclaration  { $1.AddChild($2); $$ = $1;}
                     ;
 
-FieldDeclaration    :   FieldVariableDeclaration SEMICOLON  { $$ = new Identifier("fake var decl"); }
+FieldDeclaration    :   FieldVariableDeclaration SEMICOLON  { $$ = new Identifier("Not Implemented: FieldVarDecl"); }
                     |   MethodDeclaration                   { $$ = new FieldDeclaration($1);        }
-                    |   ConstructorDeclaration              { $$ = new Identifier("field ctor decl");          }
-                    |   StaticInitializer                   { $$ = new Identifier("field static init decl");   }
-                    |   StructDeclaration                   { $$ = new Identifier("field struct decl");        }
+                    |   ConstructorDeclaration              { $$ = new Identifier("Not Implemented: ConstructorDeclaration");          }
+                    |   StaticInitializer                   { $$ = new Identifier("Not Implemented: StaticInitializer");   }
+                    |   StructDeclaration                   { $$ = new Identifier("Not Implemented: StructDeclaration");        }
                     ;
 
 StructDeclaration   :   Modifiers STRUCT Identifier ClassBody   {}
@@ -131,8 +125,8 @@ ParameterList               :   Parameter                                       
 Parameter                   :   TypeSpecifier DeclaratorName                                { $$ = new Parameter($1, $2); }
                             ;
 
-QualifiedName               :   Identifier                                                  {}
-                            |   QualifiedName PERIOD Identifier                             {}
+QualifiedName               :   Identifier                                                  { $$ = new QualifiedName($1);}
+                            |   QualifiedName PERIOD Identifier                             { $$.AddChild($3); $$ = $1;}
                             ;
 
 DeclaratorName              :   Identifier                                                  { $$ = new DeclaratorName($1); }
@@ -144,7 +138,7 @@ MethodDeclaratorName        :   Identifier                                      
 FieldVariableDeclaratorName :   Identifier                                                  {}
                             ;
 
-LocalVariableDeclaratorName :   Identifier                                                  {}
+LocalVariableDeclaratorName :   Identifier                                                  { $$ = new LocalVariableDeclaratorName($1); }
                             ;
 
 MethodBody                  :   Block                                                       { $$ = new MethodBody($1); }
@@ -161,7 +155,7 @@ StaticInitializer           :   STATIC Block                                    
  * For example:  int i;  i = 5;  int j = i;
  */
 
-Block                       :   LBRACE LocalVariableDeclarationsAndStatements RBRACE        { $$ = new Block($1); }
+Block                       :   LBRACE LocalVariableDeclarationsAndStatements RBRACE        { $$ = new Block($2); }
                             |   LBRACE RBRACE                                               { $$ = new Block(); }
                             ;
 
@@ -170,33 +164,31 @@ LocalVariableDeclarationsAndStatements  :   LocalVariableDeclarationOrStatement 
                                                                                             { $1.AddChild($2); $$ = $1; }
                                         ;
 
-// FIXME
-LocalVariableDeclarationOrStatement :   LocalVariableDeclarationStatement                   { $$ = new Identifier("FIXME: local var decl statement");}
-                                    |   Statement                                           { $$ = new Identifier("FIXME: statement");}
+LocalVariableDeclarationOrStatement :   LocalVariableDeclarationStatement                   { $$ = new LocalVariableDeclarationOrStatement($1);}
+                                    |   Statement                                           { $$ = new LocalVariableDeclarationOrStatement($1);}
                                     ;
 
-LocalVariableDeclarationStatement   :   TypeSpecifier LocalVariableDeclarators SEMICOLON
-                                    |   StructDeclaration                                           
+LocalVariableDeclarationStatement   :   TypeSpecifier LocalVariableDeclarators SEMICOLON    { $$ = new LocalVariableDeclarationStatement($1, $2);}
+                                    |   StructDeclaration                                   { $$ = new Identifier("Not Implemented: StructDeclaration");}
                                     ;
 
-LocalVariableDeclarators    :   LocalVariableDeclaratorName
-                            |   LocalVariableDeclarators COMMA LocalVariableDeclaratorName
+LocalVariableDeclarators    :   LocalVariableDeclaratorName                                 { $$ = new LocalVariableDeclarators($1); }
+                            |   LocalVariableDeclarators COMMA LocalVariableDeclaratorName  { $1.AddChild($3); $$ = $1; }
                             ;
 
                             
-
-Statement                   :   EmptyStatement
-                            |   ExpressionStatement SEMICOLON
-                            |   SelectionStatement
-                            |   IterationStatement
-                            |   ReturnStatement
-                            |   Block
+Statement                   :   EmptyStatement                                              { $$ = new Statement($1);}
+                            |   ExpressionStatement SEMICOLON                               { $$ = new Statement($1);}
+                            |   SelectionStatement                                          { $$ = new Identifier("Not Implemented: SelectionStatement");}
+                            |   IterationStatement                                          { $$ = new Identifier("Not Implemented: IterationStatement");}
+                            |   ReturnStatement                                             { $$ = new Identifier("Not Implemented: IterationStatement");}
+                            |   Block                                                       { $$ = new Statement($1);}
                             ;
 
-EmptyStatement              :   SEMICOLON
+EmptyStatement              :   SEMICOLON                                                   { $$ = new EmptyStatement();}
                             ;
 
-ExpressionStatement         :   Expression
+ExpressionStatement         :   Expression                                                  { $$ = new ExpressionStatement($1); }
                             ;
 
 /*
@@ -222,9 +214,10 @@ ArgumentList                :   Expression
                             ;
 
 
-Expression                  :   QualifiedName EQUALS Expression
-                            |   Expression OP_LOR Expression   /* short-circuit OR */
-                            |   Expression OP_LAND Expression   /* short-circuit AND */
+// TODO
+Expression                  :   QualifiedName EQUALS Expression     { $$ = new Expression($1, ExprType.EQUALS, $3); }
+   /* short-circuit OR  */  |   Expression OP_LOR Expression   
+   /* short-circuit AND */  |   Expression OP_LAND Expression   
                             |   Expression PIPE Expression
                             |   Expression HAT Expression
                             |   Expression AND Expression
@@ -240,15 +233,15 @@ Expression                  :   QualifiedName EQUALS Expression
                             |   Expression RSLASH Expression
                             |   Expression PERCENT Expression   /* remainder */
                             |   ArithmeticUnaryOperator Expression  %prec UNARY
-                            |   PrimaryExpression
+                            |   PrimaryExpression               { $$ = new Expression($1, ExprType.PRIMARY); }
                             ;
 
 ArithmeticUnaryOperator     :   PLUSOP
                             |   MINUSOP
                             ;
                             
-PrimaryExpression           :   QualifiedName
-                            |   NotJustName
+PrimaryExpression           :   QualifiedName                   { $$ = new PrimaryExpression($1);}   
+                            |   NotJustName                     { $$ = new Identifier("Not implemented: NotJustName"); }
                             ;
 
 NotJustName                 :   SpecialName

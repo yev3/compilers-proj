@@ -8,101 +8,40 @@ namespace ASTBuilder
 {
     class NodeVisitor : INodeVisitor
     {
-        public void Visit(CompilationUnit node)
+        public void Visit(AbstractNode node)
         {
-            Console.WriteLine("Visiting CompilationUnit.");
-        }
-
-        public void Visit(ClassDeclaration node)
-        {
-            Console.WriteLine("Visiting ClassDecl.");
+            Console.WriteLine("<" + node.ClassName() + ">");
         }
 
         public void Visit(Modifiers node)
         {
-            Console.Write("Visiting Modifiers: ");
+            Console.Write("<" + node.ClassName() + ">: ");
             var stringEnums = node.ModifierTokens.Select(x => x.ToString());
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(string.Join(", ", stringEnums));
+            Console.ResetColor();
         }
 
         public void Visit(Identifier node)
         {
-            Console.WriteLine("Visiting Identifier: " + node.Name);
+            Console.Write("<" + node.ClassName() + ">: ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(node.Name);
+            Console.ResetColor();
         }
-
-        public void Visit(ClassBody node)
-        {
-            Console.WriteLine("Visiting ClassBody.");
-        }
-
-        public void Visit(FieldDeclarations node)
-        {
-            Console.WriteLine("Visiting FieldDecls.");
-        }
-
         public void Visit(PrimitiveType node)
         {
-            Console.WriteLine("Visiting PrimitiveType.");
+            Console.Write("<" + node.ClassName() + ">: ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(node.Type);
+            Console.ResetColor();
         }
-
-        public void Visit(TypeName node)
+        public void Visit(Expression node)
         {
-            Console.WriteLine("Visiting TypeName.");
-        }
-
-        public void Visit(TypeSpecifier node)
-        {
-            Console.WriteLine("Visiting TypeSpecifier.");
-        }
-
-        public void Visit(MethodDeclaration node)
-        {
-            Console.WriteLine("Visiting MethodDeclaration.");
-        }
-
-        public void Visit(LocalVariableDeclarationsAndStatements node)
-        {
-            Console.WriteLine("Visiting LocalVariableDeclarationsAndStatements.");
-        }
-
-        public void Visit(Block node)
-        {
-            Console.WriteLine("Visiting Block.");
-        }
-
-        public void Visit(MethodBody node)
-        {
-            Console.WriteLine("Visiting MethodBody.");
-        }
-
-        public void Visit(MethodDeclaratorName node)
-        {
-            Console.WriteLine("Visiting MethodDeclaratorName.");
-        }
-
-        public void Visit(DeclaratorName node)
-        {
-            Console.WriteLine("Visiting DeclaratorName.");
-        }
-
-        public void Visit(Parameter node)
-        {
-            Console.WriteLine("Visiting Parameter.");
-        }
-
-        public void Visit(ParameterList node)
-        {
-            Console.WriteLine("Visiting ParameterList.");
-        }
-
-        public void Visit(MethodDeclarator node)
-        {
-            Console.WriteLine("Visiting MethodDeclarator.");
-        }
-
-        public void Visit(FieldDeclaration node)
-        {
-            Console.WriteLine("Visiting FieldDeclaration.");
+            Console.Write("<" + node.ClassName() + ">: ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(node.ExprType);
+            Console.ResetColor();
         }
     }
 }
