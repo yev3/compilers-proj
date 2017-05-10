@@ -46,7 +46,7 @@ namespace ASTBuilder
         static void Main(string[] args)
         {
             string dir = Environment.CurrentDirectory;
-            StreamReader testFile1 = File.OpenText(dir+@"\TestFiles\good1p.txt");
+            StreamReader testFile1 = File.OpenText(dir + @"\TestFiles\good1p.txt");
             StreamReader testFile2 = File.OpenText(dir+@"\TestFiles\iftest.txt");
             StreamReader testFile3 = File.OpenText(dir+@"\TestFiles\logictest.txt");
 

@@ -1,4 +1,4 @@
-﻿/* Simple comparisons:  tests method calls, if, assignment */
+/* Simple comparisons:  tests method calls, if, assignment */
 
 public class iftest {
 
@@ -21,7 +21,7 @@ public static void main() {
      i = 0;
      j = 1;
      
-	iftest.outStrln(“TCCL if test");
+	iftest.outStrln("TCCL if test");
      
 	if ( i < 10 ) 
         

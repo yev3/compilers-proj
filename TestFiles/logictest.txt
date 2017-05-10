@@ -11,7 +11,7 @@ public class logictest {
      int i, j;
      i = 0;
      j = 1;
-     logictest.outStrln(“TCCL logic test");
+     logictest.outStrln("TCCL logic test");
      if ( i < 10 & j == 1 ) 
         logictest.outStrln("In then part of & test");
      else  i = j; 

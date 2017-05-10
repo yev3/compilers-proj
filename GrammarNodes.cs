@@ -92,7 +92,7 @@ namespace ASTBuilder
     {
         public ClassBody()
         {
-            Console.WriteLine("Class body is empty!");
+            //Console.WriteLine("Class body is empty!");
         }
         public ClassBody(AbstractNode c)
         {
