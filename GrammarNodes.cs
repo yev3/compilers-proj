@@ -372,12 +372,27 @@ namespace ASTBuilder
             AddChild(abstractNode);
         }
     }
+    
     public class MethodCall : AbstractNode
     {
         public MethodCall(AbstractNode methodRef, AbstractNode argList)
         {
             AddChild(methodRef);
             AddChild(argList);
+        }
+    }
+
+    public class Number : AbstractNode
+    {
+        public int Value { get; set; }
+        public Number(int n)
+        {
+            Value = n;
+        }
+
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
         }
     }
 

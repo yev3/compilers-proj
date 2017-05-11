@@ -15,8 +15,11 @@ namespace ASTBuilder
     [DebuggerDisplay("AbstrNodeType: {DebugDisp}")]
     public abstract class AbstractNode : LinkedList<AbstractNode>, IReflectiveVisitable
     {
+        /*
+         * Token Value Types
+         */
 
-
+        public int IntVal { get; set; }
 
         public string DebugDisp => this.ToString();
 

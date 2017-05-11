@@ -83,9 +83,9 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 
 
 <INITIAL> {
-{Identifier}        { return (int)Token.IDENTIFIER;  /* parser acccesses name from yytext */}
+{Identifier}        { yylval.StrVal = yytext; return (int)Token.IDENTIFIER; }
  
-{DecIntegerLiteral} { return (int)Token.INT_NUMBER; /* parser must convert yytext to an integer */}
+{DecIntegerLiteral} { yylval.IntVal = int.Parse(yytext); return (int)Token.INT_NUMBER; }
 
 \"                  { stringval.Length = 0; BEGIN(STRING); }
 
