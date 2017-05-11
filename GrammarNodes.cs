@@ -31,7 +31,7 @@ namespace ASTBuilder
     public class CompilationUnit : AbstractNode
     {
         // just for the compilation unit because it's the top node
-        public override AbstractNode LeftMostSibling => this;
+        //public override AbstractNode LeftMostSibling => this;
         public override AbstractNode NextSibling => null;
 
         public CompilationUnit(AbstractNode classDecl)
