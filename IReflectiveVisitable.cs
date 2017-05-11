@@ -16,6 +16,7 @@
         void Visit(PrimitiveType node);
         void Visit(Expression node);
         void Visit(SpecialName node);
+        void Visit(Number node);
     }
 
 }

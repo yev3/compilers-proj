@@ -26,7 +26,7 @@ namespace ASTBuilder
         {
             NodeVisitor visitor = new NodeVisitor();
             NodeTraverser traverser = new NodeTraverser(visitor);
-            traverser.PreOrderWalk(CurrentSemanticValue);
+            traverser.PreOrderWalk(CurrentSemanticValue.AbstractNode);
             
         }
 
