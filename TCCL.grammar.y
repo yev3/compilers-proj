@@ -312,7 +312,7 @@ ReturnStatement
 
 ArgumentList            
     :   Expression                          { $$ = new ArgumentList($1); }
-    |   ArgumentList COMMA Expression       { $$ = new NotImplemented("ArgumentList"); }
+    |   ArgumentList COMMA Expression       { $1.AddChild($3); $$ = $1; }
     ;
 
 Expression                  
