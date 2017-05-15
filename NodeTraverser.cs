@@ -22,7 +22,7 @@ namespace ASTBuilder
 
             bool isLastChild = (node.NextSibling == null);
 
-            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.Write(prefix);
             Console.Write(isLastChild ? "└─ " : "├─ ");
             Console.ResetColor();

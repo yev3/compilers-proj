@@ -17,7 +17,7 @@ namespace ASTBuilder
         {
             Console.Write("<" + node.ClassName() + "> ");
             var stringEnums = node.ModifierTokens.Select(x => x.ToString());
-            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine(string.Join(", ", stringEnums));
             Console.ResetColor();
         }
@@ -25,21 +25,21 @@ namespace ASTBuilder
         public void Visit(Identifier node)
         {
             Console.Write("<" + node.ClassName() + "> ");
-            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine(node.Name);
             Console.ResetColor();
         }
         public void Visit(PrimitiveType node)
         {
             Console.Write("<" + node.ClassName() + "> ");
-            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine(node.Type);
             Console.ResetColor();
         }
         public void Visit(Expression node)
         {
             Console.Write("<" + node.ClassName() + "> ");
-            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine(node.ExprType);
             Console.ResetColor();
         }
