@@ -365,12 +365,28 @@ namespace ASTBuilder
     }
     public class SelectionStatement : AbstractNode { }
 
+    public class Then : AbstractNode
+    {
+        public Then(AbstractNode node)
+        {
+            AddChild(node);
+        }
+    }
+
+    public class Else : AbstractNode
+    {
+        public Else(AbstractNode node)
+        {
+            AddChild(node);
+        }
+    }
+
     public class IfStatement : SelectionStatement
     {
         public IfStatement(AbstractNode predicate, AbstractNode thenExpr)
         {
             AddChild(predicate);
-            AddChild(thenExpr);
+            AddChild(new Then(thenExpr));
         }
     }
 
@@ -379,8 +395,8 @@ namespace ASTBuilder
         public IfStatementElse(AbstractNode predicate, AbstractNode thenExpr, AbstractNode elseExpr)
         {
             AddChild(predicate);
-            AddChild(thenExpr);
-            AddChild(elseExpr);
+            AddChild(new Then(thenExpr));
+            AddChild(new Else(elseExpr));
         }
     }
 }
