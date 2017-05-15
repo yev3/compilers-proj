@@ -24,7 +24,6 @@ EndOfLineComment    (("//")({InputCharacter})*{LineTerminator})
 Comment  ({TraditionalComment}|{EndOfLineComment}) // | {DocumentationComment})
 
 Identifier [a-zA-Z][a-zA-Z0-9]*
-ComplexPrimaryNoParenthesis "(.*?)"
 DecIntegerLiteral (0|[1-9][0-9]*)
 
 %s STRING
@@ -85,8 +84,6 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 <INITIAL> {
 {Identifier}        { yylval.StrVal = yytext; return (int)Token.IDENTIFIER; }
 
-{ComplexPrimaryNoParenthesis}        { yylval.StrVal = yytext; return (int)Token.LITERAL; }
- 
 {DecIntegerLiteral} { yylval.IntVal = int.Parse(yytext); return (int)Token.INT_NUMBER; }
 
 \"                  { stringval.Length = 0; BEGIN(STRING); }
@@ -103,6 +100,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 <STRING> {
   \"                { BEGIN(INITIAL); 
                       yystringval = stringval.ToString();
+                      yylval.StrVal = yystringval;
                       return (int)Token.LITERAL; }
   [^\n\r\"\\]+      { stringval.Append(yytext); }
   \\t               { stringval.Append('\t'); }
