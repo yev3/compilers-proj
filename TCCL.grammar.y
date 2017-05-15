@@ -99,39 +99,45 @@
 
 %%
 
-CompilationUnit     :   ClassDeclaration                    {$$ = new CompilationUnit($1);}
-                    ;
+CompilationUnit     
+    :   ClassDeclaration    { $$ = new CompilationUnit($1);}
+    ;
 
-ClassDeclaration    :   Modifiers CLASS Identifier ClassBody {$$ = new ClassDeclaration($1, $3, $4);}
-                    ;
+ClassDeclaration    
+    :   Modifiers CLASS Identifier ClassBody 
+                            { $$ = new ClassDeclaration($1, $3, $4);}
+    ;
 
-Modifiers           :   PUBLIC                              { $$ = new Modifiers(ModifierType.PUBLIC);}
-                    |   PRIVATE                             { $$ = new Modifiers(ModifierType.PRIVATE);}
-                    |   STATIC                              { $$ = new Modifiers(ModifierType.STATIC);}
-                    |   Modifiers PUBLIC                    { ((Modifiers)$1).AddModType(ModifierType.PUBLIC); $$ = $1;}
-                    |   Modifiers PRIVATE                   { ((Modifiers)$1).AddModType(ModifierType.PRIVATE); $$ = $1;}
-                    |   Modifiers STATIC                    { ((Modifiers)$1).AddModType(ModifierType.STATIC); $$ = $1;}
-                    ;
+Modifiers           
+    :   PUBLIC              { $$ = new Modifiers(ModifierType.PUBLIC);}
+    |   PRIVATE             { $$ = new Modifiers(ModifierType.PRIVATE);}
+    |   STATIC              { $$ = new Modifiers(ModifierType.STATIC);}
+    |   Modifiers PUBLIC    { ((Modifiers)$1).AddModType(ModifierType.PUBLIC); $$ = $1;}
+    |   Modifiers PRIVATE   { ((Modifiers)$1).AddModType(ModifierType.PRIVATE); $$ = $1;}
+    |   Modifiers STATIC    { ((Modifiers)$1).AddModType(ModifierType.STATIC); $$ = $1;}
+    ;
 
-ClassBody           :   LBRACE FieldDeclarations RBRACE     { $$ = new ClassBody($2);}
-                    |   LBRACE RBRACE                       { $$ = new ClassBody();}
-                    ;
+ClassBody           
+    :   LBRACE FieldDeclarations RBRACE     { $$ = new ClassBody($2);}
+    |   LBRACE RBRACE                       { $$ = new ClassBody();}
+    ;
 
-FieldDeclarations   :   FieldDeclaration                    { $$ = new FieldDeclarations($1); }
-                    |   FieldDeclarations FieldDeclaration  { $1.AddChild($2); $$ = $1;}
-                    ;
+FieldDeclarations   
+    :   FieldDeclaration                    { $$ = new FieldDeclarations($1); }
+    |   FieldDeclarations FieldDeclaration  { $1.AddChild($2); $$ = $1;}
+    ;
 
-FieldDeclaration    :   FieldVariableDeclaration SEMICOLON  { $$ = new Identifier("Not Implemented: FieldVarDecl"); }
-                    |   MethodDeclaration                   { $$ = new FieldDeclaration($1);        }
-                    |   ConstructorDeclaration              { $$ = new Identifier("Not Implemented: ConstructorDeclaration");          }
-                    |   StaticInitializer                   { $$ = new Identifier("Not Implemented: StaticInitializer");   }
-                    |   StructDeclaration                   { $$ = new Identifier("Not Implemented: StructDeclaration");        }
-                    ;
+FieldDeclaration    
+    :   FieldVariableDeclaration SEMICOLON  { $$ = new FieldDeclaration($1);        }
+    |   MethodDeclaration                   { $$ = new FieldDeclaration($1);        }
+    |   ConstructorDeclaration              { $$ = new FieldDeclaration($1);        }
+    |   StaticInitializer                   { $$ = new FieldDeclaration($1);        }
+    |   StructDeclaration                   { $$ = new FieldDeclaration($1);        }
+    ;
 
-StructDeclaration   :   Modifiers STRUCT Identifier ClassBody   {}
-                    ;
-
-
+StructDeclaration   
+    :   Modifiers STRUCT Identifier ClassBody   { $$ = new NotImplemented("StructDeclaration"); }
+    ;
 
 /*
  * This isn't structured so nicely for a bottom up parse.  Recall
@@ -140,109 +146,144 @@ StructDeclaration   :   Modifiers STRUCT Identifier ClassBody   {}
  * here to get the information where you want it, so that the declarations can
  * be suitably annotated with their type and modifier information.
  */
-FieldVariableDeclaration    :   Modifiers TypeSpecifier FieldVariableDeclarators            {}
-                            ;
+FieldVariableDeclaration    
+    :   Modifiers TypeSpecifier FieldVariableDeclarators            
+                                            { $$ = new NotImplemented("FieldVariableDeclaration"); }
+    ;
 
-TypeSpecifier               :   TypeName                                                    { $$ = new TypeSpecifier($1); }
-                            |   ArraySpecifier                                              { $$ = new TypeSpecifier($1); }
-                            ;
+TypeSpecifier               
+    :   TypeName                            { $$ = new TypeSpecifier($1); }
+    |   ArraySpecifier                      { $$ = new TypeSpecifier($1); }
+    ;
 
-TypeName                    :   PrimitiveType                                               { $$ = new TypeName($1); }
-                            |   QualifiedName                                               { $$ = new TypeName($1); }
-                            ;
+TypeName                    
+    :   PrimitiveType                       { $$ = new TypeName($1); }
+    |   QualifiedName                       { $$ = new TypeName($1); }
+    ;
 
-ArraySpecifier              :   TypeName LBRACKET RBRACKET                                  {}
-                            ;
+ArraySpecifier              
+    :   TypeName LBRACKET RBRACKET          { $$ = new ArraySpecifier($1); }
+    ;
                             
-PrimitiveType               :   BOOLEAN                                                     { $$ = new PrimitiveType(EnumPrimitiveType.BOOLEAN); }
-                            |   INT                                                         { $$ = new PrimitiveType(EnumPrimitiveType.INT); }
-                            |   VOID                                                        { $$ = new PrimitiveType(EnumPrimitiveType.VOID); }
-                            ;
+PrimitiveType               
+    :   BOOLEAN                             { $$ = new PrimitiveType(EnumPrimitiveType.BOOLEAN); }
+    |   INT                                 { $$ = new PrimitiveType(EnumPrimitiveType.INT); }
+    |   VOID                                { $$ = new PrimitiveType(EnumPrimitiveType.VOID); }
+    ;
 
-FieldVariableDeclarators    :   FieldVariableDeclaratorName                                 {}
-                            |   FieldVariableDeclarators COMMA FieldVariableDeclaratorName  {}
-                            ;
+FieldVariableDeclarators    
+    :   FieldVariableDeclaratorName         { $$ = new NotImplemented("FieldVariableDeclarators"); }
+    |   FieldVariableDeclarators COMMA FieldVariableDeclaratorName  
+                                            { $$ = new NotImplemented("FieldVariableDeclarators"); }
+    ;
 
 
-MethodDeclaration           :   Modifiers TypeSpecifier MethodDeclarator MethodBody         {$$ = new MethodDeclaration($1, $2, $3, $4); }
-                            ;
+MethodDeclaration           
+    :   Modifiers TypeSpecifier MethodDeclarator MethodBody         
+                                            { $$ = new MethodDeclaration($1, $2, $3, $4); }
+    ;
 
-MethodDeclarator            :   MethodDeclaratorName LPAREN ParameterList RPAREN            { $$ = new MethodDeclarator($1, $3); }
-                            |   MethodDeclaratorName LPAREN RPAREN                          { $$ = new MethodDeclarator($1); }
-                            ;
+MethodDeclarator            
+    :   MethodDeclaratorName LPAREN ParameterList RPAREN            
+                                            { $$ = new MethodDeclarator($1, $3); }
+    |   MethodDeclaratorName LPAREN RPAREN  { $$ = new MethodDeclarator($1); }
+    ;
 
-ParameterList               :   Parameter                                                   { $$ = new ParameterList($1); }
-                            |   ParameterList COMMA Parameter                               { $1.AddChild($2); $$ = $1;}  
-                            ;
+ParameterList               
+    :   Parameter                           { $$ = new ParameterList($1); }
+    |   ParameterList COMMA Parameter       { $1.AddChild($2); $$ = $1;}  
+    ;
 
-Parameter                   :   TypeSpecifier DeclaratorName                                { $$ = new Parameter($1, $2); }
-                            ;
+Parameter                   
+    :   TypeSpecifier DeclaratorName        { $$ = new Parameter($1, $2); }
+    ;
 
-QualifiedName               :   Identifier                                                  { $$ = new QualifiedName($1);}
-                            |   QualifiedName PERIOD Identifier                             { $$.AddChild($3); $$ = $1;}
-                            ;
+QualifiedName               
+    :   Identifier                          { $$ = new QualifiedName($1);}
+    |   QualifiedName PERIOD Identifier     { $$.AddChild($3); $$ = $1;}
+    ;
 
-DeclaratorName              :   Identifier                                                  { $$ = new DeclaratorName($1); }
-                            ;
+DeclaratorName              
+    :   Identifier                          { $$ = new DeclaratorName($1); }
+    ;
 
-MethodDeclaratorName        :   Identifier                                                  { $$ = new MethodDeclaratorName($1); }
-                            ;
+MethodDeclaratorName        
+    :   Identifier                          { $$ = new MethodDeclaratorName($1); }
+    ;
 
-FieldVariableDeclaratorName :   Identifier                                                  {}
-                            ;
+FieldVariableDeclaratorName 
+    :   Identifier                          { $$ = new FieldVariableDeclaratorName($1); }
+    ;
 
-LocalVariableDeclaratorName :   Identifier                                                  { $$ = new LocalVariableDeclaratorName($1); }
-                            ;
+LocalVariableDeclaratorName 
+    :   Identifier                          { $$ = new LocalVariableDeclaratorName($1); }
+    ;
 
-MethodBody                  :   Block                                                       { $$ = new MethodBody($1); }
-                            ;
+MethodBody                  
+    :   Block                               { $$ = new MethodBody($1); }
+    ;
 
-ConstructorDeclaration      :   Modifiers MethodDeclarator Block                            {}
-                            ;
+ConstructorDeclaration      
+    :   Modifiers MethodDeclarator Block    { $$ = new NotImplemented("ConstructorDeclaration"); }
+    ;
 
-StaticInitializer           :   STATIC Block                                                {}
-                            ;
+StaticInitializer           
+    :   STATIC Block                        { $$ = new StaticInitializer($2); }
+    ;
         
 /*
  * These can't be reorganized, because the order matters.
- * For example:  int i;  i = 5;  int j = i;
+ * For example
+    :  int i;  i = 5;  int j = i;
  */
 
-Block                       :   LBRACE LocalVariableDeclarationsAndStatements RBRACE        { $$ = new Block($2); }
-                            |   LBRACE RBRACE                                               { $$ = new Block(); }
-                            ;
+Block                       
+    :   LBRACE LocalVariableDeclarationsAndStatements RBRACE        
+                                            { $$ = new Block($2); }
+    |   LBRACE RBRACE                       { $$ = new Block(); }
+    ;
 
-LocalVariableDeclarationsAndStatements  :   LocalVariableDeclarationOrStatement             { $$ = new LocalVariableDeclarationsAndStatements($1);}
-                                        |   LocalVariableDeclarationsAndStatements LocalVariableDeclarationOrStatement
-                                                                                            { $1.AddChild($2); $$ = $1; }
-                                        ;
+LocalVariableDeclarationsAndStatements  
+    :   LocalVariableDeclarationOrStatement             
+                                            { $$ = new LocalVariableDeclarationsAndStatements($1);}
+    |   LocalVariableDeclarationsAndStatements LocalVariableDeclarationOrStatement
+                                            { $1.AddChild($2); $$ = $1; }
+    ;
 
-LocalVariableDeclarationOrStatement :   LocalVariableDeclarationStatement                   { $$ = new LocalVariableDeclarationOrStatement($1);}
-                                    |   Statement                                           { $$ = new LocalVariableDeclarationOrStatement($1);}
-                                    ;
+LocalVariableDeclarationOrStatement 
+    :   LocalVariableDeclarationStatement   { $$ = new LocalVariableDeclarationOrStatement($1);}
+    |   Statement                           { $$ = new LocalVariableDeclarationOrStatement($1);}
+    ;
 
-LocalVariableDeclarationStatement   :   TypeSpecifier LocalVariableDeclarators SEMICOLON    { $$ = new LocalVariableDeclarationStatement($1, $2);}
-                                    |   StructDeclaration                                   { $$ = new Identifier("Not Implemented: StructDeclaration");}
-                                    ;
+LocalVariableDeclarationStatement   
+    :   TypeSpecifier LocalVariableDeclarators SEMICOLON    
+                                            { $$ = new LocalVariableDeclarationStatement($1, $2);}
+    |   StructDeclaration                   { $$ = new LocalVariableDeclarationStatement($1);}
+    ;
 
-LocalVariableDeclarators    :   LocalVariableDeclaratorName                                 { $$ = new LocalVariableDeclarators($1); }
-                            |   LocalVariableDeclarators COMMA LocalVariableDeclaratorName  { $1.AddChild($3); $$ = $1; }
-                            ;
+LocalVariableDeclarators    
+    :   LocalVariableDeclaratorName         { $$ = new LocalVariableDeclarators($1); }
+    |   LocalVariableDeclarators COMMA LocalVariableDeclaratorName  
+                                            { $1.AddChild($3); $$ = $1; }
+    ;
 
                             
-Statement                   :   EmptyStatement                                              { $$ = new Statement($1);}
-                            |   ExpressionStatement SEMICOLON                               { $$ = new Statement($1);}
-                            |   SelectionStatement                                          { $$ = new Identifier("Not Implemented: SelectionStatement");}
-                            |   IterationStatement                                          { $$ = new Identifier("Not Implemented: IterationStatement");}
-                            |   ReturnStatement                                             { $$ = new Identifier("Not Implemented: IterationStatement");}
-                            |   Block                                                       { $$ = new Statement($1);}
-                            ;
+Statement                   
+    :   EmptyStatement                      { $$ = new Statement($1);}
+    |   ExpressionStatement SEMICOLON       { $$ = new Statement($1);}
+    |   SelectionStatement                  { $$ = new Statement($1);}
+    |   IterationStatement                  { $$ = new Statement($1);}
+    |   ReturnStatement                     { $$ = new Statement($1);}
+    |   Block                               { $$ = new Statement($1);}
+    ;
 
-EmptyStatement              :   SEMICOLON                                                   { $$ = new EmptyStatement();}
-                            ;
+EmptyStatement              
+    :   SEMICOLON                           { $$ = new EmptyStatement();}
+    ;
 
-ExpressionStatement         :   Expression                                                  { $$ = new ExpressionStatement($1); }
-                            ;
+ExpressionStatement         
+    :   Expression                          { $$ = new ExpressionStatement($1); }
+    ;
 
 /*
  *  You will eventually have to address the shift/reduce error that
@@ -250,89 +291,106 @@ ExpressionStatement         :   Expression                                      
  *
  */
 
-SelectionStatement          :   IF LPAREN Expression RPAREN Statement ELSE Statement
-//                          |   IF LPAREN Expression RPAREN Statement
-                            ;
+SelectionStatement          
+    :   IF LPAREN Expression RPAREN Statement ELSE Statement
+                                            { $$ = new NotImplemented("SelectionStatement"); }
+//  |   IF LPAREN Expression RPAREN Statement
+    ;
 
 
-IterationStatement          :   WHILE LPAREN Expression RPAREN Statement
-                            ;
+IterationStatement          
+    :   WHILE LPAREN Expression RPAREN Statement
+                                            { $$ = new NotImplemented("IterationStatement"); }
+    ;
 
-ReturnStatement             :   RETURN Expression SEMICOLON
-                            |   RETURN            SEMICOLON
-                            ;
+ReturnStatement         
+    :   RETURN Expression SEMICOLON         { $$ = new ReturnStatement($2); }
+    |   RETURN            SEMICOLON         { $$ = new ReturnStatement(); }
+    ;
 
-ArgumentList                :   Expression
-                            |   ArgumentList COMMA Expression
-                            ;
+ArgumentList            
+    :   Expression                          { $$ = new NotImplemented("ArgumentList"); }
+    |   ArgumentList COMMA Expression       { $$ = new NotImplemented("ArgumentList"); }
+    ;
 
+Expression                  
+    :   QualifiedName EQUALS Expression     { $$ = new Expression($1, ExprType.EQUALS, $3); }
+    |   Expression OP_LOR Expression        { $$ = new Expression($1, ExprType.EQUALS, $3); }   /* short-circuit OR  */  
+    |   Expression OP_LAND Expression       { $$ = new Expression($1, ExprType.EQUALS, $3); }   /* short-circuit AND */  
+    |   Expression PIPE Expression          { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression HAT Expression           { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression AND Expression           { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression OP_EQ Expression         { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression OP_NE Expression         { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression OP_GT Expression         { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression OP_LT Expression         { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression OP_LE Expression         { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression OP_GE Expression         { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression PLUSOP Expression        { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression MINUSOP Expression       { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression ASTERISK Expression      { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression RSLASH Expression        { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression PERCENT Expression       { $$ = new Expression($1, ExprType.EQUALS, $3); }   /* remainder */
+    |   ArithmeticUnaryOperator Expression  %prec UNARY
+                                            { $$ = new NotImplemented("ArithmeticUnaryOperator Expression  %prec UNARY"); }
+    |   PrimaryExpression                   { $$ = new Expression($1, ExprType.PRIMARY); }
+    ;
 
-// TODO
-Expression                  :   QualifiedName EQUALS Expression     { $$ = new Expression($1, ExprType.EQUALS, $3); }
-   /* short-circuit OR  */  |   Expression OP_LOR Expression   
-   /* short-circuit AND */  |   Expression OP_LAND Expression   
-                            |   Expression PIPE Expression
-                            |   Expression HAT Expression
-                            |   Expression AND Expression
-                            |   Expression OP_EQ Expression
-                            |   Expression OP_NE Expression
-                            |   Expression OP_GT Expression
-                            |   Expression OP_LT Expression
-                            |   Expression OP_LE Expression
-                            |   Expression OP_GE Expression
-                            |   Expression PLUSOP Expression
-                            |   Expression MINUSOP Expression
-                            |   Expression ASTERISK Expression
-                            |   Expression RSLASH Expression
-                            |   Expression PERCENT Expression   /* remainder */
-                            |   ArithmeticUnaryOperator Expression  %prec UNARY
-                            |   PrimaryExpression               { $$ = new Expression($1, ExprType.PRIMARY); }
-                            ;
-
-ArithmeticUnaryOperator     :   PLUSOP
-                            |   MINUSOP
-                            ;
+ArithmeticUnaryOperator     
+    :   PLUSOP                          { $$ = new NotImplemented("ArithmeticUnaryOperator"); }
+    |   MINUSOP                         { $$ = new NotImplemented("ArithmeticUnaryOperator"); }
+    ;
                             
-PrimaryExpression           :   QualifiedName                   { $$ = new PrimaryExpression($1);}   
-                            |   NotJustName                     { $$ = new PrimaryExpression($1);}
-                            ;
+PrimaryExpression           
+    :   QualifiedName                   { $$ = new PrimaryExpression($1);}   
+    |   NotJustName                     { $$ = new PrimaryExpression($1);}
+    ;
 
-NotJustName                 :   SpecialName                     { $$ = new NotJustName($1);}
-                            |   ComplexPrimary                  { $$ = new NotJustName($1);}
-                            ;
+NotJustName                 
+    :   SpecialName                     { $$ = new NotJustName($1);}
+    |   ComplexPrimary                  { $$ = new NotJustName($1);}
+    ;
 
-ComplexPrimary              :   LPAREN Expression RPAREN        { $$ = new ComplexPrimary($2);}
-                            |   ComplexPrimaryNoParenthesis     { $$ = new ComplexPrimary($1);}
-                            ;
+ComplexPrimary              
+    :   LPAREN Expression RPAREN        { $$ = new ComplexPrimary($2);}
+    |   ComplexPrimaryNoParenthesis     { $$ = new ComplexPrimary($1);}
+    ;
 
-ComplexPrimaryNoParenthesis :   LITERAL                         { $$ = new ComplexPrimaryNoParenthesis($1);}
-                            |   Number                          { $$ = new ComplexPrimaryNoParenthesis($1);}
-                            |   FieldAccess                     { $$ = new ComplexPrimaryNoParenthesis($1);}    
-                            |   MethodCall                      { $$ = new ComplexPrimaryNoParenthesis($1);}    
-                            ;
+ComplexPrimaryNoParenthesis 
+    :   LITERAL                         { $$ = new NotImplemented("LITERAL"); }
+    |   Number                          { $$ = new ComplexPrimaryNoParenthesis($1);}
+    |   FieldAccess                     { $$ = new ComplexPrimaryNoParenthesis($1);}    
+    |   MethodCall                      { $$ = new ComplexPrimaryNoParenthesis($1);}    
+    ;
 
-FieldAccess                 :   NotJustName PERIOD Identifier   { $$ = new Identifier("Not Implemented: Number");}   
-                            ;       
+FieldAccess                 
+    :   NotJustName PERIOD Identifier   { $$ = new NotImplemented("FieldAccess");}   
+    ;       
 
-MethodCall                  :   MethodReference LPAREN ArgumentList RPAREN
-                                                                { $$ = new MethodCall($1, $3);}
-                            |   MethodReference LPAREN RPAREN   { $$ = new Identifier("Not Implemented: MethodRef()");}
-                            ;
+MethodCall                  
+    :   MethodReference LPAREN ArgumentList RPAREN
+                                        { $$ = new MethodCall($1, $3);}
+    |   MethodReference LPAREN RPAREN   { $$ = new MethodCall($1);}
+    ;
 
-MethodReference             :   ComplexPrimaryNoParenthesis     { $$ = new MethodReference($1);}
-                            |   QualifiedName                   { $$ = new MethodReference($1);}
-                            |   SpecialName                     { $$ = new MethodReference($1);}
-                            ;
+MethodReference             
+    :   ComplexPrimaryNoParenthesis     { $$ = new MethodReference($1);}
+    |   QualifiedName                   { $$ = new MethodReference($1);}
+    |   SpecialName                     { $$ = new MethodReference($1);}
+    ;
 
-SpecialName                 :   THIS                            { $$ = new SpecialName(SpecialNameType.THIS);}
-                            |   NULL                            { $$ = new SpecialName(SpecialNameType.NULL);}
-                            ;
+SpecialName                 
+    :   THIS                            { $$ = new SpecialName(SpecialNameType.THIS);}
+    |   NULL                            { $$ = new SpecialName(SpecialNameType.NULL);}
+    ;
 
-Identifier                  :   IDENTIFIER                      {$$ = new Identifier($1);}
-                            ;
+Identifier                  
+    :   IDENTIFIER                      { $$ = new Identifier($1);}
+    ;
 
-Number                      :   INT_NUMBER                      { $$ = new Number($1);}
-                            ;
+Number                      
+    :   INT_NUMBER                      { $$ = new Number($1);}
+    ;
 
 %%
 

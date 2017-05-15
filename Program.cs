@@ -9,14 +9,19 @@ namespace ASTBuilder
 {
     class Program
     {
+
+
         private static List<string> test_files = new List<string>()
         {
             @"TestFiles\good1p.txt",
             @"TestFiles\iftest.txt",
             @"TestFiles\logictest.txt"
         };
+
+
         static void Main(string[] args)
         {
+
             var testNbr = 1;
             foreach (var file in test_files)
             {
@@ -32,7 +37,7 @@ namespace ASTBuilder
             }
        
 
-            Console.ReadKey();
+            //Console.ReadKey();
         }
     }
 }
