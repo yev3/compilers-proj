@@ -28,9 +28,10 @@ public static void main() {
 	iftest.outStrln("In then part");
      
 	else  i = j; 
-     if ( i == 10 ) j = i;
+    
+	if ( i == 10 ) j = i;
      
-	else  iftest.outStrln("In else part"); 
+	else  iftest.outStrln("Ingit diff else part"); 
    
 }
 

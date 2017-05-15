@@ -97,7 +97,9 @@
 %left  OP_GT, OP_LT, OP_LE, OP_GE
 %left  PLUSOP, MINUSOP
 %left  ASTERISK, RSLASH, PERCENT
-%left  UNARY 
+%left  UNARY
+%nonassoc RPAREN
+%nonassoc ELSE
 
 %%
 
@@ -294,7 +296,7 @@ ExpressionStatement
 
 SelectionStatement          
     :   IF LPAREN Expression RPAREN Statement ELSE Statement
-                                            { $$ = new SelectionStatement($3,$5,$7); }
+                                            { $$ = new SelectionStatement($3,$5,$7);} /*marc*/
 //  |   IF LPAREN Expression RPAREN Statement
 											{ $$ = new SelectionStatement($3,$5); }
     ;
