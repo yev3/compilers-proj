@@ -20,12 +20,14 @@
 
 %start CompilationUnit
 
+/* Terminals */
 %token <AbstractNode> AND ASTERISK BANG BOOLEAN CLASS
 %token <AbstractNode> COLON COMMA ELSE EQUALS HAT
 %token <AbstractNode> IF INSTANCEOF INT 
-%token <StrVal> IDENTIFIER 
+%token <StrVal> IDENTIFIER
+%token <StrVal> LITERAL 
 %token <IntVal> INT_NUMBER
-%token <AbstractNode> LBRACE LBRACKET LITERAL LPAREN MINUSOP
+%token <AbstractNode> LBRACE LBRACKET LPAREN MINUSOP
 %token <AbstractNode> NEW NULL OP_EQ OP_GE OP_GT
 %token <AbstractNode> OP_LAND OP_LE OP_LOR OP_LT OP_NE
 %token <AbstractNode> PERCENT PERIOD PIPE PLUSOP PRIVATE
@@ -292,8 +294,9 @@ ExpressionStatement
 
 SelectionStatement          
     :   IF LPAREN Expression RPAREN Statement ELSE Statement
-                                            { $$ = new NotImplemented("SelectionStatement"); }
+                                            { $$ = new SelectionStatement($3,$5,$7); }
 //  |   IF LPAREN Expression RPAREN Statement
+											{ $$ = new SelectionStatement($3,$5); }
     ;
 
 
@@ -356,7 +359,7 @@ ComplexPrimary
     ;
 
 ComplexPrimaryNoParenthesis 
-    :   LITERAL                         { $$ = new NotImplemented("LITERAL"); }
+    :   LITERAL                         { $$ = new ComplexPrimaryNoParenthesis($1);}
     |   Number                          { $$ = $1;}
     |   FieldAccess                     { $$ = $1;}    
     |   MethodCall                      { $$ = $1;}    

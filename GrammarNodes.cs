@@ -290,9 +290,14 @@ namespace ASTBuilder
 
     public class ComplexPrimaryNoParenthesis : AbstractNode
     {
-        public ComplexPrimaryNoParenthesis(AbstractNode abstractNode)
+        public ComplexPrimaryNoParenthesis(string s)
         {
-            AddChild(abstractNode);
+            Name = s;
+        }
+
+        public override void Accept(INodeVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
         }
     }
 
@@ -387,6 +392,21 @@ namespace ASTBuilder
         public ArgumentList(AbstractNode abstractNode)
         {
             AddChild(abstractNode);
+        }
+    }
+    public class SelectionStatement : AbstractNode
+    {
+        public SelectionStatement(AbstractNode expression, AbstractNode statement1)
+        {
+            AddChild(expression);
+            AddChild(statement1);
+        }
+
+        public SelectionStatement(AbstractNode expression, AbstractNode statement1, AbstractNode statement2)
+        {
+            AddChild(expression);
+            AddChild(statement1);
+            AddChild(statement2);
         }
     }
 }

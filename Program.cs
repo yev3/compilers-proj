@@ -37,7 +37,7 @@ namespace ASTBuilder
             }
        
 
-            //Console.ReadKey();
+            Console.ReadKey();
         }
     }
 }
