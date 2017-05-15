@@ -63,7 +63,7 @@ namespace ASTBuilder
         {
             Console.Write("<" + node.ClassName() + "> ");
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(node.Name);
+            Console.WriteLine("\"" + node.Name +"\"");
             Console.ResetColor();
         }
         public void Visit(NotImplemented node)
