@@ -15,7 +15,7 @@ namespace ASTBuilder
 
         public void Visit(Modifiers node)
         {
-            Console.Write("<" + node.ClassName() + ">: ");
+            Console.Write("<" + node.ClassName() + "> ");
             var stringEnums = node.ModifierTokens.Select(x => x.ToString());
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(string.Join(", ", stringEnums));
@@ -24,21 +24,21 @@ namespace ASTBuilder
 
         public void Visit(Identifier node)
         {
-            Console.Write("<" + node.ClassName() + ">: ");
+            Console.Write("<" + node.ClassName() + "> ");
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(node.Name);
             Console.ResetColor();
         }
         public void Visit(PrimitiveType node)
         {
-            Console.Write("<" + node.ClassName() + ">: ");
+            Console.Write("<" + node.ClassName() + "> ");
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(node.Type);
             Console.ResetColor();
         }
         public void Visit(Expression node)
         {
-            Console.Write("<" + node.ClassName() + ">: ");
+            Console.Write("<" + node.ClassName() + "> ");
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(node.ExprType);
             Console.ResetColor();
@@ -46,7 +46,7 @@ namespace ASTBuilder
 
         public void Visit(SpecialName node)
         {
-            Console.Write("<" + node.ClassName() + ">: ");
+            Console.Write("<" + node.ClassName() + "> ");
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(node.SpecialType);
             Console.ResetColor();
@@ -54,14 +54,14 @@ namespace ASTBuilder
 
         public void Visit(Number node)
         {
-            Console.Write("<" + node.ClassName() + ">: ");
+            Console.Write("<" + node.ClassName() + "> ");
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(node.Value);
             Console.ResetColor();
         }
-        public void Visit(ComplexPrimaryNoParenthesis node)
+        public void Visit(Literal node)
         {
-            Console.Write("<" + node.ClassName() + ">: ");
+            Console.Write("<" + node.ClassName() + "> ");
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(node.Name);
             Console.ResetColor();
@@ -69,7 +69,7 @@ namespace ASTBuilder
         public void Visit(NotImplemented node)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("<NOT IMPLEMENTED: " + node.Name + ">");
+            Console.WriteLine("<NOT IMPLEMENTED " + node.Name + ">");
             Console.ResetColor();
         }
     }

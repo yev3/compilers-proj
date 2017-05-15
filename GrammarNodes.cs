@@ -118,7 +118,8 @@ namespace ASTBuilder
         {
             AddChild(modifiers);
             AddChild(typeSpecifier);
-            AddChild(methodDeclarator);
+            foreach (AbstractNode node in methodDeclarator)
+                AddChild(node);
             AddChild(methodBody);
         }
 
@@ -140,32 +141,16 @@ namespace ASTBuilder
             myVisitor.Visit(this);
         }
     }
-    public class LocalVariableDeclarationsAndStatements : AbstractNode
-    {
-        public LocalVariableDeclarationsAndStatements(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
 
     public class Block : Statement
     {
         public Block() { }
-
-        public Block(AbstractNode declsAndStaments)
+        public Block(AbstractNode child)
         {
-            AddChild(declsAndStaments);
+            AddChild(child);
         }
     }
 
-
-    public class DeclaratorName : AbstractNode
-    {
-        public DeclaratorName(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
 
     public class Parameter : AbstractNode
     {
@@ -184,16 +169,16 @@ namespace ASTBuilder
         }
     }
 
+
     public class MethodDeclarator : AbstractNode
     {
-        public MethodDeclarator(AbstractNode name)
+        public MethodDeclarator(AbstractNode identifier)
         {
-            AddChild(name);
+            AddChild(identifier);
         }
-
-        public MethodDeclarator(AbstractNode name, AbstractNode paramList)
+        public MethodDeclarator(AbstractNode identifier, AbstractNode paramList)
         {
-            AddChild(name);
+            AddChild(identifier);
             AddChild(paramList);
         }
     }
@@ -214,9 +199,9 @@ namespace ASTBuilder
         }
     }
 
-    public class LocalVariableDeclarators : AbstractNode
+    public class DeclaredVars : AbstractNode
     {
-        public LocalVariableDeclarators(AbstractNode abstractNode)
+        public DeclaredVars(AbstractNode abstractNode)
         {
             AddChild(abstractNode);
         }
@@ -228,14 +213,6 @@ namespace ASTBuilder
 
     public class EmptyStatement : Statement { }
 
-    public class LocalVariableDeclaratorName : AbstractNode
-    {
-        public LocalVariableDeclaratorName(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
-
     public class QualifiedName : TypeName
     {
         public QualifiedName(AbstractNode abstractNode)
@@ -245,9 +222,9 @@ namespace ASTBuilder
     }
     public enum ExprType
     {
-        EQUALS, OP_LOR, OP_LAND, PIPE, HAT, AND, OP_EQ,
-        OP_NE, OP_GT, OP_LT, OP_LE, OP_GE, PLUSOP, MINUSOP,
-        ASTERISK, RSLASH, PERCENT, UNARY, PRIMARY
+        ASSIGNMENT, LOGICAL_OR, LOGICAL_AND, PIPE, HAT, AND, EQUALS,
+        NOT_EQUALS, GREATER_THAN, LESS_THAN, LESS_EQUAL, GREATER_EQUAL, PLUSOP, MINUSOP,
+        ASTERISK, RSLASH, PERCENT, UNARY, @EVAL
     }
     public class Expression : ExpressionStatement
     {
@@ -288,9 +265,9 @@ namespace ASTBuilder
 
     public class NotJustName : PrimaryExpression { }
 
-    public class ComplexPrimaryNoParenthesis : AbstractNode
+    public class Literal : AbstractNode
     {
-        public ComplexPrimaryNoParenthesis(string s)
+        public Literal(string s)
         {
             Name = s;
         }
@@ -298,14 +275,6 @@ namespace ASTBuilder
         public override void Accept(INodeVisitor myVisitor)
         {
             myVisitor.Visit(this);
-        }
-    }
-
-    public class MethodReference : AbstractNode
-    {
-        public MethodReference(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
         }
     }
 
@@ -394,19 +363,24 @@ namespace ASTBuilder
             AddChild(abstractNode);
         }
     }
-    public class SelectionStatement : AbstractNode
-    {
-        public SelectionStatement(AbstractNode expression, AbstractNode statement1)
-        {
-            AddChild(expression);
-            AddChild(statement1);
-        }
+    public class SelectionStatement : AbstractNode { }
 
-        public SelectionStatement(AbstractNode expression, AbstractNode statement1, AbstractNode statement2)
+    public class IfStatement : SelectionStatement
+    {
+        public IfStatement(AbstractNode predicate, AbstractNode thenExpr)
         {
-            AddChild(expression);
-            AddChild(statement1);
-            AddChild(statement2);
+            AddChild(predicate);
+            AddChild(thenExpr);
+        }
+    }
+
+    public class IfStatementElse : SelectionStatement
+    {
+        public IfStatementElse(AbstractNode predicate, AbstractNode thenExpr, AbstractNode elseExpr)
+        {
+            AddChild(predicate);
+            AddChild(thenExpr);
+            AddChild(elseExpr);
         }
     }
 }
