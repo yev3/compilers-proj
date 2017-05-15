@@ -59,5 +59,12 @@ namespace ASTBuilder
             Console.WriteLine(node.Value);
             Console.ResetColor();
         }
+
+        public void Visit(NotImplemented node)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("<NOT IMPLEMENTED: " + node.Name + ">");
+            Console.ResetColor();
+        }
     }
 }
