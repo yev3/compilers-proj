@@ -59,7 +59,13 @@ namespace ASTBuilder
             Console.WriteLine(node.Value);
             Console.ResetColor();
         }
-
+        public void Visit(ComplexPrimaryNoParenthesis node)
+        {
+            Console.Write("<" + node.ClassName() + ">: ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(node.Name);
+            Console.ResetColor();
+        }
         public void Visit(NotImplemented node)
         {
             Console.ForegroundColor = ConsoleColor.Red;

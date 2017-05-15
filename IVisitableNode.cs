@@ -17,6 +17,7 @@
         void Visit(Expression node);
         void Visit(SpecialName node);
         void Visit(Number node);
+        void Visit(ComplexPrimaryNoParenthesis node);
         void Visit(NotImplemented node);
     }
 
