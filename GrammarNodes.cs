@@ -382,4 +382,11 @@ namespace ASTBuilder
         }
     }
 
+    public class ArgumentList : AbstractNode
+    {
+        public ArgumentList(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
 }

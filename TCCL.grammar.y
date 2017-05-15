@@ -308,7 +308,7 @@ ReturnStatement
     ;
 
 ArgumentList            
-    :   Expression                          { $$ = new NotImplemented("ArgumentList"); }
+    :   Expression                          { $$ = new ArgumentList($1); }
     |   ArgumentList COMMA Expression       { $$ = new NotImplemented("ArgumentList"); }
     ;
 
