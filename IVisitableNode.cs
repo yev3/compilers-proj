@@ -2,7 +2,7 @@
 {
 	/// <summary>
 	/// Reflective visitor pattern -- a node must accept a visitor </summary>
-	public interface IReflectiveVisitable
+	public interface IVisitableNode
 	{
 	   void Accept(INodeVisitor rv);
 	}
@@ -17,6 +17,7 @@
         void Visit(Expression node);
         void Visit(SpecialName node);
         void Visit(Number node);
+        void Visit(NotImplemented node);
     }
 
 }

@@ -13,7 +13,7 @@ namespace ASTBuilder
     /// Each node gets a node number to help identify it distinctly in an AST.
     /// </summary>
     [DebuggerDisplay("AbstrNodeType: {DebugDisp}")]
-    public abstract class AbstractNode : LinkedList<AbstractNode>, IReflectiveVisitable
+    public abstract class AbstractNode : LinkedList<AbstractNode>, IVisitableNode
     {
         /*
          * Token Value Types

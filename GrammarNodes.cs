@@ -242,6 +242,13 @@ namespace ASTBuilder
 
     public class LocalVariableDeclarationStatement : AbstractNode
     {
+        private AbstractNode abstractNode;
+
+        public LocalVariableDeclarationStatement(AbstractNode abstractNode)
+        {
+            this.abstractNode = abstractNode;
+        }
+
         public LocalVariableDeclarationStatement(AbstractNode typeSpecifier, AbstractNode localVarDecls)
         {
             AddChild(typeSpecifier);
@@ -372,9 +379,16 @@ namespace ASTBuilder
             AddChild(abstractNode);
         }
     }
-    
+
     public class MethodCall : AbstractNode
     {
+        private AbstractNode abstractNode;
+
+        public MethodCall(AbstractNode abstractNode)
+        {
+            this.abstractNode = abstractNode;
+        }
+
         public MethodCall(AbstractNode methodRef, AbstractNode argList)
         {
             AddChild(methodRef);
@@ -393,6 +407,53 @@ namespace ASTBuilder
         public override void Accept(INodeVisitor myVisitor)
         {
             myVisitor.Visit(this);
+        }
+    }
+
+    public class NotImplemented : AbstractNode
+    {
+        public NotImplemented(string msg)
+        {
+            Name = msg;
+        }
+
+        public override void Accept(INodeVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
+    }
+
+    public class ReturnStatement : AbstractNode
+    {
+        public ReturnStatement() { }
+
+        public ReturnStatement(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
+
+    public class StaticInitializer : AbstractNode
+    {
+        public StaticInitializer(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
+
+    public class FieldVariableDeclaratorName : AbstractNode
+    {
+        public FieldVariableDeclaratorName(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
+    }
+
+    public class ArraySpecifier : AbstractNode
+    {
+        public ArraySpecifier(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
         }
     }
 
