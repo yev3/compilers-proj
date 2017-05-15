@@ -108,7 +108,7 @@ namespace ASTBuilder
         }
 
     }
-    public class MethodDeclaration : AbstractNode
+    public class MethodDeclaration : FieldDeclaration
     {
         public MethodDeclaration(
             AbstractNode modifiers,
@@ -125,23 +125,10 @@ namespace ASTBuilder
     }
 
 
-    public class TypeName : AbstractNode
-    {
-        public TypeName(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
-
-    public class TypeSpecifier : AbstractNode
-    {
-        public TypeSpecifier(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
+    public class TypeName : AbstractNode { }
+    public class TypeSpecifier : AbstractNode { }
     public enum EnumPrimitiveType { BOOLEAN, INT, VOID }
-    public class PrimitiveType : AbstractNode
+    public class PrimitiveType : TypeName
     {
         public EnumPrimitiveType Type { get; set; }
         public PrimitiveType(EnumPrimitiveType type)
@@ -161,7 +148,7 @@ namespace ASTBuilder
         }
     }
 
-    public class Block : AbstractNode
+    public class Block : Statement
     {
         public Block() { }
 
@@ -171,21 +158,6 @@ namespace ASTBuilder
         }
     }
 
-    public class MethodBody : AbstractNode
-    {
-        public MethodBody(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
-
-    public class MethodDeclaratorName : AbstractNode
-    {
-        public MethodDeclaratorName(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
 
     public class DeclaratorName : AbstractNode
     {
@@ -225,31 +197,17 @@ namespace ASTBuilder
             AddChild(paramList);
         }
     }
-    public class FieldDeclaration : AbstractNode
+    public class FieldDeclaration : AbstractNode { }
+    public class LocalVarDeclOrStatement : AbstractNode { }
+
+    public class LocalVariableDecl : LocalVarDeclOrStatement
     {
-        public FieldDeclaration(AbstractNode abstractNode)
+        public LocalVariableDecl(AbstractNode abstractNode)
         {
             AddChild(abstractNode);
         }
-    }
-    public class LocalVariableDeclarationOrStatement : AbstractNode
-    {
-        public LocalVariableDeclarationOrStatement(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
 
-    public class LocalVariableDeclarationStatement : AbstractNode
-    {
-        private AbstractNode abstractNode;
-
-        public LocalVariableDeclarationStatement(AbstractNode abstractNode)
-        {
-            this.abstractNode = abstractNode;
-        }
-
-        public LocalVariableDeclarationStatement(AbstractNode typeSpecifier, AbstractNode localVarDecls)
+        public LocalVariableDecl(AbstractNode typeSpecifier, AbstractNode localVarDecls)
         {
             AddChild(typeSpecifier);
             AddChild(localVarDecls);
@@ -264,25 +222,11 @@ namespace ASTBuilder
         }
     }
 
-    public class Statement : AbstractNode
-    {
-        public Statement(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
+    public class Statement : LocalVarDeclOrStatement { }
 
-    public class ExpressionStatement : AbstractNode
-    {
-        public ExpressionStatement(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
+    public class ExpressionStatement : Statement { }
 
-    public class EmptyStatement : AbstractNode
-    {
-    }
+    public class EmptyStatement : Statement { }
 
     public class LocalVariableDeclaratorName : AbstractNode
     {
@@ -292,7 +236,7 @@ namespace ASTBuilder
         }
     }
 
-    public class QualifiedName : AbstractNode
+    public class QualifiedName : TypeName
     {
         public QualifiedName(AbstractNode abstractNode)
         {
@@ -305,7 +249,7 @@ namespace ASTBuilder
         OP_NE, OP_GT, OP_LT, OP_LE, OP_GE, PLUSOP, MINUSOP,
         ASTERISK, RSLASH, PERCENT, UNARY, PRIMARY
     }
-    public class Expression : AbstractNode
+    public class Expression : ExpressionStatement
     {
         public ExprType ExprType { get; set; }
         public Expression(AbstractNode expr, ExprType type)
@@ -325,16 +269,10 @@ namespace ASTBuilder
             myVisitor.Visit(this);
         }
     }
-    public class PrimaryExpression : AbstractNode
-    {
-        public PrimaryExpression(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
+    public class PrimaryExpression : AbstractNode { }
     public enum SpecialNameType { THIS, NULL }
 
-    public class SpecialName : AbstractNode
+    public class SpecialName : NotJustName
     {
         public SpecialNameType SpecialType { get; set; }
         public SpecialName(SpecialNameType specialType)
@@ -348,13 +286,7 @@ namespace ASTBuilder
         }
     }
 
-    public class NotJustName : AbstractNode
-    {
-        public NotJustName(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
+    public class NotJustName : PrimaryExpression { }
 
     public class ComplexPrimaryNoParenthesis : AbstractNode
     {
@@ -372,21 +304,14 @@ namespace ASTBuilder
         }
     }
 
-    public class ComplexPrimary : AbstractNode
-    {
-        public ComplexPrimary(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
+    public class ComplexPrimary : NotJustName { }
 
-    public class MethodCall : AbstractNode
+    public class MethodCall : ComplexPrimary
     {
-        private AbstractNode abstractNode;
 
         public MethodCall(AbstractNode abstractNode)
         {
-            this.abstractNode = abstractNode;
+            AddChild(abstractNode);
         }
 
         public MethodCall(AbstractNode methodRef, AbstractNode argList)
@@ -396,7 +321,7 @@ namespace ASTBuilder
         }
     }
 
-    public class Number : AbstractNode
+    public class Number : ComplexPrimary
     {
         public int Value { get; set; }
         public Number(int n)
@@ -423,7 +348,7 @@ namespace ASTBuilder
         }
     }
 
-    public class ReturnStatement : AbstractNode
+    public class ReturnStatement : Statement
     {
         public ReturnStatement() { }
 
@@ -433,7 +358,7 @@ namespace ASTBuilder
         }
     }
 
-    public class StaticInitializer : AbstractNode
+    public class StaticInitializer : FieldDeclaration
     {
         public StaticInitializer(AbstractNode abstractNode)
         {
@@ -449,7 +374,7 @@ namespace ASTBuilder
         }
     }
 
-    public class ArraySpecifier : AbstractNode
+    public class ArraySpecifier : TypeSpecifier
     {
         public ArraySpecifier(AbstractNode abstractNode)
         {
