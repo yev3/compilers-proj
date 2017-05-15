@@ -64,6 +64,11 @@ namespace ASTBuilder
             this.AddLast(newNode);
         }
 
+        public virtual AbstractNode Parent
+        {
+            get { return (LinkedListNodeContainer.List as AbstractNode); }
+        }
+
         // These are not currently used.
         // =============================
 
@@ -72,10 +77,6 @@ namespace ASTBuilder
         //    get { return LinkedListNodeContainer.List.First?.Value; }
         //}
 
-        //public virtual AbstractNode Parent
-        //{
-        //    get { return (LinkedListNodeContainer.List as AbstractNode); }
-        //}
     }
 
 }

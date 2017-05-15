@@ -35,6 +35,9 @@
 %token <AbstractNode> RPAREN RSLASH SEMICOLON STATIC STRUCT
 %token <AbstractNode> SUPER THIS TILDE VOID WHILE
 
+%nonassoc RP
+%nonassoc ELSE
+
 /* All Nodes are AbstractType */
 %type <AbstractNode> ArgumentList
 %type <AbstractNode> ArithmeticUnaryOperator
@@ -98,8 +101,6 @@
 %left  PLUSOP, MINUSOP
 %left  ASTERISK, RSLASH, PERCENT
 %left  UNARY
-%nonassoc RPAREN
-%nonassoc ELSE
 
 %%
 
@@ -208,7 +209,7 @@ QualifiedName
     ;
 
 DeclaratorName              
-    :   Identifier                          { $$ = new DeclaratorName($1); }
+    :   Identifier                          { $$ = $1; }
     ;
 
 MethodDeclaratorName        
@@ -220,7 +221,7 @@ FieldVariableDeclaratorName
     ;
 
 LocalVariableDeclaratorName 
-    :   Identifier                          { $$ = new LocalVariableDeclaratorName($1); }
+    :   Identifier                          { $$ = $1; }
     ;
 
 MethodBody                  
@@ -243,12 +244,12 @@ StaticInitializer
 
 Block                       
     :   LBRACE LocalVariableDeclarationsAndStatements RBRACE        
-                                            { $$ = new Block($2); }
+                                            { $$ = $2; }
     |   LBRACE RBRACE                       { $$ = new Block(); }
     ;
 
 LocalVariableDeclarationsAndStatements  
-    :   LocalVarDeclOrStatement             { $$ = new LocalVariableDeclarationsAndStatements($1);}
+    :   LocalVarDeclOrStatement             { $$ = new Block($1);}
     |   LocalVariableDeclarationsAndStatements LocalVarDeclOrStatement
                                             { $1.AddChild($2); $$ = $1; }
     ;
@@ -265,12 +266,11 @@ LocalVariableDecl
     ;
 
 LocalVariableDeclarators    
-    :   LocalVariableDeclaratorName         { $$ = new LocalVariableDeclarators($1); }
+    :   LocalVariableDeclaratorName         { $$ = new DeclaredVars($1); }
     |   LocalVariableDeclarators COMMA LocalVariableDeclaratorName  
                                             { $1.AddChild($3); $$ = $1; }
     ;
 
-                            
 Statement                   
     :   EmptyStatement                      { $$ = $1; }
     |   ExpressionStatement SEMICOLON       { $$ = $1; }
@@ -295,10 +295,8 @@ ExpressionStatement
  */
 
 SelectionStatement          
-    :   IF LPAREN Expression RPAREN Statement ELSE Statement
-                                            { $$ = new SelectionStatement($3,$5,$7);} /*marc*/
-//  |   IF LPAREN Expression RPAREN Statement
-											{ $$ = new SelectionStatement($3,$5); }
+    :   IF LPAREN Expression RPAREN Statement ELSE Statement    { $$ = new IfStatementElse($3,$5,$7); }
+    |   IF LPAREN Expression RPAREN Statement                   { $$ = new IfStatement($3,$5); }
     ;
 
 
@@ -318,18 +316,18 @@ ArgumentList
     ;
 
 Expression                  
-    :   QualifiedName EQUALS Expression     { $$ = new Expression($1, ExprType.EQUALS, $3); }
-    |   Expression OP_LOR Expression        { $$ = new Expression($1, ExprType.OP_LOR, $3); }   /* short-circuit OR  */  
-    |   Expression OP_LAND Expression       { $$ = new Expression($1, ExprType.OP_LAND, $3); }   /* short-circuit AND */  
+    :   QualifiedName EQUALS Expression     { $$ = new Expression($1, ExprType.ASSIGNMENT, $3); }
+    |   Expression OP_LOR Expression        { $$ = new Expression($1, ExprType.LOGICAL_OR, $3); }   /* short-circuit OR  */  
+    |   Expression OP_LAND Expression       { $$ = new Expression($1, ExprType.LOGICAL_AND, $3); }   /* short-circuit AND */  
     |   Expression PIPE Expression          { $$ = new Expression($1, ExprType.PIPE, $3); }                
     |   Expression HAT Expression           { $$ = new Expression($1, ExprType.HAT, $3); }                
     |   Expression AND Expression           { $$ = new Expression($1, ExprType.AND, $3); }                
-    |   Expression OP_EQ Expression         { $$ = new Expression($1, ExprType.OP_EQ, $3); }                
-    |   Expression OP_NE Expression         { $$ = new Expression($1, ExprType.OP_NE, $3); }                
-    |   Expression OP_GT Expression         { $$ = new Expression($1, ExprType.OP_GT, $3); }                
-    |   Expression OP_LT Expression         { $$ = new Expression($1, ExprType.OP_LT, $3); }                
-    |   Expression OP_LE Expression         { $$ = new Expression($1, ExprType.OP_LE, $3); }                
-    |   Expression OP_GE Expression         { $$ = new Expression($1, ExprType.OP_GE, $3); }                
+    |   Expression OP_EQ Expression         { $$ = new Expression($1, ExprType.EQUALS, $3); }                
+    |   Expression OP_NE Expression         { $$ = new Expression($1, ExprType.NOT_EQUALS, $3); }                
+    |   Expression OP_GT Expression         { $$ = new Expression($1, ExprType.GREATER_THAN, $3); }                
+    |   Expression OP_LT Expression         { $$ = new Expression($1, ExprType.LESS_THAN, $3); }                
+    |   Expression OP_LE Expression         { $$ = new Expression($1, ExprType.LESS_EQUAL, $3); }                
+    |   Expression OP_GE Expression         { $$ = new Expression($1, ExprType.GREATER_EQUAL, $3); }                
     |   Expression PLUSOP Expression        { $$ = new Expression($1, ExprType.PLUSOP, $3); }                
     |   Expression MINUSOP Expression       { $$ = new Expression($1, ExprType.MINUSOP, $3); }                
     |   Expression ASTERISK Expression      { $$ = new Expression($1, ExprType.ASTERISK, $3); }                
@@ -337,7 +335,7 @@ Expression
     |   Expression PERCENT Expression       { $$ = new Expression($1, ExprType.PERCENT, $3); }   /* remainder */
     |   ArithmeticUnaryOperator Expression  %prec UNARY
                                             { $$ = new NotImplemented("ArithmeticUnaryOperator Expression  %prec UNARY"); }
-    |   PrimaryExpression                   { $$ = new Expression($1, ExprType.PRIMARY); }
+    |   PrimaryExpression                   { $$ = new Expression($1, ExprType.EVAL); }
     ;
 
 ArithmeticUnaryOperator     
@@ -361,7 +359,7 @@ ComplexPrimary
     ;
 
 ComplexPrimaryNoParenthesis 
-    :   LITERAL                         { $$ = new ComplexPrimaryNoParenthesis($1);}
+    :   LITERAL                         { $$ = new Literal($1);}
     |   Number                          { $$ = $1;}
     |   FieldAccess                     { $$ = $1;}    
     |   MethodCall                      { $$ = $1;}    
@@ -378,9 +376,9 @@ MethodCall
     ;
 
 MethodReference             
-    :   ComplexPrimaryNoParenthesis     { $$ = new MethodReference($1);}
-    |   QualifiedName                   { $$ = new MethodReference($1);}
-    |   SpecialName                     { $$ = new MethodReference($1);}
+    :   ComplexPrimaryNoParenthesis     { $$ = $1;}
+    |   QualifiedName                   { $$ = $1;}
+    |   SpecialName                     { $$ = $1;}
     ;
 
 SpecialName                 

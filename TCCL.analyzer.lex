@@ -23,7 +23,7 @@ EndOfLineComment    (("//")({InputCharacter})*{LineTerminator})
 //DocumentationComment ("/**" {CommentContent} "*"+ "/")
 Comment  ({TraditionalComment}|{EndOfLineComment}) // | {DocumentationComment})
 
-Identifier [a-zA-Z][a-zA-Z0-9]*
+Identifier [a-zA-Z_][a-zA-Z0-9_]*
 DecIntegerLiteral (0|[1-9][0-9]*)
 
 %s STRING
