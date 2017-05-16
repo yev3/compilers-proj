@@ -3,16 +3,7 @@
 %parsertype TCCLParser
 %visibility public
 %tokentype Token
-
-// We are setting the type for each production individually below
-// %YYSTYPE AbstractNode
-
-%union{
-    public int IntVal;
-    public double DblVal;
-    public string StrVal;
-    public AbstractNode AbstractNode;
-}
+%YYSTYPE AbstractNode
 
 %{
     // user defined functions go here
@@ -21,74 +12,19 @@
 %start CompilationUnit
 
 /* Terminals */
-%token <AbstractNode> AND ASTERISK BANG BOOLEAN CLASS
-%token <AbstractNode> COLON COMMA ELSE EQUALS HAT
-%token <AbstractNode> IF INSTANCEOF INT 
-%token <StrVal> IDENTIFIER
-%token <StrVal> LITERAL 
-%token <IntVal> INT_NUMBER
-%token <AbstractNode> LBRACE LBRACKET LPAREN MINUSOP
-%token <AbstractNode> NEW NULL OP_EQ OP_GE OP_GT
-%token <AbstractNode> OP_LAND OP_LE OP_LOR OP_LT OP_NE
-%token <AbstractNode> PERCENT PERIOD PIPE PLUSOP PRIVATE
-%token <AbstractNode> PUBLIC QUESTION RBRACE RBRACKET RETURN
-%token <AbstractNode> RPAREN RSLASH SEMICOLON STATIC STRUCT
-%token <AbstractNode> SUPER THIS TILDE VOID WHILE
+%token AND ASTERISK BANG BOOLEAN CLASS
+%token COLON COMMA ELSE EQUALS HAT
+%token IF INSTANCEOF INT IDENTIFIER LITERAL INT_NUMBER
+%token LBRACE LBRACKET LPAREN MINUSOP
+%token NEW NULL OP_EQ OP_GE OP_GT
+%token OP_LAND OP_LE OP_LOR OP_LT OP_NE
+%token PERCENT PERIOD PIPE PLUSOP PRIVATE
+%token PUBLIC QUESTION RBRACE RBRACKET RETURN
+%token RPAREN RSLASH SEMICOLON STATIC STRUCT
+%token SUPER THIS TILDE VOID WHILE
 
 %nonassoc RP
 %nonassoc ELSE
-
-/* All Nodes are AbstractType */
-%type <AbstractNode> ArgumentList
-%type <AbstractNode> ArithmeticUnaryOperator
-%type <AbstractNode> ArraySpecifier
-%type <AbstractNode> Block
-%type <AbstractNode> ClassBody
-%type <AbstractNode> ClassDeclaration
-%type <AbstractNode> CompilationUnit
-%type <AbstractNode> ComplexPrimary
-%type <AbstractNode> ComplexPrimaryNoParenthesis
-%type <AbstractNode> ConstructorDeclaration
-%type <AbstractNode> DeclaratorName
-%type <AbstractNode> EmptyStatement
-%type <AbstractNode> Expression
-%type <AbstractNode> ExpressionStatement
-%type <AbstractNode> FieldAccess
-%type <AbstractNode> FieldDeclaration
-%type <AbstractNode> FieldDeclarations
-%type <AbstractNode> FieldVariableDeclaration
-%type <AbstractNode> FieldVariableDeclaratorName
-%type <AbstractNode> FieldVariableDeclarators
-%type <AbstractNode> Identifier
-%type <AbstractNode> IterationStatement
-%type <AbstractNode> LocalVarDeclOrStatement
-%type <AbstractNode> LocalVariableDecl
-%type <AbstractNode> LocalVariableDeclarationsAndStatements
-%type <AbstractNode> LocalVariableDeclaratorName
-%type <AbstractNode> LocalVariableDeclarators
-%type <AbstractNode> MethodBody
-%type <AbstractNode> MethodCall
-%type <AbstractNode> MethodDeclaration
-%type <AbstractNode> MethodDeclarator
-%type <AbstractNode> MethodDeclaratorName
-%type <AbstractNode> MethodReference
-%type <AbstractNode> Modifiers
-%type <AbstractNode> NotJustName
-%type <AbstractNode> Number
-%type <AbstractNode> Parameter
-%type <AbstractNode> ParameterList
-%type <AbstractNode> PrimaryExpression           
-%type <AbstractNode> PrimitiveType
-%type <AbstractNode> QualifiedName
-%type <AbstractNode> ReturnStatement
-%type <AbstractNode> SelectionStatement
-%type <AbstractNode> SpecialName
-%type <AbstractNode> Statement
-%type <AbstractNode> StaticInitializer
-%type <AbstractNode> StructDeclaration
-%type <AbstractNode> TypeName
-%type <AbstractNode> TypeSpecifier
-
 
 %right EQUALS
 %left  OP_LOR
@@ -359,7 +295,7 @@ ComplexPrimary
     ;
 
 ComplexPrimaryNoParenthesis 
-    :   LITERAL                         { $$ = new Literal($1);}
+    :   LITERAL                         { $$ = $1;}
     |   Number                          { $$ = $1;}
     |   FieldAccess                     { $$ = $1;}    
     |   MethodCall                      { $$ = $1;}    
@@ -387,11 +323,11 @@ SpecialName
     ;
 
 Identifier                  
-    :   IDENTIFIER                      { $$ = new Identifier($1);}
+    :   IDENTIFIER                      { $$ = $1;}
     ;
 
 Number                      
-    :   INT_NUMBER                      { $$ = new Number($1);}
+    :   INT_NUMBER                      { $$ = $1;}
     ;
 
 %%
