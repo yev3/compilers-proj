@@ -15,10 +15,6 @@ namespace ASTBuilder
     [DebuggerDisplay("AbstrNodeType: {DebugDisp}")]
     public abstract class AbstractNode : LinkedList<AbstractNode>, IVisitableNode
     {
-        /*
-         * Token Value Types
-         */
-
         public int IntVal { get; set; }
 
         public string DebugDisp => this.ToString();
@@ -46,9 +42,9 @@ namespace ASTBuilder
             return this.GetType().Name;
         }
 
-        public virtual void Accept(INodeVisitor myVisitor)
+        public virtual void Accept(INodeReflectiveVisitor myVisitor)
         {
-            myVisitor.Visit(this);
+            myVisitor.VisitDispatch(this);
         }
 
         public void AddChild(AbstractNode child)

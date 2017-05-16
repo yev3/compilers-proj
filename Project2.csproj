@@ -61,10 +61,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomExtensions.cs" />
     <Compile Include="GplexBuffers.cs" />
     <Compile Include="GrammarNodes.cs" />
-    <Compile Include="NodeTraverser.cs" />
     <Compile Include="NodeVisitor.cs" />
+    <Compile Include="NodeVisitorMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShiftReduceParserCode.cs" />
@@ -78,6 +79,7 @@
     </None>
   </ItemGroup>
   <ItemGroup Label="TCCLFiles">
+    <Compile Include="ReflectiveVisitorDispatch.cs" />
     <Compile Include="TCCL.Parser.cs">
       <DependentUpon>TCCL.parser</DependentUpon>
     </Compile>

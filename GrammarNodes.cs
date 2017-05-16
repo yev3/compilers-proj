@@ -70,10 +70,6 @@ namespace ASTBuilder
         {
             AddModType(type);
         }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
     public class Identifier : AbstractNode
     {
@@ -82,10 +78,6 @@ namespace ASTBuilder
             Name = s;
         }
 
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
 
     public class ClassBody : AbstractNode
@@ -135,10 +127,6 @@ namespace ASTBuilder
         public PrimitiveType(EnumPrimitiveType type)
         {
             Type = type;
-        }
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
         }
     }
 
@@ -241,10 +229,6 @@ namespace ASTBuilder
             ExprType = type;
         }
 
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
     public class PrimaryExpression : AbstractNode { }
     public enum SpecialNameType { THIS, NULL }
@@ -257,10 +241,6 @@ namespace ASTBuilder
             SpecialType = specialType;
         }
 
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
 
     public class NotJustName : PrimaryExpression { }
@@ -272,10 +252,6 @@ namespace ASTBuilder
             Name = s;
         }
 
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
 
     public class ComplexPrimary : NotJustName { }
@@ -303,10 +279,6 @@ namespace ASTBuilder
             Value = n;
         }
 
-        public override void Accept(INodeVisitor myVisitor)
-        {
-            myVisitor.Visit(this);
-        }
     }
 
     public class NotImplemented : AbstractNode
@@ -314,11 +286,6 @@ namespace ASTBuilder
         public NotImplemented(string msg)
         {
             Name = msg;
-        }
-
-        public override void Accept(INodeVisitor visitor)
-        {
-            visitor.Visit(this);
         }
     }
 

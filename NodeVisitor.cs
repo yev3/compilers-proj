@@ -6,71 +6,36 @@ using System.Threading.Tasks;
 
 namespace ASTBuilder
 {
-    class NodeVisitor : INodeVisitor
+    class NodeVisitor
     {
+        private INodeReflectiveVisitor _visitorInstance;
+        public NodeVisitor(INodeReflectiveVisitor visitorInstance)
+        {
+            _visitorInstance = visitorInstance;
+        }
+
         public void Visit(AbstractNode node)
         {
-            Console.WriteLine("<" + node.ClassName() + ">");
+            _visit(node);
         }
 
-        public void Visit(Modifiers node)
+        private void _visit(AbstractNode node, string prefix = "")
         {
-            Console.Write("<" + node.ClassName() + "> ");
-            var stringEnums = node.ModifierTokens.Select(x => x.ToString());
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine(string.Join(", ", stringEnums));
+            if (node == null) return;
+
+            bool isLastChild = (node.NextSibling == null);
+
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.Write(prefix);
+            Console.Write(isLastChild ? "└─ " : "├─ ");
             Console.ResetColor();
+
+            node.Accept(_visitorInstance);
+
+            _visit(node.LeftMostChild, prefix + (isLastChild ? "   " : "│  "));
+            if (!isLastChild) _visit(node.NextSibling, prefix);
         }
 
-        public void Visit(Identifier node)
-        {
-            Console.Write("<" + node.ClassName() + "> ");
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine(node.Name);
-            Console.ResetColor();
-        }
-        public void Visit(PrimitiveType node)
-        {
-            Console.Write("<" + node.ClassName() + "> ");
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine(node.Type);
-            Console.ResetColor();
-        }
-        public void Visit(Expression node)
-        {
-            Console.Write("<" + node.ClassName() + "> ");
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine(node.ExprType);
-            Console.ResetColor();
-        }
 
-        public void Visit(SpecialName node)
-        {
-            Console.Write("<" + node.ClassName() + "> ");
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(node.SpecialType);
-            Console.ResetColor();
-        }
-
-        public void Visit(Number node)
-        {
-            Console.Write("<" + node.ClassName() + "> ");
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(node.Value);
-            Console.ResetColor();
-        }
-        public void Visit(Literal node)
-        {
-            Console.Write("<" + node.ClassName() + "> ");
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("\"" + node.Name +"\"");
-            Console.ResetColor();
-        }
-        public void Visit(NotImplemented node)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("<NOT IMPLEMENTED " + node.Name + ">");
-            Console.ResetColor();
-        }
     }
 }

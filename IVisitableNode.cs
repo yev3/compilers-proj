@@ -1,24 +1,17 @@
-﻿namespace ASTBuilder
+﻿using System;
+
+namespace ASTBuilder
 {
-	/// <summary>
-	/// Reflective visitor pattern -- a node must accept a visitor </summary>
+	/// <summary> Reflective visitor pattern -- a node must accept a visitor </summary>
 	public interface IVisitableNode
 	{
-	   void Accept(INodeVisitor rv);
+	   void Accept(INodeReflectiveVisitor rv);
 	}
 
-    public interface INodeVisitor
+    public interface INodeReflectiveVisitor
     {
-        //void Visit(CompilationUnit node);
-        void Visit(AbstractNode node);
-        void Visit(Modifiers node);
-        void Visit(Identifier node);
-        void Visit(PrimitiveType node);
-        void Visit(Expression node);
-        void Visit(SpecialName node);
-        void Visit(Number node);
-        void Visit(Literal node);
-        void Visit(NotImplemented node);
+        void VisitDispatch(Object node);
+        
     }
 
 }
