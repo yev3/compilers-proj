@@ -35,6 +35,7 @@ namespace ASTBuilder
 
             if (_debugTrace)
             {
+                Console.WriteLine(_getLookupTable());
             }
         }
 
@@ -69,6 +70,10 @@ namespace ASTBuilder
             Console.ResetColor();
         }
 
+        /// <summary>
+        /// Called by the node. Finds the best method to call from the template paramemter
+        /// </summary>
+        /// <param name="node"></param>
         public void VisitDispatch(Object node)
         {
             var nodeType = node.GetType();
