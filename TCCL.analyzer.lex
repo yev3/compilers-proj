@@ -5,8 +5,6 @@
 
 %option stack, minimize, parser, verbose, persistbuffer, noembedbuffers 
 
-
-
 %{
     public string yystringval;
     private StringBuilder stringval = new StringBuilder();
@@ -82,9 +80,9 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 
 
 <INITIAL> {
-{Identifier}        { yylval.StrVal = yytext; return (int)Token.IDENTIFIER; }
+{Identifier}        { yylval = new Identifier(yytext); return (int)Token.IDENTIFIER; }
 
-{DecIntegerLiteral} { yylval.IntVal = int.Parse(yytext); return (int)Token.INT_NUMBER; }
+{DecIntegerLiteral} { yylval = new Number(int.Parse(yytext)); return (int)Token.INT_NUMBER; }
 
 \"                  { stringval.Length = 0; BEGIN(STRING); }
 
@@ -100,7 +98,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 <STRING> {
   \"                { BEGIN(INITIAL); 
                       yystringval = stringval.ToString();
-                      yylval.StrVal = yystringval;
+                      yylval = new Literal(yystringval);
                       return (int)Token.LITERAL; }
   [^\n\r\"\\]+      { stringval.Append(yytext); }
   \\t               { stringval.Append('\t'); }

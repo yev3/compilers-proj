@@ -7,7 +7,7 @@ namespace ASTBuilder
 {
     public partial class TCCLParser
     {
-        public AbstractNode Root => CurrentSemanticValue.AbstractNode;
+        public AbstractNode Root => CurrentSemanticValue;
         public TCCLParser() : base(null) { }
 
         public void Parse(string filename)
