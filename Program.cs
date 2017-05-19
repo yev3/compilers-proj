@@ -14,8 +14,8 @@ namespace Proj3Semantics
         private static List<string> test_files = new List<string>()
         {
             @"TestFiles\good1p.txt",
-            @"TestFiles\iftest.txt",
-            @"TestFiles\logictest.txt"
+            //@"TestFiles\iftest.txt",
+            //@"TestFiles\logictest.txt"
         };
 
 

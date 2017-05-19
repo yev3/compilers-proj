@@ -379,4 +379,26 @@ namespace Proj3Semantics.Nodes
             AddChild(new Else(elseExpr));
         }
     }
+
+    public class ClassVarDecl : AbstractNode
+    {
+        public ClassVarDecl(AbstractNode identifier)
+        {
+            this.Identifier = identifier as Identifier;
+        }
+    }
+
+    public class ClassFieldDecl : AbstractNode
+    {
+        public ClassFieldDecl(
+            AbstractNode modifiers, 
+            AbstractNode typeSpecifier, 
+            AbstractNode fieldVariableDeclarators )
+        {
+            AddChild(modifiers);
+            AddChild(typeSpecifier);
+            AddChild(fieldVariableDeclarators);
+        }
+    }
+
 }
