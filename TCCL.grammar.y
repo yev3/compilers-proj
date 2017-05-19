@@ -1,4 +1,5 @@
-%namespace ASTBuilder
+%namespace Proj3Semantics
+%using Proj3Semantics.Nodes
 %partial
 %parsertype TCCLParser
 %visibility public

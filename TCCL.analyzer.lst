@@ -1,6 +1,21 @@
+
+// ==========================================================================
+//  GPLEX error listing for lex source file <TCCL.analyzer.lex>
+// ==========================================================================
+//  Version:  1.2.2
+//  Machine:  YK-PC
+//  DateTime: 5/18/2017 8:05:43 PM
+//  UserName: YK
+// ==========================================================================
+
+
 %namespace Proj3Semantics
-%using Proj3Semantics.Nodes;
+%using Proj3Semantics.Nodes
 %scannertype TCCLScanner
+//^^^^^^^^^^
+// Error: Unexpected symbol, skipping to  <%%> 
+// Error: Parser error <Syntax error, unexpected scannertype, expecting ;, or .> 
+// ------------------------------------------------------------------------------
 %visibility public
 %tokentype Token 
 
@@ -82,21 +97,39 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 
 <INITIAL> {
 {Identifier}        { yylval = new Identifier(yytext); return (int)Token.IDENTIFIER; }
+//^^^^^^^^^
+// Error: Unknown lexical category <Identifier> 
+// ---------------------------------------------
 
 {DecIntegerLiteral} { yylval = new Number(int.Parse(yytext)); return (int)Token.INT_NUMBER; }
+//^^^^^^^^^^^^^^^^
+// Error: Unknown lexical category <DecIntegerLiteral> 
+// ----------------------------------------------------
 
 \"                  { stringval.Length = 0; BEGIN(STRING); }
 
 {Comment}           { /* ignore */ } // { Listing.get().echo(yytext()); }
+//^^^^^^
+// Error: Unknown lexical category <Comment> 
+// ------------------------------------------
   
 {LineTerminator}    { /* ignore */ } // { Listing.get().newLine(1); }
+//^^^^^^^^^^^^^
+// Error: Unknown lexical category <LineTerminator> 
+// -------------------------------------------------
  
 {WhiteSpace}        { /* ignore */ } // { Listing.get().echo(yytext()); }
+//^^^^^^^^^
+// Error: Unknown lexical category <WhiteSpace> 
+// ---------------------------------------------
 }
 
 
 
 <STRING> {
+//^^^^^
+// Error: Start state <STRING> undefined
+// -------------------------------------
   \"                { BEGIN(INITIAL); 
                       yystringval = stringval.ToString();
                       yylval = new Literal(yystringval);
@@ -115,3 +148,5 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 /* error fallback */
 .|\n                             { Console.WriteLine("Illegal character <"+
                                                     yytext+">"); }
+// ==========================================================================
+

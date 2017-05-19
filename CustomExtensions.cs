@@ -5,11 +5,10 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ASTBuilder
+namespace Proj3Semantics
 {
     public static class Extensions
     {
-        //var methods =  this.GetType().GetMethodsBySig(typeof(void), typeof(int), typeof(string));
 
         private const string EVAL_METHOD_NAME = "visit";
         public static IEnumerable<MethodInfo> GetVisitMethodsOneArg(this Type type)
@@ -45,6 +44,28 @@ namespace ASTBuilder
         {
             for (var current = type; current != null; current = current.BaseType)
                 yield return current;
+        }
+    }
+
+    public class WithColor : IDisposable
+    {
+        private ConsoleColor _originalForeColor;
+        private ConsoleColor _originalBackColor;
+        public WithColor(ConsoleColor newFore, ConsoleColor? newBack = null)
+        {
+            _originalForeColor = Console.ForegroundColor;
+            _originalBackColor = Console.BackgroundColor;
+            Console.ForegroundColor = newFore;
+            if (newBack.HasValue)
+            {
+                Console.BackgroundColor = newBack.Value;
+            }
+        }
+
+        public void Dispose()
+        {
+            Console.ForegroundColor = _originalForeColor;
+            Console.BackgroundColor = _originalBackColor;
         }
     }
 }

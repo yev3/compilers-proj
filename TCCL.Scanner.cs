@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ASTBuilder
+namespace Proj3Semantics
 {
     public partial class TCCLScanner
     {

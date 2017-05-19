@@ -1,16 +1,16 @@
 ﻿using System;
 
-namespace ASTBuilder
+namespace Proj3Semantics
 {
 	/// <summary> Reflective visitor pattern -- a node must accept a visitor </summary>
 	public interface IVisitableNode
 	{
-	   void Accept(INodeReflectiveVisitor rv);
+	   void Accept(IReflectiveVisitor rv);
 	}
 
-    public interface INodeReflectiveVisitor
+    public interface IReflectiveVisitor
     {
-        void VisitDispatch(Object node);
+        void Visit(dynamic node);
         
     }
 

@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Proj3Semantics.Nodes;
 
-namespace ASTBuilder
+namespace Proj3Semantics
 {
     public partial class TCCLParser
     {
