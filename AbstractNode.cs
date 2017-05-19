@@ -5,19 +5,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace ASTBuilder
+namespace Proj3Semantics.Nodes
 {
     /// <summary>
     /// All AST nodes are subclasses of this node.  This node knows how to
     /// link itself with other siblings and adopt children.
     /// Each node gets a node number to help identify it distinctly in an AST.
     /// </summary>
-    [DebuggerDisplay("AbstrNodeType: {DebugDisp}")]
+    [DebuggerDisplay("AbstrNodeType: {ToString()}")]
     public abstract class AbstractNode : LinkedList<AbstractNode>, IVisitableNode
     {
-        public int IntVal { get; set; }
+        public Identifier Identifier { get; protected set; }
 
-        public string DebugDisp => this.ToString();
+        #region Linked List Funcs
 
         public LinkedListNode<AbstractNode> LinkedListNodeContainer { get; set; }
 
@@ -29,22 +29,6 @@ namespace ASTBuilder
         public virtual AbstractNode NextSibling
         {
             get { return LinkedListNodeContainer.Next?.Value; }
-        }
-        public virtual string Name { get; protected set; }
-
-        public override string ToString()
-        {
-            return this.GetType().FullName;
-        }
-
-        public virtual string ClassName()
-        {
-            return this.GetType().Name;
-        }
-
-        public virtual void Accept(INodeReflectiveVisitor myVisitor)
-        {
-            myVisitor.VisitDispatch(this);
         }
 
         public void AddChild(AbstractNode child)
@@ -60,11 +44,6 @@ namespace ASTBuilder
             this.AddLast(newNode);
         }
 
-        public virtual AbstractNode Parent
-        {
-            get { return (LinkedListNodeContainer.List as AbstractNode); }
-        }
-
         // These are not currently used.
         // =============================
 
@@ -72,6 +51,28 @@ namespace ASTBuilder
         //{
         //    get { return LinkedListNodeContainer.List.First?.Value; }
         //}
+
+
+        public virtual AbstractNode Parent
+        {
+            get { return (LinkedListNodeContainer.List as AbstractNode); }
+        }
+
+
+        #endregion
+
+        public virtual string Name { get; protected set; }
+
+        public override string ToString()
+        {
+            return "<" + this.GetType().Name + ">";
+        }
+
+        public virtual void Accept(IReflectiveVisitor myVisitor)
+        {
+            myVisitor.Visit(this);
+        }
+
 
     }
 

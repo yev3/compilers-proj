@@ -4,9 +4,9 @@ using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ASTBuilder;
+using Proj3Semantics;
 
-namespace ASTBuilder
+namespace Proj3Semantics.Nodes
 {
     using static Token;
 
@@ -49,7 +49,7 @@ namespace ASTBuilder
             AbstractNode classBody)
         {
             AddChild(modifiers);
-            AddChild(className);
+            this.Identifier = className as Identifier; 
             AddChild(classBody);
         }
 
@@ -71,8 +71,16 @@ namespace ASTBuilder
             AddModType(type);
         }
     }
+
+    /// <summary>
+    /// (Page 303)
+    /// </summary>
     public class Identifier : AbstractNode
     {
+        public string Type { get; set; }
+        public Object Attributes { get; set; }
+        public string Name { get; set; }
+
         public Identifier(string s)
         {
             Name = s;
@@ -100,6 +108,20 @@ namespace ASTBuilder
         }
 
     }
+
+    public class MethodDeclarator : AbstractNode
+    {
+        public readonly ParameterList ParameterList;
+        public MethodDeclarator(AbstractNode identifier)
+        {
+            this.Identifier = identifier as Identifier;
+        }
+        public MethodDeclarator(AbstractNode identifier, AbstractNode paramList)
+        {
+            this.Identifier = identifier as Identifier;
+            this.ParameterList = paramList as ParameterList;
+        }
+    }
     public class MethodDeclaration : FieldDeclaration
     {
         public MethodDeclaration(
@@ -110,8 +132,9 @@ namespace ASTBuilder
         {
             AddChild(modifiers);
             AddChild(typeSpecifier);
-            foreach (AbstractNode node in methodDeclarator)
-                AddChild(node);
+
+            this.Identifier = methodDeclarator.Identifier;
+            AddChild((methodDeclarator as MethodDeclarator)?.ParameterList);
             AddChild(methodBody);
         }
 
@@ -158,18 +181,6 @@ namespace ASTBuilder
     }
 
 
-    public class MethodDeclarator : AbstractNode
-    {
-        public MethodDeclarator(AbstractNode identifier)
-        {
-            AddChild(identifier);
-        }
-        public MethodDeclarator(AbstractNode identifier, AbstractNode paramList)
-        {
-            AddChild(identifier);
-            AddChild(paramList);
-        }
-    }
     public class FieldDeclaration : AbstractNode { }
     public class LocalVarDeclOrStatement : AbstractNode { }
 
@@ -247,6 +258,7 @@ namespace ASTBuilder
 
     public class Literal : AbstractNode
     {
+        public string Name { get; set; }
         public Literal(string s)
         {
             Name = s;
@@ -273,7 +285,7 @@ namespace ASTBuilder
 
     public class Number : ComplexPrimary
     {
-        public int Value { get; set; }
+        public int Value { get; }
         public Number(int n)
         {
             Value = n;
@@ -283,9 +295,10 @@ namespace ASTBuilder
 
     public class NotImplemented : AbstractNode
     {
+        public string Msg { get; set; } 
         public NotImplemented(string msg)
         {
-            Name = msg;
+            Msg = msg;
         }
     }
 
