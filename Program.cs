@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NLog;
 
 namespace Proj3Semantics
 {
@@ -20,6 +21,7 @@ namespace Proj3Semantics
 
         static void Main(string[] args)
         {
+
             var testNbr = 1;
             foreach (var file in test_files)
             {
@@ -34,8 +36,12 @@ namespace Proj3Semantics
                 Console.WriteLine();
                 parser.Parse(file);
 
-                var nodeVisitor = new NodeVisitor();
+                var nodeVisitor = new NodePrintingVisitor();
                 nodeVisitor.PreorderTraverseRoot(parser.Root);
+
+                var topDeclVisitor = new TopDeclVisitor();
+                topDeclVisitor.VisitChildren(parser.Root);
+
             }
 
 

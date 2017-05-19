@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ASTBuilder;
 using Proj3Semantics.Nodes;
 
 namespace Proj3Semantics
 {
-    class NodeVisitor : IReflectiveVisitor
+    class NodePrintingVisitor : IReflectiveVisitor
     {
 
         public void PreorderTraverseRoot(AbstractNode node, string prefix = "")
@@ -28,21 +29,18 @@ namespace Proj3Semantics
             if (!isLastChild) PreorderTraverseRoot(node.NextSibling, prefix);
         }
 
-        /// <summary>
-        /// Dynamically dispatch the best overload match for the true type of node
-        /// </summary>
-        /// <param name="node">AbstractNode</param>
+        // ============================================================
+        //                  DYNAMIC DISPATCH
+        // ============================================================
         public void Visit(dynamic node)
         {
-            this.VisitNode(node);
+            VisitNode(node);
         }
-
 
         // ============================================================
         //                  VISIT METHODS BELOW
         // ============================================================
-
-        private void VisitNode(AbstractNode node)
+        public void VisitNode(AbstractNode node)
         {
             if (node.Identifier == null)
             {
@@ -107,5 +105,6 @@ namespace Proj3Semantics
             using (new WithColor(ConsoleColor.Red))
                 Console.WriteLine("<NOT IMPLEMENTED " + node.Msg + ">");
         }
+
     }
 }
