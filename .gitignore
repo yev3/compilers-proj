@@ -2,7 +2,7 @@
 *.Scanner.Generated.cs
 *.Parser.Generated.cs
 *.grammar.lst
-
+*.analyzer.lst
 
 
 ## Ignore Visual Studio temporary files, build results, and
