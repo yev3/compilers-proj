@@ -3,37 +3,54 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NLog;
 using Proj3Semantics.Nodes;
 
 namespace Proj3Semantics
 {
-    class SemanticsVisitor : IReflectiveVisitor
+    abstract class SemanticsVisitor : IReflectiveVisitor
     {
-        public void Visit(dynamic node)
+        public void VisitChildren(AbstractNode node)
         {
-            this.VisitNode(node);
-        }
-
-        // Call this method to begin the semantic checking process
-        public void CheckSemantics(AbstractNode node)
-        {
-            if (node == null) { 
-                return;
+            foreach (AbstractNode child in node)
+            {
+                child.Accept(this);
             }
-
-            ///More here
         }
+
+        public abstract void Visit(dynamic node);
+    }
+
+    class TopDeclVisitor : SemanticsVisitor
+    {
+        private static Logger _log = LogManager.GetCurrentClassLogger();
+        public override void Visit(dynamic node)
+        {
+            VisitNode(node);
+        }
+        private void VisitNode(AbstractNode node)
+        {
+            _log.Trace("Visiting {0}", node);
+        }
+
+        private void VisitNode(ClassDeclaration variableListDeclaring)
+        {
+            _log.Error("Pretend error occured in LocalVarDecl");
+        }
+
+    }
+
+    class TypeVisitor : SemanticsVisitor    
+    {
+        public override void Visit(dynamic node)
+        {
+            VisitNode(node);
+        }
+
         public void VisitNode(AbstractNode node)
         {
-            
+            Console.WriteLine("TypeVisitor is visiting: " + node); 
         }
-
-        public void VisitNode(Modifiers node)
-        {
-            
-        }
-
-        
     }
 }
 
