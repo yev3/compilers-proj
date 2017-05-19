@@ -90,7 +90,7 @@ StructDeclaration
  */
 FieldVariableDeclaration    
     :   Modifiers TypeSpecifier FieldVariableDeclarators            
-                                            { $$ = new NotImplemented("FieldVariableDeclaration"); }
+                                            { $$ = new ClassFieldDecl($1, $2, $3); }
     ;
 
 TypeSpecifier               
@@ -114,9 +114,9 @@ PrimitiveType
     ;
 
 FieldVariableDeclarators    
-    :   FieldVariableDeclaratorName         { $$ = new NotImplemented("FieldVariableDeclarators"); }
+    :   FieldVariableDeclaratorName         { $$ = new ClassVarDecl($1); }
     |   FieldVariableDeclarators COMMA FieldVariableDeclaratorName  
-                                            { $$ = new NotImplemented("FieldVariableDeclarators"); }
+                                            { $$.AddChild($3); $$ = $1;}
     ;
 
 
@@ -154,7 +154,7 @@ MethodDeclaratorName
     ;
 
 FieldVariableDeclaratorName 
-    :   Identifier                          { $$ = new FieldVariableDeclaratorName($1); }
+    :   Identifier                          { $$ = $1; }
     ;
 
 LocalVariableDeclaratorName 

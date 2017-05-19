@@ -1,5 +1,7 @@
 public class good1p {
 
+   private int localIntVar;
+
    public static void outInt(int n) {
      java.io.PrintStream ps;
      ps = java.lang.System.out;

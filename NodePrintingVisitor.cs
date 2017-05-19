@@ -100,6 +100,11 @@ namespace Proj3Semantics
             using (new WithColor(ConsoleColor.Yellow))
                 Console.WriteLine("\"" + node.Name + "\"");
         }
+        //private void VisitNode(ClassVarDecl node)
+        //{
+        //    using (new WithColor(ConsoleColor.Red))
+        //        Console.WriteLine("<NOT IMPLEMENTED " + node.Msg + ">");
+        //}
         private void VisitNode(NotImplemented node)
         {
             using (new WithColor(ConsoleColor.Red))
