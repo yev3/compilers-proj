@@ -15,6 +15,7 @@ namespace Proj3Semantics.Nodes
     [DebuggerDisplay("AbstrNodeType: {ToString()}")]
     public abstract class AbstractNode : LinkedList<AbstractNode>, IVisitableNode
     {
+        // Identifier ref associated with this node
         public Identifier Identifier { get; protected set; }
 
         #region Linked List Funcs
@@ -60,8 +61,6 @@ namespace Proj3Semantics.Nodes
 
 
         #endregion
-
-        public virtual string Name { get; protected set; }
 
         public override string ToString()
         {
