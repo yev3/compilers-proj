@@ -99,7 +99,7 @@ TypeSpecifier
     ;
 
 TypeName                    
-    :   PrimitiveType                       { $$ = new QualifiedName($1); }
+    :   PrimitiveType                       { $$ = $1; }
     |   QualifiedName                       { $$ = $1; }
     ;
 
@@ -108,9 +108,9 @@ ArraySpecifier
     ;
                             
 PrimitiveType               
-    :   BOOLEAN                             { $$ = new JavaPredefinedType(Token.BOOLEAN); }
-    |   INT                                 { $$ = new JavaPredefinedType(Token.INT); }
-    |   VOID                                { $$ = new JavaPredefinedType(Token.VOID); }
+    :   BOOLEAN                             { $$ = new BuiltinType(Token.BOOLEAN); }
+    |   INT                                 { $$ = new BuiltinType(Token.INT); }
+    |   VOID                                { $$ = new BuiltinType(Token.VOID); }
     ;
 
 FieldVariableDeclarators    

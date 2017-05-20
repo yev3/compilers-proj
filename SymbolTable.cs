@@ -6,11 +6,17 @@ using System.Threading.Tasks;
 
 namespace Proj3Semantics
 {
-    using FrameDict = Dictionary<string, SymInfo>;
-    public class SymInfo
+    using FrameDict = Dictionary<string, SymbolTableEntry>;
+
+    public enum AttribRecordTypes
     {
-        public string Name { get; set; }
-        public string Type { get; set; }
+        TypeAttrib, MethodAttribs, ClassAttribs
+    }
+    public class SymbolTableEntry
+    {
+        public AttribRecordTypes EntryType { get; set; }
+        public SymbolAttributes AttribRecord { get; set; }
+        public VariableTypes VariableType { get; set; }
     }
     class SymbolTable
     {
@@ -18,7 +24,7 @@ namespace Proj3Semantics
         public int CurrentNestLevel => _frames.Count;
         public virtual void IncrNestLevel() => _frames.Push(new FrameDict());
         public virtual void DecrNestLevel() => _frames.Pop();
-        public virtual void EnterInfo(string s, SymInfo info) => _frames.Peek().Add(s, info);
+        public virtual void EnterInfo(string s, SymbolTableEntry info) => _frames.Peek().Add(s, info);
         public bool IsDeclaredLocally(string s) => _frames.Peek().ContainsKey(s);
 
         /// <summary>
@@ -26,7 +32,7 @@ namespace Proj3Semantics
         ///     declaration of the given symbol.  If there is no such valid declaration,
         ///     return null.  Do NOT throw any excpetions from this method.
         /// </summary>
-        public virtual SymInfo Lookup(string s)
+        public virtual SymbolTableEntry Lookup(string s)
         {
             foreach (FrameDict frame in _frames)
             {

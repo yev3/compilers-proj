@@ -68,7 +68,7 @@ namespace Proj3Semantics
             using (new WithColor(ConsoleColor.Cyan))
                 Console.WriteLine(node.Name);
         }
-        private void VisitNode(JavaPredefinedType node)
+        private void VisitNode(BuiltinType node)
         {
             Console.Write(node + ": ");
             using (new WithColor(ConsoleColor.Magenta))
@@ -120,6 +120,7 @@ namespace Proj3Semantics
             using (new WithColor(ConsoleColor.Red))
                 Console.WriteLine("<NOT IMPLEMENTED " + node.Msg + ">");
         }
+
 
     }
 }
