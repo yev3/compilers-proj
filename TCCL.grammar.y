@@ -90,7 +90,7 @@ StructDeclaration
  */
 FieldVariableDeclaration    
     :   Modifiers TypeSpecifier FieldVariableDeclarators            
-                                            { $$ = new ClassFieldDecl($1, $2, $3); }
+                                            { $$ = new ClassFieldDecl($1, new VariableListDeclaring($2, $3)); }
     ;
 
 TypeSpecifier               
@@ -99,7 +99,7 @@ TypeSpecifier
     ;
 
 TypeName                    
-    :   PrimitiveType                       { $$ = $1; }
+    :   PrimitiveType                       { $$ = new QualifiedName($1); }
     |   QualifiedName                       { $$ = $1; }
     ;
 
@@ -108,13 +108,13 @@ ArraySpecifier
     ;
                             
 PrimitiveType               
-    :   BOOLEAN                             { $$ = new PrimitiveType(EnumPrimitiveType.BOOLEAN); }
-    |   INT                                 { $$ = new PrimitiveType(EnumPrimitiveType.INT); }
-    |   VOID                                { $$ = new PrimitiveType(EnumPrimitiveType.VOID); }
+    :   BOOLEAN                             { $$ = new JavaPredefinedType(Token.BOOLEAN); }
+    |   INT                                 { $$ = new JavaPredefinedType(Token.INT); }
+    |   VOID                                { $$ = new JavaPredefinedType(Token.VOID); }
     ;
 
 FieldVariableDeclarators    
-    :   FieldVariableDeclaratorName         { $$ = new ClassVarDecl($1); }
+    :   FieldVariableDeclaratorName         { $$ = new DeclaredVars($1); }
     |   FieldVariableDeclarators COMMA FieldVariableDeclaratorName  
                                             { $$.AddChild($3); $$ = $1;}
     ;

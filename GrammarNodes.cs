@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Proj3Semantics;
+using Xunit;
 
 namespace Proj3Semantics.Nodes
 {
@@ -49,7 +51,7 @@ namespace Proj3Semantics.Nodes
             AbstractNode classBody)
         {
             AddChild(modifiers);
-            this.Identifier = className as Identifier; 
+            this.Identifier = className as Identifier;
             AddChild(classBody);
         }
 
@@ -71,6 +73,9 @@ namespace Proj3Semantics.Nodes
             AddModType(type);
         }
     }
+
+
+
 
     /// <summary>
     /// (Page 303)
@@ -143,15 +148,45 @@ namespace Proj3Semantics.Nodes
 
     public class TypeName : AbstractNode { }
     public class TypeSpecifier : AbstractNode { }
-    public enum EnumPrimitiveType { BOOLEAN, INT, VOID }
-    public class PrimitiveType : TypeName
+
+    public class JavaPredefinedType : TypeName
     {
-        public EnumPrimitiveType Type { get; set; }
-        public PrimitiveType(EnumPrimitiveType type)
+        public VariableTypes TypeKind { get; set; }
+        public VariablePrimitiveTypes PrimitiveTypes { get; set; }
+
+        public JavaPredefinedType(Token token)
         {
-            Type = type;
+            switch (token)
+            {
+                case BOOLEAN:
+                    TypeKind = VariableTypes.Primitive;
+                    PrimitiveTypes = VariablePrimitiveTypes.Boolean;
+                    break;
+                case INT:
+                    TypeKind = VariableTypes.Primitive;
+                    PrimitiveTypes = VariablePrimitiveTypes.Int;
+                    break;
+                case VOID:
+                    TypeKind = VariableTypes.Void;
+                    break;
+                case NULL:
+                    TypeKind = VariableTypes.Null;
+                    break;
+                case SUPER:
+                    throw new NotImplementedException("'super' keyword not supported.");
+                    break;
+                case THIS:
+                    throw new NotImplementedException("'this' keyword not supported.");
+                    break;
+                default:
+                    throw new ArgumentException("unsupported token type.");
+                    break;
+            }
+
         }
+
     }
+    
 
     public class Block : Statement
     {
@@ -183,6 +218,33 @@ namespace Proj3Semantics.Nodes
 
     public class FieldDeclaration : AbstractNode { }
     public class LocalVarDeclOrStatement : AbstractNode { }
+
+    public class VariableListDeclaring : AbstractNode
+    {
+        public VariableListDeclaring(
+            AbstractNode itemType,
+            AbstractNode itemIdList)
+        {
+            Assert.IsType<QualifiedName>(itemType);
+            Assert.IsType<DeclaredVars>(itemIdList);
+
+            AddChild(itemType);         
+            AddChild(itemIdList);       
+        }
+        public VariableListDeclaring(
+            AbstractNode itemType,
+            AbstractNode itemIdList, 
+            AbstractNode initialization)
+        {
+            Assert.IsType<QualifiedName>(itemType);
+            Assert.IsType<DeclaredVars>(itemIdList);
+            Assert.IsType<Expression>(initialization);
+
+            AddChild(itemType);         
+            AddChild(itemIdList);       
+            AddChild(initialization);   
+        }
+    }
 
     public class LocalVariableDecl : LocalVarDeclOrStatement
     {
@@ -295,7 +357,7 @@ namespace Proj3Semantics.Nodes
 
     public class NotImplemented : AbstractNode
     {
-        public string Msg { get; set; } 
+        public string Msg { get; set; }
         public NotImplemented(string msg)
         {
             Msg = msg;
@@ -391,13 +453,13 @@ namespace Proj3Semantics.Nodes
     public class ClassFieldDecl : AbstractNode
     {
         public ClassFieldDecl(
-            AbstractNode modifiers, 
-            AbstractNode typeSpecifier, 
-            AbstractNode fieldVariableDeclarators )
+            AbstractNode modifiers,
+            AbstractNode variableDeclarations)
         {
             AddChild(modifiers);
-            AddChild(typeSpecifier);
-            AddChild(fieldVariableDeclarators);
+
+            Assert.IsType<VariableListDeclaring>(variableDeclarations);
+            AddChild(variableDeclarations);
         }
     }
 

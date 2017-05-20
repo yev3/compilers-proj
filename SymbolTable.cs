@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ASTBuilder
+namespace Proj3Semantics
 {
     using FrameDict = Dictionary<string, SymInfo>;
     public class SymInfo

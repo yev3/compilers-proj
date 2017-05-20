@@ -33,9 +33,21 @@ namespace Proj3Semantics
             _log.Trace("Visiting {0}", node);
         }
 
+        private void VisitNode(ClassVarDecl variableListDeclaring)
+        {
+            _log.Trace("Analyzing ClassVarDecl");
+        }
+        //private void VisitNode(TypeDeclaring variableListDeclaring)
+        //{
+        //    _log.Trace("Analyzing TypeDeclaring");
+        //}
         private void VisitNode(ClassDeclaration variableListDeclaring)
         {
-            _log.Error("Pretend error occured in LocalVarDecl");
+            _log.Trace("Analyzing ClassDeclaring");
+        }
+        private void VisitNode(MethodDeclaration variableListDeclaring)
+        {
+            _log.Trace("Analyzing MethodDeclaration");
         }
 
     }
@@ -51,6 +63,7 @@ namespace Proj3Semantics
         {
             Console.WriteLine("TypeVisitor is visiting: " + node); 
         }
+
     }
 }
 
