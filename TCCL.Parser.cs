@@ -21,5 +21,11 @@ namespace Proj3Semantics
             this.Scanner = new TCCLScanner(strm);
             this.Parse();
         }
+
+        public void ParseString(string str)
+        {
+            Stream strm = new MemoryStream(Encoding.UTF8.GetBytes(str ?? ""));
+            Parse(strm);
+        }
     }
 }

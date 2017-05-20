@@ -9,8 +9,8 @@ namespace Proj3Semantics
 {
     public class SymbolAttributes
     {
-        public VariableTypes TypeKind { get; set; }
-        public VariablePrimitiveTypes PrimitiveTypes { get; set; }
+        public VariableTypes KindVariableCategory { get; set; }
+        public VariablePrimitiveTypes VariableTypeOfPrimitive { get; set; }
     }
 
     // found here:

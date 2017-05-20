@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Proj3Semantics;
-using Xunit;
 
 namespace Proj3Semantics.Nodes
 {
@@ -80,10 +79,9 @@ namespace Proj3Semantics.Nodes
     /// <summary>
     /// (Page 303)
     /// </summary>
-    public class Identifier : AbstractNode
+    public class Identifier : QualifiedName
     {
-        public VariableTypes Type { get; set; }
-        public SymbolAttributes RefAttribRecord { get; set; }
+        public SymbolAttributes AttributesRef { get; set; }
         public string Name { get; set; }
 
         public Identifier(string s)
@@ -222,7 +220,7 @@ namespace Proj3Semantics.Nodes
     public class VariableListDeclaring : AbstractNode
     {
         public bool IsPrimitiveType { get; set; }
-        public QualifiedName DeclType { get; set; }
+        public QualifiedName TypeNameDecl { get; set; }
         public DeclaredVars ItemIdList { get; set; }
         public Expression Initialization { get; set; }
         public VariableListDeclaring(
@@ -240,18 +238,18 @@ namespace Proj3Semantics.Nodes
             if (builtin != null)
             {
                 IsPrimitiveType = true;
-                DeclType = builtin;
+                TypeNameDecl = builtin;
             }
             else
             {
                 QualifiedName qualname = declType as QualifiedName;
                 IsPrimitiveType = false;
-                DeclType = qualname;
+                TypeNameDecl = qualname;
             }
-            Assert.NotNull(DeclType);
+            Debug.Assert(TypeNameDecl != null);
 
             ItemIdList = itemIdList as DeclaredVars;
-            Assert.NotNull(ItemIdList);
+            Debug.Assert(itemIdList != null);
 
             Initialization = init as Expression;
         }
@@ -287,6 +285,7 @@ namespace Proj3Semantics.Nodes
 
     public class QualifiedName : TypeName
     {
+        public VariableTypes Type { get; set; }
         public QualifiedName(AbstractNode abstractNode)
         {
             AddChild(abstractNode);
@@ -470,8 +469,6 @@ namespace Proj3Semantics.Nodes
             AbstractNode variableDeclarations)
         {
             AddChild(modifiers);
-
-            Assert.IsType<VariableListDeclaring>(variableDeclarations);
             AddChild(variableDeclarations);
         }
     }

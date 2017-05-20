@@ -39,7 +39,8 @@ namespace Proj3Semantics
                 var nodeVisitor = new NodePrintingVisitor();
                 nodeVisitor.PreorderTraverseRoot(parser.Root);
 
-                var topDeclVisitor = new TopDeclVisitor();
+                var symbolTable = new SymbolTable();
+                var topDeclVisitor = new TopDeclVisitor(symbolTable);
                 topDeclVisitor.VisitChildren(parser.Root);
 
             }
