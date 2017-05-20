@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ASTBuilder;
+using Proj3Semantics;
 using Proj3Semantics.Nodes;
 
 namespace Proj3Semantics
@@ -68,11 +68,21 @@ namespace Proj3Semantics
             using (new WithColor(ConsoleColor.Cyan))
                 Console.WriteLine(node.Name);
         }
-        private void VisitNode(PrimitiveType node)
+        private void VisitNode(JavaPredefinedType node)
         {
             Console.Write(node + ": ");
             using (new WithColor(ConsoleColor.Magenta))
-                Console.WriteLine(node.Type);
+            {
+                Console.Write(node.TypeKind);
+                if (node.TypeKind == VariableTypes.Primitive)
+                {
+                    Console.WriteLine(" / " + node.PrimitiveTypes);
+                }
+                else
+                {
+                    Console.WriteLine();
+                }
+            }
         }
         private void VisitNode(Expression node)
         {

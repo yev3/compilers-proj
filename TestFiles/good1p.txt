@@ -1,6 +1,6 @@
 public class good1p {
 
-   private int localIntVar;
+   private int localIntVar, yz;
 
    public static void outInt(int n) {
      java.io.PrintStream ps;
