@@ -12,11 +12,18 @@ namespace Proj3Semantics
     {
         TypeAttrib, MethodAttribs, ClassAttribs
     }
+    
+    public class SymbolAttributes
+    {
+        public VariableTypes KindVariableCategory { get; set; }
+        public VariablePrimitiveTypes VariableTypeOfPrimitive { get; set; }
+    }
+
     public class SymbolTableEntry
     {
         public AttribRecordTypes EntryType { get; set; }
         public SymbolAttributes AttribRecord { get; set; }
-        public VariableTypes VariableType { get; set; }
+        public VariableTypes KindVariableCategory { get; set; }
     }
 
     public interface ISymbolTable

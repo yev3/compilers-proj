@@ -59,7 +59,8 @@ namespace Proj3Semantics
                 else
                 {
                     id.Type = decls.TypeNameDecl.Type;
-                    SymbolAttributes
+                    id.AttributesRef = decls.TypeNameDecl.AttributesRef;
+                    _symbolTable.EnterInfo(id.Name, new SymbolTableEntry() );
 
                 }
             }
@@ -118,7 +119,7 @@ namespace Proj3Semantics
             if (entry != null && entry.EntryType ==
                 AttribRecordTypes.TypeAttrib)
             {
-                id.Type = entry.VariableType;
+                id.Type = entry.KindVariableCategory;
                 id.AttributesRef = entry.AttribRecord;
             }
             else

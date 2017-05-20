@@ -81,7 +81,6 @@ namespace Proj3Semantics.Nodes
     /// </summary>
     public class Identifier : QualifiedName
     {
-        public SymbolAttributes AttributesRef { get; set; }
         public string Name { get; set; }
 
         public Identifier(string s)
@@ -286,6 +285,7 @@ namespace Proj3Semantics.Nodes
     public class QualifiedName : TypeName
     {
         public VariableTypes Type { get; set; }
+        public SymbolAttributes AttributesRef { get; set; }
         public QualifiedName(AbstractNode abstractNode)
         {
             AddChild(abstractNode);

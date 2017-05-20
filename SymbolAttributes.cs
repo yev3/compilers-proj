@@ -7,11 +7,6 @@ using Proj3Semantics;
 
 namespace Proj3Semantics
 {
-    public class SymbolAttributes
-    {
-        public VariableTypes KindVariableCategory { get; set; }
-        public VariablePrimitiveTypes VariableTypeOfPrimitive { get; set; }
-    }
 
     // found here:
     // http://www.ccs.neu.edu/home/riccardo/courses/csu370-fa07/lect4.pdf
