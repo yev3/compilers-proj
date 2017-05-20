@@ -7,7 +7,7 @@ using Proj3Semantics;
 
 namespace Proj3Semantics
 {
-    public class Attributes
+    public class SymbolAttributes
     {
         public VariableTypes TypeKind { get; set; }
         public VariablePrimitiveTypes PrimitiveTypes { get; set; }
@@ -18,7 +18,7 @@ namespace Proj3Semantics
 
     public enum VariableTypes
     {
-        Primitive, Null, Array, Class, Void
+        Primitive, Null, Array, Class, Void, ErrorType
     }
     public enum VariablePrimitiveTypes
     {

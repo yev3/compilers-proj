@@ -82,8 +82,8 @@ namespace Proj3Semantics.Nodes
     /// </summary>
     public class Identifier : AbstractNode
     {
-        public string Type { get; set; }
-        public Object Attributes { get; set; }
+        public VariableTypes Type { get; set; }
+        public SymbolAttributes RefAttribRecord { get; set; }
         public string Name { get; set; }
 
         public Identifier(string s)
@@ -149,12 +149,12 @@ namespace Proj3Semantics.Nodes
     public class TypeName : AbstractNode { }
     public class TypeSpecifier : AbstractNode { }
 
-    public class JavaPredefinedType : TypeName
+    public class BuiltinType : QualifiedName
     {
         public VariableTypes TypeKind { get; set; }
         public VariablePrimitiveTypes PrimitiveTypes { get; set; }
 
-        public JavaPredefinedType(Token token)
+        public BuiltinType(Token token)
         {
             switch (token)
             {
@@ -186,7 +186,7 @@ namespace Proj3Semantics.Nodes
         }
 
     }
-    
+
 
     public class Block : Statement
     {
@@ -221,28 +221,39 @@ namespace Proj3Semantics.Nodes
 
     public class VariableListDeclaring : AbstractNode
     {
+        public bool IsPrimitiveType { get; set; }
+        public QualifiedName DeclType { get; set; }
+        public DeclaredVars ItemIdList { get; set; }
+        public Expression Initialization { get; set; }
         public VariableListDeclaring(
-            AbstractNode itemType,
-            AbstractNode itemIdList)
+            AbstractNode declType,
+            AbstractNode itemIdList,
+            AbstractNode init = null)
         {
-            Assert.IsType<QualifiedName>(itemType);
-            Assert.IsType<DeclaredVars>(itemIdList);
+            // adding children for printing
+            AddChild(declType);
+            AddChild(itemIdList);
+            if (init != null) AddChild(init);
 
-            AddChild(itemType);         
-            AddChild(itemIdList);       
-        }
-        public VariableListDeclaring(
-            AbstractNode itemType,
-            AbstractNode itemIdList, 
-            AbstractNode initialization)
-        {
-            Assert.IsType<QualifiedName>(itemType);
-            Assert.IsType<DeclaredVars>(itemIdList);
-            Assert.IsType<Expression>(initialization);
 
-            AddChild(itemType);         
-            AddChild(itemIdList);       
-            AddChild(initialization);   
+            BuiltinType builtin = declType as BuiltinType;
+            if (builtin != null)
+            {
+                IsPrimitiveType = true;
+                DeclType = builtin;
+            }
+            else
+            {
+                QualifiedName qualname = declType as QualifiedName;
+                IsPrimitiveType = false;
+                DeclType = qualname;
+            }
+            Assert.NotNull(DeclType);
+
+            ItemIdList = itemIdList as DeclaredVars;
+            Assert.NotNull(ItemIdList);
+
+            Initialization = init as Expression;
         }
     }
 
@@ -280,6 +291,8 @@ namespace Proj3Semantics.Nodes
         {
             AddChild(abstractNode);
         }
+
+        protected QualifiedName() { }
     }
     public enum ExprType
     {

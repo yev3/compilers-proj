@@ -50,10 +50,24 @@ namespace Proj3Semantics
             _log.Trace("Analyzing MethodDeclaration");
         }
 
+        public void VisitNode(VariableListDeclaring decls)
+        {
+            _log.Trace("Analyzing VariableDecls");
+            
+        }
+
     }
 
-    class TypeVisitor : SemanticsVisitor    
+    class TypeVisitor : SemanticsVisitor
     {
+        private static Logger _log = LogManager.GetCurrentClassLogger();
+
+        private ISymbolTable SymbolTable { get; set; }
+        public TypeVisitor(ISymbolTable symbolTable)
+        {
+            SymbolTable = symbolTable;
+        }
+
         public override void Visit(dynamic node)
         {
             VisitNode(node);
@@ -63,6 +77,24 @@ namespace Proj3Semantics
         {
             Console.WriteLine("TypeVisitor is visiting: " + node); 
         }
+
+        public void VisitNode(Identifier id)
+        {
+            SymbolTableEntry entry = SymbolTable.Lookup(id.Name);
+            if (entry != null && entry.EntryType ==
+                AttribRecordTypes.TypeAttrib)
+            {
+                id.Type = entry.VariableType;
+                id.RefAttribRecord = entry.AttribRecord;
+            }
+            else
+            {
+                _log.Error("This identifier is not a type name: {0}", id.Name);
+                id.Type = VariableTypes.ErrorType;
+                id.RefAttribRecord = null;
+            }
+        }
+
 
     }
 }

@@ -88,8 +88,7 @@
     <Compile Include="ShiftReduceParserCode.cs" />
     <Compile Include="AbstractNode.cs" />
     <Compile Include="IVisitableNode.cs" />
-    <Compile Include="VariableTypes.cs" />
-    <Compile Include="Attributes.cs" />
+    <Compile Include="SymbolAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
