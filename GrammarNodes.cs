@@ -82,7 +82,7 @@ namespace Proj3Semantics.Nodes
     public class Identifier : QualifiedName
     {
         public string Name { get; set; }
-
+        public VariableTypes Type { get; set; }
         public Identifier(string s)
         {
             Name = s;
@@ -284,14 +284,14 @@ namespace Proj3Semantics.Nodes
 
     public class QualifiedName : TypeName
     {
-        public VariableTypes Type { get; set; }
-        public SymbolAttributes AttributesRef { get; set; }
+        public VariableTypes VariableType { get; set; }
+        public TypeDescriptor TypeDescriptor { get; set; }
         public QualifiedName(AbstractNode abstractNode)
         {
             AddChild(abstractNode);
         }
 
-        protected QualifiedName() { }
+        public QualifiedName() { }
     }
     public enum ExprType
     {

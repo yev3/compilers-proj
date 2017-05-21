@@ -6,48 +6,36 @@ using System.Threading.Tasks;
 
 namespace Proj3Semantics
 {
-    using FrameDict = Dictionary<string, SymbolTableEntry>;
-
-    public enum AttribRecordTypes
-    {
-        TypeAttrib, MethodAttribs, ClassAttribs
-    }
     
-    public class SymbolAttributes
-    {
-        public VariableTypes KindVariableCategory { get; set; }
-        public VariablePrimitiveTypes VariableTypeOfPrimitive { get; set; }
-    }
-
     public class SymbolTableEntry
     {
-        public AttribRecordTypes EntryType { get; set; }
-        public SymbolAttributes AttribRecord { get; set; }
+        //public AttribRecordTypes EntryType { get; set; }
+        //public SymbolAttributes AttribRecord { get; set; }
         public VariableTypes KindVariableCategory { get; set; }
     }
 
-    public interface ISymbolTable
+    public interface ISymbolTable<TEntry>
     {
         int CurrentNestLevel { get; }
         void IncrNestLevel();
         void DecrNestLevel();
-        void EnterInfo(string s, SymbolTableEntry info);
+        void EnterInfo(string s, TEntry info);
         bool IsDeclaredLocally(string s);
         /// <summary>
         /// Returns the information associated with the innermost currently valid
         ///     declaration of the given symbol.  If there is no such valid declaration,
         ///     return null.  Do NOT throw any excpetions from this method.
         /// </summary>
-        SymbolTableEntry Lookup(string s);
+        TEntry Lookup(string s);
     }
 
-    public class SymbolTable : ISymbolTable
+    public class SymbolTable<TEntry> : ISymbolTable<TEntry> 
     {
-        private Stack<FrameDict> _frames = new Stack<FrameDict>();
+        private Stack<Dictionary<string, TEntry>> _frames = new Stack<Dictionary<string, TEntry>>();
         public int CurrentNestLevel => _frames.Count;
-        public virtual void IncrNestLevel() => _frames.Push(new FrameDict());
-        public virtual void DecrNestLevel() => _frames.Pop();
-        public virtual void EnterInfo(string s, SymbolTableEntry info) => _frames.Peek().Add(s, info);
+        public void IncrNestLevel() => _frames.Push(new Dictionary<string, TEntry>());
+        public void DecrNestLevel() => _frames.Pop();
+        public void EnterInfo(string s, TEntry info) => _frames.Peek().Add(s, info);
         public bool IsDeclaredLocally(string s) => _frames.Peek().ContainsKey(s);
 
         /// <summary>
@@ -55,18 +43,17 @@ namespace Proj3Semantics
         ///     declaration of the given symbol.  If there is no such valid declaration,
         ///     return null.  Do NOT throw any excpetions from this method.
         /// </summary>
-        public virtual SymbolTableEntry Lookup(string s)
+        public TEntry Lookup(string s)
         {
-            foreach (FrameDict frame in _frames)
+            foreach (var frame in _frames)
             {
                 if (frame.ContainsKey(s))
                 {
                     return frame[s];
                 }
             }
-            return null;
+            return default(TEntry);
         }
-
     }
 
 }
