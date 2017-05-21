@@ -25,10 +25,16 @@ namespace Proj3Semantics
     public class TopDeclVisitor : SemanticsVisitor
     {
         private static Logger _log = LogManager.GetCurrentClassLogger();
-        private ISymbolTable _symbolTable { get; set; }
-        public TopDeclVisitor(ISymbolTable symbolTable)
+
+        private ISymbolTable<LocalVarDescriptor> _localVarSymbolTable { get; set; }
+        private ISymbolTable<TypeDescriptor> _typeSymbolTable { get; set; }
+
+        public TopDeclVisitor(
+            ISymbolTable<LocalVarDescriptor> localVarSymbolTable,
+            ISymbolTable<TypeDescriptor> typeSymbolTable)
         {
-            _symbolTable = symbolTable;
+            _localVarSymbolTable = localVarSymbolTable;
+            _typeSymbolTable = typeSymbolTable;
         }
 
         public override void Visit(dynamic node)
@@ -42,7 +48,7 @@ namespace Proj3Semantics
         public void VisitNode(VariableListDeclaring decls)
         {
             _log.Trace("Analyzing VariableDecls");
-            var typeVisitor = new TypeVisitor(_symbolTable);
+            var typeVisitor = new TypeVisitor(_typeSymbolTable);
             decls.TypeNameDecl.Accept(typeVisitor);
 
             foreach (AbstractNode node in decls.ItemIdList)
@@ -50,27 +56,24 @@ namespace Proj3Semantics
                 Identifier id = node as Identifier;
                 Debug.Assert(id != null, "DeclaredVars node children should be Identifiers");
 
-                if (_symbolTable.IsDeclaredLocally(id.Name))
+                if (_localVarSymbolTable.IsDeclaredLocally(id.Name))
                 {
                     CompilerErrors.Add(SemanticErrorTypes.VariableAlreadyDeclared, id.Name);
                     id.Type = VariableTypes.ErrorType;
-                    id.AttributesRef = null;
+                    id.TypeDescriptor = null;
                 }
                 else
                 {
-                    id.Type = decls.TypeNameDecl.Type;
-                    id.AttributesRef = decls.TypeNameDecl.AttributesRef;
-                    _symbolTable.EnterInfo(id.Name, new SymbolTableEntry() );
+                    var attr = new LocalVarDescriptor();
+                    attr.Kind = decls.TypeNameDecl.VariableType;
+                    attr.TypeDescriptor = decls.TypeNameDecl.TypeDescriptor;
 
+                    id.Type = attr.Kind;
+                    id.TypeDescriptor = attr.TypeDescriptor;
+
+                    _localVarSymbolTable.EnterInfo(id.Name, attr);
                 }
             }
-
-
-
-        }
-        private void VisitNode(AbstractNode node)
-        {
-            _log.Trace("Visiting {0}", node);
         }
 
         private void VisitNode(ClassVarDecl variableListDeclaring)
@@ -90,15 +93,21 @@ namespace Proj3Semantics
             _log.Trace("Analyzing MethodDeclaration");
         }
 
+        private void VisitNode(AbstractNode node)
+        {
+            _log.Trace("Visiting {0}", node);
+        }
+
 
     }
 
+    // Fills in the types of the child nodes to be used later
     public class TypeVisitor : SemanticsVisitor
     {
         private static Logger _log = LogManager.GetCurrentClassLogger();
 
-        private ISymbolTable SymbolTable { get; set; }
-        public TypeVisitor(ISymbolTable symbolTable)
+        private ISymbolTable<TypeDescriptor> SymbolTable { get; set; }
+        public TypeVisitor(ISymbolTable<TypeDescriptor> symbolTable)
         {
             SymbolTable = symbolTable;
         }
@@ -115,18 +124,17 @@ namespace Proj3Semantics
 
         public void VisitNode(Identifier id)
         {
-            SymbolTableEntry entry = SymbolTable.Lookup(id.Name);
-            if (entry != null && entry.EntryType ==
-                AttribRecordTypes.TypeAttrib)
+            TypeDescriptor entry = SymbolTable.Lookup(id.Name);
+            if (entry != null)
             {
                 id.Type = entry.KindVariableCategory;
-                id.AttributesRef = entry.AttribRecord;
+                id.TypeDescriptor = entry;
             }
             else
             {
                 CompilerErrors.Add(SemanticErrorTypes.IdentifierNotTypeName, id.Name);
                 id.Type = VariableTypes.ErrorType;
-                id.AttributesRef = null;
+                id.TypeDescriptor = null;
             }
         }
 

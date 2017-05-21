@@ -71,6 +71,8 @@
     <Compile Include="GplexBuffers.cs" />
     <Compile Include="GrammarNodes.cs" />
     <Compile Include="NodePrintingVisitor.cs" />
+    <None Include="Notes\SymbolKind.cs" />
+    <None Include="Notes\RoslynTypes.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SemanticsVisitor.cs" />
@@ -78,6 +80,8 @@
     <Compile Include="AbstractNode.cs" />
     <Compile Include="IVisitableNode.cs" />
     <Compile Include="SymbolAttributes.cs" />
+    <Compile Include="SymLocalDescr.cs" />
+    <Compile Include="SymTypeDescr.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestFiles\good1p.txt" />
