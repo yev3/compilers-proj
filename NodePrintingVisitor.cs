@@ -43,15 +43,6 @@ namespace Proj3Semantics
         public void VisitNode(AbstractNode node)
         {
             List<string> nodeProps = new List<string>();
-            var typeDescriptor = node as ITypeSpecifier;
-            if (typeDescriptor != null)
-                nodeProps.Add(
-                    typeDescriptor.NodeTypeCategory.ToString());
-
-            var primitiveDescriptor = node as IPrimitiveTypeDescriptor;
-            if (primitiveDescriptor != null)
-                nodeProps.Add(
-                    primitiveDescriptor.VariableTypePrimitive.ToString());
 
             var modifiers = node as ITypeHasModifiers;
             if (modifiers != null)
@@ -60,23 +51,48 @@ namespace Proj3Semantics
                 nodeProps.Add(modStr);
             }
 
+            // type description
+            var typeDescriptor = node as ITypeSpecifier;
             if (typeDescriptor != null)
             {
-                
+                var typeStrings = new List<string>();
+                typeStrings.Add(typeDescriptor.NodeTypeCategory.ToString());
+
+                var primitiveDescriptor = node as IPrimitiveTypeDescriptor;
+                if (primitiveDescriptor != null)
+                    typeStrings.Add(primitiveDescriptor.VariableTypePrimitive.ToString());
+
+                ITypeSpecifier typeRef = typeDescriptor?.TypeSpecifierRef;
+                typeStrings.Add(typeRef?.GetType().Name ?? "null");
+
+                var typeStr = "{" + string.Join(", ", typeStrings) + "}";
+                nodeProps.Add(typeStr);
             }
-            var typeRef = typeDescriptor?.TypeSpecifierRef;
-            //if (typeRef != null)
-            nodeProps.Add("TypeRef=" + (typeRef?.GetType().Name ?? "null"));
+
+
 
             bool hasDescriptors = nodeProps.Count > 0;
-            //bool hasIdentifier = node.Identifier != null;
+            bool hasName = node is INamedType;
 
-            if (hasDescriptors)
+            INamedType namedNode = node as INamedType;
+            string nodeName = namedNode?.Name;
+
+            if (hasDescriptors || hasName)
             {
                 Console.Write(node + ": ");
-                var descriptorStrings = "{" + string.Join(", ", nodeProps) + "}";
-                using (OutColor.Magenta)
-                    Console.Write(descriptorStrings);
+                if (hasName)
+                {
+                    using (OutColor.Cyan)
+                        Console.Write(nodeName);
+                    if (hasDescriptors)
+                        Console.Write(", ");
+                }
+                if (hasDescriptors)
+                {
+                    var descriptorStrings = string.Join(", ", nodeProps);
+                    using (OutColor.Magenta)
+                        Console.Write(descriptorStrings);
+                }
             }
             else
             {
@@ -93,12 +109,6 @@ namespace Proj3Semantics
                 Console.WriteLine(string.Join(", ", stringEnums));
         }
 
-        private void VisitNode(Identifier node)
-        {
-            Console.Write(node + ": ");
-            using (OutColor.Cyan)
-                Console.WriteLine(node.Name);
-        }
         private void VisitNode(Expression node)
         {
             Console.Write(node + ": ");

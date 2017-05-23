@@ -54,10 +54,12 @@ namespace Proj3Semantics
         // VISIT METHODS
         // ============================================================
 
+        // PAGE 319
         //procedureVISIT(ClassDeclaring cd)
         //typeRef ← new TypeDescriptor(ClassType) typeRef.names ← new SymbolTable( )
         //attr ← new Attributes ( ClassAttributes ) attr.classType ← typeRef
-        //call currentSymbolTable.ENTERSYMBOL( name.name, attr ) call SETCURRENTCLASS( attr )
+        //call currentSymbolTable.ENTERSYMBOL( name.name, attr ) 
+        //call SETCURRENTCLASS( attr )
         //if cd.parentclass = null
         //then cd.parentclass ← GETREFTOOBJECT( )
         //else
@@ -77,7 +79,7 @@ namespace Proj3Semantics
         private void CheckEnterClassDef(ClassDeclaration cdecl)
         {
             _log.Trace("Checking class declaration in env: " + cdecl);
-            string name = cdecl.Identifier.Name;
+            string name = cdecl.Name;
             ITypeSpecifier entry = TypeEnv.Lookup(name);
             if (entry != null)
             {
@@ -89,20 +91,21 @@ namespace Proj3Semantics
                 TypeEnv.EnterInfo(name, cdecl);
             }
         }
+
         private static void CheckEnterClassMemberDef(
-            Identifier id,
+            IClassMember classMember,
             IEnv env)
         {
-            _log.Trace("Checking class member in env: " + id);
-            ITypeSpecifier entry = env.Lookup(id.Name);
+            _log.Trace("Checking class member in env: " + classMember);
+            ITypeSpecifier entry = env.Lookup(classMember.Name);
             if (entry != null)
             {
-                CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, id.Name);
-                id.TypeSpecifierRef = null;
+                CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, classMember.Name);
+                classMember.TypeSpecifierRef = null;
             }
             else
             {
-                env.EnterInfo(id.Name, id);
+                env.EnterInfo(classMember.Name, classMember);
             }
         }
 
@@ -111,6 +114,9 @@ namespace Proj3Semantics
             // put class refs into the current type env
             // no need to get the type of the class unless we change to have inheritance
             //var typeVisitor = new TypeVisitor(TypeEnv);
+
+
+            // First enter all the top class declarations into the env
             foreach (AbstractNode child in unit)
                 CheckEnterClassDef(child as ClassDeclaration);
 
@@ -126,26 +132,33 @@ namespace Proj3Semantics
 
 
         private void ProcessModifierTokens(
-            ITypeHasModifiers nodeModified, 
-            List<ModifierType> modifiers, 
+            ITypeHasModifiers nodeModified,
+            List<ModifierType> modifiers,
             string nodeName)
         {
-            bool accessorSet = false;
+            bool accessorWasSet = false;
             nodeModified.IsStatic = false;
             nodeModified.AccessorType = AccessorType.Private;
             foreach (ModifierType modifier in modifiers)
             {
                 if (modifier == ModifierType.PUBLIC || modifier == ModifierType.PRIVATE)
                 {
-                    if (accessorSet)
+                    if (accessorWasSet)
                     {
                         CompilerErrors.Add(SemanticErrorTypes.InconsistentModifiers, nodeName);
                         break;
                     }
-                    accessorSet = true;
-                    if (modifier == ModifierType.PUBLIC)
+                    accessorWasSet = true;
+                    switch (modifier)
                     {
-                        nodeModified.AccessorType = AccessorType.Public;
+                        case ModifierType.PUBLIC:
+                            nodeModified.AccessorType = AccessorType.Public;
+                            break;
+                        case ModifierType.PRIVATE:
+                            nodeModified.AccessorType = AccessorType.Private;
+                            break;
+                        default:
+                            throw new ArgumentException();
                     }
                 }
                 else if (modifier == ModifierType.STATIC)
@@ -157,8 +170,6 @@ namespace Proj3Semantics
                     throw new NotImplementedException("Unrecognized modifier type encountered.");
                 }
             }
-            // TODO: remove child modifiers
-            //(classDecl as AbstractNode)?.Remove(classDecl.Modifiers);
         }
 
 
@@ -170,77 +181,106 @@ namespace Proj3Semantics
         {
             foreach (AbstractNode node in fields)
             {
-                ClassFieldDeclStatement fieldDecl = node as ClassFieldDeclStatement;
-                if (fieldDecl == null) throw new NullReferenceException();
+                ClassFieldDeclStatement classFieldDeclStatement = node as ClassFieldDeclStatement;
+                if (classFieldDeclStatement == null) throw new NullReferenceException();
 
-                VariableListDeclaring vld = (fieldDecl as ClassFieldDeclStatement)?.VariableListDeclaring as VariableListDeclaring;
+                VariableListDeclaring vld = classFieldDeclStatement.VariableListDeclaring as VariableListDeclaring;
                 if (vld == null) throw new NullReferenceException("Declared class variable list is null.");
 
-                ITypeSpecifier typeNameDecl = vld.TypeSpecifier as ITypeSpecifier;
+                ITypeSpecifier typeNameDecl = vld.FieldTypeSpecifier;
                 if (typeNameDecl == null) throw new NullReferenceException("Declared class field is not ITypeInfo.");
 
                 // lookup the types
                 if (typeNameDecl.TypeSpecifierRef == null)
                 {
                     TypeVisitor tVisitor = new TypeVisitor(TypeEnv);
-                    tVisitor.Visit(vld.TypeSpecifier);
+                    tVisitor.Visit(vld.FieldTypeSpecifier);
                 }
 
                 // what are the modifiers
-                var modifierTokens = fieldDecl.Modifiers.ModifierTokens;
+                var modifierTokens = classFieldDeclStatement.Modifiers.ModifierTokens;
 
                 // enter each field
                 foreach (AbstractNode decl in vld.ItemIdList)
                 {
-                    Identifier declVar = (decl as FieldVarDecl)?.Identifier;
-                    if (declVar == null) throw new ArgumentException("Variable being declared is not an identifier.");
-                    string name = declVar.Name;
+                    FieldVarDecl fieldVarDecl = decl as FieldVarDecl;
+                    if (fieldVarDecl == null) throw new ArgumentException("Variable being declared is not an identifier.");
 
-                    ProcessModifierTokens(fieldDecl, modifierTokens, name);
+                    string name = fieldVarDecl.Name;
 
-                    CheckEnterClassMemberDef(declVar, classNameEnv);
+                    ProcessModifierTokens(fieldVarDecl, modifierTokens, name);
+
+                    // copy the link to the proper type
+                    fieldVarDecl.TypeSpecifierRef = typeNameDecl.TypeSpecifierRef;
+
+                    CheckEnterClassMemberDef(fieldVarDecl, classNameEnv);
                 }
+            }
+        }
+        private void ProcessClassMethodParams(
+            ParameterList parameterList,
+            IEnv methodLocalsEnv)
+        {
+            if (parameterList == null) return;
+            foreach (AbstractNode node in parameterList)
+            {
+                Parameter p = node as Parameter;
+                if (p == null) throw new ArgumentNullException(nameof(p));
+
+                if (p.TypeSpecifier.TypeSpecifierRef == null)
+                {
+                    var tVisitor = new TypeVisitor(TypeEnv);
+                    tVisitor.Visit(p.TypeSpecifier);
+                }
+
+                p.Identifier.NodeTypeCategory = p.TypeSpecifier.NodeTypeCategory;
+                p.Identifier.TypeSpecifierRef = p.TypeSpecifier;
             }
         }
 
         private void ProcessClassMethods(AbstractNode methods, IEnv classNameEnv)
         {
-            foreach (AbstractNode methodDecl in methods)
+            foreach (AbstractNode node in methods)
             {
-                //ProcessModifierTokens(methodDecl as ITypeHasModifiers);
+                MethodDeclaration mdecl = (node as MethodDeclaration);
+                if (mdecl == null) throw new NullReferenceException();
 
-                //MethodDeclaration mdecl = (methodDecl as MethodDeclaration);
-                //if (mdecl == null) throw new NullReferenceException();
+                string methodName = mdecl.Name;
+                var modifierTokens = mdecl.Modifiers.ModifierTokens;
+                ProcessModifierTokens(mdecl, modifierTokens, methodName);
 
-                //ITypeInfo typeNameDecl = vld.TypeNameDecl as ITypeInfo;
-                //if (typeNameDecl == null) throw new NullReferenceException("Declared class field is not ITypeInfo.");
+                TypeSpecifier retType = mdecl.ReturnType;
+                if (retType.TypeSpecifierRef == null)
+                {
+                    var tVisitor = new TypeVisitor(TypeEnv);
+                    tVisitor.Visit(retType);
+                }
 
-                //// lookup the types
-                //if (typeNameDecl.TypeInfoRef == null)
-                //{
-                //    TypeVisitor tVisitor = new TypeVisitor(TypeEnv);
-                //    tVisitor.Visit(vld.TypeNameDecl);
-                //}
+                mdecl.TypeSpecifierRef = retType.TypeSpecifierRef;
 
-                //// enter each field
-                //foreach (AbstractNode decl in vld.ItemIdList)
-                //{
-                //    Identifier id = decl as Identifier;
-                //    if (id == null) throw new ArgumentException("Variable being declared is not an identifier.");
-                //    CheckEnterClassMemberDef(id, classNameEnv);
-                //}
+                var methodLocalsEnv = classNameEnv.GetNewLevel();
+                ProcessClassMethodParams(mdecl.ParameterList, methodLocalsEnv);
+
+                // TODO: visit the body with the new scope
+
+                CheckEnterClassMemberDef(mdecl, classNameEnv);
+
             }
         }
+
 
 
         private void VisitNode(ClassDeclaration cdecl)
         {
             _log.Trace("Analyzing ClassDeclaring");
-            string name = cdecl.Identifier.Name;
+
+            string name = cdecl.Name;
+
             var modifiers = cdecl.Modifiers.ModifierTokens;
             ProcessModifierTokens(cdecl, modifiers, name);
+
             ProcessClassFields(cdecl.Fields, cdecl.NameEnv);
-            //ProcessClassMethods(cdecl.Methods);
+            ProcessClassMethods(cdecl.Methods, cdecl.NameEnv);
 
 
         }
@@ -276,7 +316,7 @@ namespace Proj3Semantics
         {
             _log.Trace("Analyzing VariableDecls");
             var typeVisitor = new TypeVisitor(TypeEnv);
-            decls.TypeSpecifier.Accept(typeVisitor);
+            decls.FieldTypeSpecifier.Accept(typeVisitor);
 
             foreach (AbstractNode node in decls.ItemIdList)
             {
@@ -286,16 +326,16 @@ namespace Proj3Semantics
                 if (NameEnv.IsDeclaredLocally(id.Name))
                 {
                     CompilerErrors.Add(SemanticErrorTypes.VariableAlreadyDeclared, id.Name);
-                    id.TypeCategory = NodeTypeCategory.ErrorType;
+                    id.NodeTypeCategory = NodeTypeCategory.ErrorType;
                 }
                 else
                 {
                     // this attrib was found in the symbol table by typevisitor
-                    var typeSpecEntry = decls.TypeSpecifier as ITypeSpecifier;
+                    var typeSpecEntry = decls.FieldTypeSpecifier as ITypeSpecifier;
                     Debug.Assert(typeSpecEntry != null, "The node specifying the type is not of ITypeInfo");
 
                     // copy the found entry to the declared var
-                    id.TypeCategory = typeSpecEntry.NodeTypeCategory;
+                    id.NodeTypeCategory = typeSpecEntry.NodeTypeCategory;
                     id.TypeSpecifierRef = typeSpecEntry.TypeSpecifierRef;
 
                     // and are saved in the symbol table
@@ -392,13 +432,13 @@ namespace Proj3Semantics
             ITypeSpecifier entry = TypeEnv.Lookup(id.Name);
             if (entry != null)
             {
-                id.TypeCategory = entry.NodeTypeCategory;
+                id.NodeTypeCategory = entry.NodeTypeCategory;
                 id.TypeSpecifierRef = entry.TypeSpecifierRef;
             }
             else
             {
                 CompilerErrors.Add(SemanticErrorTypes.IdentifierNotTypeName, id.Name);
-                id.TypeCategory = NodeTypeCategory.ErrorType;
+                id.NodeTypeCategory = NodeTypeCategory.ErrorType;
                 id.TypeSpecifierRef = null;
             }
         }
