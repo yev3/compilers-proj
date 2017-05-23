@@ -42,8 +42,8 @@ namespace Proj3Semantics
                 Console.WriteLine("Start semantic analysis");
                 Console.WriteLine("========================================\n");
 
-                var typeEnv = new SymbolTable<ITypeInfo>();
-                var nameEnv = new SymbolTable<ITypeInfo>();
+                var typeEnv = new SymbolTable<ITypeSpecifier>();
+                var nameEnv = new SymbolTable<ITypeSpecifier>();
                 var topDeclVisitor = new TopDeclVisitor(typeEnv,nameEnv);
                 topDeclVisitor.Visit(parser.Root);
 

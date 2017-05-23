@@ -43,7 +43,7 @@ namespace Proj3Semantics
         public void VisitNode(AbstractNode node)
         {
             List<string> nodeProps = new List<string>();
-            var typeDescriptor = node as ITypeInfo;
+            var typeDescriptor = node as ITypeSpecifier;
             if (typeDescriptor != null)
                 nodeProps.Add(
                     typeDescriptor.NodeTypeCategory.ToString());
@@ -60,29 +60,19 @@ namespace Proj3Semantics
                 nodeProps.Add(modStr);
             }
 
-            var typeRef = typeDescriptor?.TypeInfoRef;
+            var typeRef = typeDescriptor?.TypeSpecifierRef;
             //if (typeRef != null)
             nodeProps.Add("TypeRef=" + (typeRef?.GetType().Name ?? "null"));
 
             bool hasDescriptors = nodeProps.Count > 0;
-            bool hasIdentifier = node.Identifier != null;
+            //bool hasIdentifier = node.Identifier != null;
 
-            if (hasDescriptors || hasIdentifier)
+            if (hasDescriptors)
             {
                 Console.Write(node + ": ");
-                if (hasIdentifier)
-                {
-                    using (OutColor.Cyan)
-                        Console.Write(node.Identifier?.Name);
-                    if (hasDescriptors)
-                        Console.Write(" , ");
-                }
-                if (hasDescriptors)
-                {
-                    var descriptorStrings = "{" + string.Join(", ", nodeProps) + "}";
-                    using (OutColor.Magenta)
-                        Console.Write(descriptorStrings);
-                }
+                var descriptorStrings = "{" + string.Join(", ", nodeProps) + "}";
+                using (OutColor.Magenta)
+                    Console.Write(descriptorStrings);
             }
             else
             {
