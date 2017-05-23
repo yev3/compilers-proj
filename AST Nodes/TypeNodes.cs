@@ -14,23 +14,23 @@ namespace Proj3Semantics.Nodes
 
     public class VariableListDeclaring : AbstractNode
     {
-        public AbstractNode TypeNameDecl { get; set; }
+        public TypeSpecifier TypeSpecifier { get; set; }
         public DeclaredVars ItemIdList { get; set; }
         public Expression Initialization { get; set; }
         public VariableListDeclaring(
-            AbstractNode declType,
+            AbstractNode typeSpecifier,
             AbstractNode itemIdList,
             AbstractNode init = null)
         {
             // adding children for printing
-            AddChild(declType);
+            AddChild(typeSpecifier);
             AddChild(itemIdList);
             if (init != null) AddChild(init);
 
             // check that the parser assigned some type of a node with type info
-            var decl = declType as ITypeInfo;
+            var decl = typeSpecifier as ITypeSpecifier;
             Debug.Assert(decl != null);
-            TypeNameDecl = declType;
+            TypeSpecifier = typeSpecifier as TypeSpecifier;
 
             ItemIdList = itemIdList as DeclaredVars;
             Debug.Assert(itemIdList != null);
@@ -51,21 +51,37 @@ namespace Proj3Semantics.Nodes
 
 
 
-    public class TypeName : AbstractNode { }
-    public class TypeSpecifier : AbstractNode { }
+    public abstract class TypeSpecifier : AbstractNode, ITypeSpecifier{
+        public abstract NodeTypeCategory NodeTypeCategory { get; set; }
+        public virtual ITypeSpecifier TypeSpecifierRef { get; set; } = null;
+    }
 
+    public abstract class TypeName : TypeSpecifier  { }
 
-    public class QualifiedName : TypeName, ITypeInfo
+    public class ArraySpecifier : TypeSpecifier
     {
+        public ArraySpecifier(AbstractNode abstractNode)
+        {
+            AddChild(abstractNode);
+        }
 
+        public override NodeTypeCategory NodeTypeCategory
+        {
+            get => NodeTypeCategory.Array;
+            set => throw new InvalidOperationException("unable to set node type cat");
+        }
+    }
+
+    public class QualifiedName : TypeName
+    {
         public QualifiedName(AbstractNode abstractNode)
         {
             AddChild(abstractNode);
         }
 
         public QualifiedName() { }
-        public NodeTypeCategory NodeTypeCategory { get; set; }
-        public ITypeInfo TypeInfoRef { get; set; }
+        public override NodeTypeCategory NodeTypeCategory { get; set; }
+        public override ITypeSpecifier TypeSpecifierRef { get; set; }
     }
 
 
@@ -95,7 +111,7 @@ namespace Proj3Semantics.Nodes
 
     }
 
-    public class Literal : AbstractNode, ITypeInfo
+    public class Literal : AbstractNode, ITypeSpecifier
     {
         public string Name { get; set; }
         public Literal(string s)
@@ -109,58 +125,64 @@ namespace Proj3Semantics.Nodes
             set => throw new NotImplementedException("You're not supposed to set a literal");
         }
 
-        public ITypeInfo TypeInfoRef
+
+        public virtual ITypeSpecifier TypeSpecifierRef
         {
             get => this;
             set => throw new AccessViolationException("unable to set typeref of a string literal");
         }
     }
-    public class BuiltinTypeVoid : AbstractNode, ITypeInfo
+
+    public abstract class PrimitiveType : TypeSpecifier, IPrimitiveTypeDescriptor
     {
-        public NodeTypeCategory NodeTypeCategory
+        public override NodeTypeCategory NodeTypeCategory
         {
-            get => NodeTypeCategory.Void;
-            set => throw new NotImplementedException();
+            get => NodeTypeCategory.Primitive;
+            set => throw new InvalidOperationException();
         }
 
-        public ITypeInfo TypeInfoRef
+        public abstract VariablePrimitiveTypes VariableTypePrimitive { get; set; }
+    }
+
+    public class BuiltinTypeVoid : TypeSpecifier
+    {
+        public override NodeTypeCategory NodeTypeCategory
+        {
+            get => NodeTypeCategory.Void;
+            set => throw new InvalidOperationException();
+        }
+
+        public override ITypeSpecifier TypeSpecifierRef
         {
             get => this;
             set => throw new AccessViolationException("unable to set typeref of a builtin");
         }
     }
 
-    public class BuiltinTypeInt : AbstractNode, IPrimitiveTypeDescriptor
+    public class BuiltinTypeInt : PrimitiveType
     {
-        public NodeTypeCategory NodeTypeCategory
-        {
-            get => NodeTypeCategory.Primitive;
-            set => throw new NotImplementedException();
-        }
-
-        public ITypeInfo TypeInfoRef
+        public override ITypeSpecifier TypeSpecifierRef
         {
             get => this;
             set => throw new AccessViolationException("unable to set typeref of a builtin");
         }
 
-        public VariablePrimitiveTypes VariableTypePrimitive
+        public override VariablePrimitiveTypes VariableTypePrimitive
         {
             get => VariablePrimitiveTypes.Int;
             set => throw new NotImplementedException();
         }
     }
 
-    public class BuiltinTypeBoolean : AbstractNode, IPrimitiveTypeDescriptor
+    public class BuiltinTypeBoolean : PrimitiveType
     {
-        public VariablePrimitiveTypes VariableTypePrimitive
+        public override VariablePrimitiveTypes VariableTypePrimitive
         {
             get => VariablePrimitiveTypes.Boolean;
-            set { throw new NotImplementedException(); }
+            set => throw new NotImplementedException();
         }
 
-        public NodeTypeCategory NodeTypeCategory { get; set; }
-        public ITypeInfo TypeInfoRef
+        public override ITypeSpecifier TypeSpecifierRef
         {
             get => this;
             set => throw new AccessViolationException("unable to set typeref of a builtin");
@@ -178,7 +200,7 @@ namespace Proj3Semantics.Nodes
             set => throw new NotImplementedException("You're not supposed to set a number literal");
         }
 
-        public ITypeInfo TypeInfoRef
+        public ITypeSpecifier TypeSpecifierRef
         {
             get => this;
             set => throw new AccessViolationException("unable to set typeref of a builtin");

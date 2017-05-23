@@ -17,41 +17,39 @@ namespace Proj3Semantics
     /// <summary>
     /// Specifies if the node has type information attached to it
     /// </summary>
-    public interface ITypeInfo
+    public interface ITypeSpecifier
     {
         // every type belongs to some kind of a category
         NodeTypeCategory NodeTypeCategory { get; set; }
-        ITypeInfo TypeInfoRef { get; set; }
+        ITypeSpecifier TypeSpecifierRef { get; set; }
     }
 
-    public interface IPrimitiveTypeDescriptor : ITypeInfo
+    public interface IPrimitiveTypeDescriptor : ITypeSpecifier
     {
         VariablePrimitiveTypes VariableTypePrimitive { get; set; }
     }
 
     public interface ITypeHasModifiers
     {
-        Modifiers Modifiers { get; set; }
         AccessorType AccessorType { get; set; }
         bool IsStatic { get; set; }
-        
+
     }
 
-    public interface IClassTypeDescriptor : ITypeInfo, ITypeHasModifiers
+    public interface IClassTypeDescriptor : ITypeSpecifier, ITypeHasModifiers
     {
-        ISymbolTable<ITypeInfo> FieldsEnv { get; set; }
-        ISymbolTable<ITypeInfo> MethodsEnv { get; set; }
+        ISymbolTable<ITypeSpecifier> NameEnv { get; set; }
         IClassTypeDescriptor ParentClass { get; set; }
     }
 
-    public interface IClassFieldTypeDesc : ITypeInfo, ITypeHasModifiers
+    public interface IClassFieldTypeDesc : ITypeSpecifier, ITypeHasModifiers
     {
-        
+        Identifier Identifier { get; set; }
     }
 
-    public interface IClassMethodTypeDesc : ITypeInfo, ITypeHasModifiers
+    public interface IClassMethodTypeDesc : ITypeSpecifier, ITypeHasModifiers
     {
-        ITypeInfo ReturnType { get; set; }
+        TypeSpecifier ReturnType { get; set; }
     }
 
 }

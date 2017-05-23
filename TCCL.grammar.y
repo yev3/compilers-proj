@@ -76,7 +76,7 @@ FieldDeclarations
     ;
 
 FieldDeclaration    
-    :   FieldVariableDeclaration SEMICOLON  { $$ = $1; }
+    :   CLassFieldDecl SEMICOLON  { $$ = $1; }
     |   MethodDeclaration                   { $$ = $1; }
     |   ConstructorDeclaration              { $$ = $1; }
     |   StaticInitializer                   { $$ = $1; }
@@ -94,9 +94,9 @@ StructDeclaration
  * here to get the information where you want it, so that the declarations can
  * be suitably annotated with their type and modifier information.
  */
-FieldVariableDeclaration    
+CLassFieldDecl    
     :   Modifiers TypeSpecifier FieldVariableDeclarators            
-                                            { $$ = new ClassFieldDecl($1, new VariableListDeclaring($2, $3)); }
+                                            { $$ = new ClassFieldDeclStatement($1, new VariableListDeclaring($2, $3)); }
     ;
 
 TypeSpecifier               
@@ -160,7 +160,7 @@ MethodDeclaratorName
     ;
 
 FieldVariableDeclaratorName 
-    :   Identifier                          { $$ = $1; }
+    :   Identifier                          { $$ = new FieldVarDecl($1); }
     ;
 
 LocalVariableDeclaratorName 

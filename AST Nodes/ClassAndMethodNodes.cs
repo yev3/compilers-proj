@@ -38,19 +38,19 @@ namespace Proj3Semantics.Nodes
             set => throw new AccessViolationException("unable to set the type category.");
         }
 
-        public ITypeInfo TypeInfoRef
+        public ITypeSpecifier TypeSpecifierRef
         {
             get => this;
             set => throw new AccessViolationException("unable to set the class decl to a diff class decl.");
         }
-        public ISymbolTable<ITypeInfo> FieldsEnv { get; set; } = new SymbolTable<ITypeInfo>();
-        public ISymbolTable<ITypeInfo> MethodsEnv { get; set; } = new SymbolTable<ITypeInfo>();
+        public ISymbolTable<ITypeSpecifier> NameEnv { get; set; } = new SymbolTable<ITypeSpecifier>();
         public IClassTypeDescriptor ParentClass { get; set; } = null;
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
         #endregion
 
         public Modifiers Modifiers { get; set; }
+        public Identifier Identifier { get; set; }
         public ClassFields Fields { get; set; } = new ClassFields();
         public ClassMethods Methods { get; set; } = new ClassMethods();
         public NotImplemented NotImplemented { get; set; } = null;
@@ -63,7 +63,7 @@ namespace Proj3Semantics.Nodes
             this.Identifier = className as Identifier;
             foreach (var child in classBody)
             {
-                if (child is ClassFieldDecl)
+                if (child is ClassFieldDeclStatement)
                 {
                     Fields.AddChild(child);
                 }
@@ -91,13 +91,30 @@ namespace Proj3Semantics.Nodes
     public class ClassFields : AbstractNode { }
     public class ClassMethods : AbstractNode { }
 
+    public class FieldVarDecl : AbstractNode, IClassFieldTypeDesc
+    {
+        public Identifier Identifier { get; set; }
+        public FieldVarDecl(AbstractNode identifier)
+        {
+            Identifier = identifier as Identifier;
+        }
 
-    public class ClassFieldDecl : AbstractNode, IClassFieldTypeDesc
+        public NodeTypeCategory NodeTypeCategory
+        {
+            get => NodeTypeCategory.ClassFieldDef;
+            set => throw new AccessViolationException("unable to set class field type");
+        }
+        public ITypeSpecifier TypeSpecifierRef { get; set; } = null;
+        public AccessorType AccessorType { get; set; }
+        public bool IsStatic { get; set; }
+    }
+
+    public class ClassFieldDeclStatement : AbstractNode, ITypeHasModifiers
     {
         public Modifiers Modifiers { get; set; }
         public AbstractNode VariableListDeclaring { get; set; }
 
-        public ClassFieldDecl(
+        public ClassFieldDeclStatement(
             AbstractNode modifiers,
             AbstractNode variableDeclarations)
         {
@@ -108,12 +125,6 @@ namespace Proj3Semantics.Nodes
             AddChild(variableDeclarations);
         }
 
-        public NodeTypeCategory NodeTypeCategory
-        {
-            get => NodeTypeCategory.ClassFieldDef;
-            set => throw new AccessViolationException("unable to set class field type");
-        }
-        public ITypeInfo TypeInfoRef { get; set; }
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
     }
@@ -133,21 +144,23 @@ namespace Proj3Semantics.Nodes
 
     public class MethodDeclarator : AbstractNode
     {
+        public readonly Identifier Identifier;
         public readonly ParameterList ParameterList;
-        public MethodDeclarator(AbstractNode identifier)
+        public MethodDeclarator(AbstractNode methodDeclaratorName)
         {
-            this.Identifier = identifier as Identifier;
+            this.Identifier = methodDeclaratorName as Identifier;
         }
-        public MethodDeclarator(AbstractNode identifier, AbstractNode paramList)
+        public MethodDeclarator(AbstractNode methodDeclaratorName, AbstractNode paramList)
         {
-            this.Identifier = identifier as Identifier;
+            this.Identifier = methodDeclaratorName as Identifier;
             this.ParameterList = paramList as ParameterList;
         }
     }
     public class MethodDeclaration : AbstractNode, IClassMethodTypeDesc
     {
         public Modifiers Modifiers { get; set; }
-        public ITypeInfo ReturnType { get; set; }
+        public TypeSpecifier ReturnType { get; set; }
+        public Identifier Identifier { get; set; }
         public ParameterList ParameterList { get; set; }
         public Block MethodBody { get; set; }
 
@@ -158,13 +171,14 @@ namespace Proj3Semantics.Nodes
             AbstractNode methodBody)
         {
             this.Modifiers = modifiers as Modifiers;
-            this.ReturnType = typeSpecifier as ITypeInfo;
-            this.Identifier = methodDeclarator.Identifier;
+            this.ReturnType = typeSpecifier as TypeSpecifier;
+            this.Identifier = (methodDeclarator as MethodDeclarator)?.Identifier;
             this.ParameterList = (methodDeclarator as MethodDeclarator)?.ParameterList;
             this.MethodBody = methodBody as Block;
 
             AddChild(modifiers);
             AddChild(typeSpecifier);
+            AddChild(Identifier);
             if (this.ParameterList != null) AddChild(this.ParameterList);
             AddChild(methodBody);
         }
@@ -174,15 +188,19 @@ namespace Proj3Semantics.Nodes
             get => NodeTypeCategory.ClassMethodDef;
             set => throw new AccessViolationException("unable to set method node to diff type.");
         } 
-        public ITypeInfo TypeInfoRef { get; set; }
+        public ITypeSpecifier TypeSpecifierRef { get; set; }
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
     }
 
     public class Parameter : AbstractNode
     {
+        public TypeSpecifier TypeSpecifier { get; set; }
+        public Identifier Identifier { get; set; }
         public Parameter(AbstractNode typeSpec, AbstractNode declName)
         {
+            TypeSpecifier = typeSpec as TypeSpecifier;
+            Identifier = declName as Identifier;
             AddChild(typeSpec);
             AddChild(declName);
         }

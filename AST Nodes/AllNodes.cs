@@ -107,13 +107,6 @@ namespace Proj3Semantics.Nodes
         }
     }
 
-    public class ArraySpecifier : TypeSpecifier
-    {
-        public ArraySpecifier(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-    }
 
     public class ArgumentList : AbstractNode
     {
