@@ -60,6 +60,10 @@ namespace Proj3Semantics
                 nodeProps.Add(modStr);
             }
 
+            if (typeDescriptor != null)
+            {
+                
+            }
             var typeRef = typeDescriptor?.TypeSpecifierRef;
             //if (typeRef != null)
             nodeProps.Add("TypeRef=" + (typeRef?.GetType().Name ?? "null"));

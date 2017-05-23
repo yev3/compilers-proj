@@ -7,13 +7,6 @@ using System.Threading.Tasks;
 namespace Proj3Semantics
 {
 
-    public class SymbolTableEntry
-    {
-        //public AttribRecordTypes EntryType { get; set; }
-        //public SymbolAttributes AttribRecord { get; set; }
-        public NodeTypeCategory KindNodeCategory { get; set; }
-    }
-
     public interface ISymbolTable<TEntry>
     {
         int CurrentNestLevel { get; }
