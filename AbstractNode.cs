@@ -29,7 +29,7 @@ namespace Proj3Semantics.Nodes
             get { return LinkedListNodeContainer.Next?.Value; }
         }
 
-        public void AddChild(AbstractNode child)
+        public virtual void AddChild(AbstractNode child)
         {
             if (child == null)
             {

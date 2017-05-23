@@ -43,7 +43,8 @@ namespace Proj3Semantics.Nodes
             get => this;
             set => throw new AccessViolationException("unable to set the class decl to a diff class decl.");
         }
-        public ISymbolTable<ITypeSpecifier> NameEnv { get; set; } = new SymbolTable<ITypeSpecifier>();
+
+        public ISymbolTable<ITypeSpecifier> LocalNameEnv { get; set; } = null;
         public IClassTypeDescriptor ParentClass { get; set; } = null;
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
@@ -86,6 +87,10 @@ namespace Proj3Semantics.Nodes
                 AddChild(NotImplemented);
         }
 
+        public override string ToString()
+        {
+            return "<" + this.GetType().Name + ":" + Name + ">";
+        }
     }
 
     public class ClassFields : AbstractNode { }
@@ -108,6 +113,11 @@ namespace Proj3Semantics.Nodes
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
         public string Name { get; set; }
+        public ISymbolTable<ITypeSpecifier> LocalNameEnv
+        {
+            get => null;
+            set => throw new AccessViolationException();
+        }
     }
 
     public class ClassFieldDeclStatement : AbstractNode
@@ -194,6 +204,7 @@ namespace Proj3Semantics.Nodes
         public bool IsStatic { get; set; }
         public ITypeSpecifier ReturnTypeSpecifier { get; set; }
         public string Name { get; set; }
+        public ISymbolTable<ITypeSpecifier> LocalNameEnv { get; set; } = null;
     }
 
     public class Parameter : AbstractNode

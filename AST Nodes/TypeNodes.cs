@@ -51,12 +51,14 @@ namespace Proj3Semantics.Nodes
 
 
 
-    public abstract class TypeSpecifier : AbstractNode, ITypeSpecifier{
+    public abstract class TypeSpecifier : AbstractNode, ITypeSpecifier
+    {
         public abstract NodeTypeCategory NodeTypeCategory { get; set; }
         public virtual ITypeSpecifier TypeSpecifierRef { get; set; } = null;
+        public ISymbolTable<ITypeSpecifier> LocalNameEnv { get; set; } = null;
     }
 
-    public abstract class TypeName : TypeSpecifier  { }
+    public abstract class TypeName : TypeSpecifier { }
 
     public class ArraySpecifier : TypeSpecifier
     {
@@ -74,12 +76,30 @@ namespace Proj3Semantics.Nodes
 
     public class QualifiedName : TypeName
     {
-        public QualifiedName(AbstractNode abstractNode)
+        public List<string> IdentifierList { get; set; } = new List<string>();
+
+        public QualifiedName(string s)
         {
-            AddChild(abstractNode);
+            IdentifierList.Add(s);
+        }
+        public QualifiedName(AbstractNode node)
+        {
+            AppendIdentifier(node);
         }
 
-        public QualifiedName() { }
+        private void AppendIdentifier(AbstractNode child)
+        {
+            Identifier id = child as Identifier;
+            if (id == null) throw new ArgumentNullException(nameof(id));
+            IdentifierList.Add(id.Name);
+
+        }
+
+        public override void AddChild(AbstractNode child)
+        {
+            AppendIdentifier(child);
+        }
+
         public override NodeTypeCategory NodeTypeCategory { get; set; }
         public override ITypeSpecifier TypeSpecifierRef { get; set; }
     }
@@ -91,7 +111,7 @@ namespace Proj3Semantics.Nodes
     public class Identifier : QualifiedName
     {
         public string Name { get; set; }
-        public Identifier(string s)
+        public Identifier(string s) : base(s)
         {
             Name = s;
         }
@@ -129,6 +149,12 @@ namespace Proj3Semantics.Nodes
         {
             get => this;
             set => throw new AccessViolationException("unable to set typeref of a string literal");
+        }
+
+        public ISymbolTable<ITypeSpecifier> LocalNameEnv
+        {
+            get => null;
+            set => throw new AccessViolationException();
         }
     }
 
@@ -204,10 +230,17 @@ namespace Proj3Semantics.Nodes
             get => this;
             set => throw new AccessViolationException("unable to set typeref of a builtin");
         }
+
+
         public VariablePrimitiveTypes VariableTypePrimitive
         {
             get => VariablePrimitiveTypes.Int;
             set => throw new NotImplementedException("You're not supposed to set a number literal");
+        }
+        public ISymbolTable<ITypeSpecifier> LocalNameEnv
+        {
+            get => null;
+            set => throw new AccessViolationException();
         }
     }
 

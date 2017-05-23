@@ -2,10 +2,6 @@ public class good1p {
 
     private int field1, field2;
 
-    public good1p(){
-        // ctor
-    }
-
     public static void outInt(int n) {
         java.io.PrintStream ps;
         ps = java.lang.System.out;
@@ -15,13 +11,14 @@ public class good1p {
     public static void main431() {
         int w, x;
         x = 3 + 4;  
-        TestClasses.good1p.outInt(x);
+        good1p.outInt(x);
         x = 5 * 7;  
-        TestClasses.good1p.outInt(x);
+        good1p.outInt(x);
     }
 }
 
 private class class2{
+    private good1p pass(){}
     private good1p fail(){}
     private void fail(){}
 }
