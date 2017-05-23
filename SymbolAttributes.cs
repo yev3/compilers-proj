@@ -11,13 +11,9 @@ namespace Proj3Semantics
     // found here:
     // http://www.ccs.neu.edu/home/riccardo/courses/csu370-fa07/lect4.pdf
 
-    public enum VariableTypes
-    {
-        Primitive, Null, Array, Class, Void, ErrorType
-    }
     public enum VariablePrimitiveTypes
     {
-        Boolean, Byte, Char, Short, Int, Long, Float, Double
+        Boolean, Byte, Char, Short, Int, Long, Float, Double, NotPrimitive
         //boolean	true or false	false	1 bit	true, false
         //byte	twos complement integer	0	8 bits	(none)
         //char	Unicode character	\u0000	16 bits	'a', '\u0041', '\101', '\\', '\'', '\n', 'ß'

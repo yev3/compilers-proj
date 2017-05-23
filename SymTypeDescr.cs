@@ -3,56 +3,55 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.ModelBinding;
+using Proj3Semantics.Nodes;
 
 namespace Proj3Semantics
 {
 
-    //Primitive, Null, Array, Class, Void, ErrorType
-    public abstract class TypeDescriptor
+    public enum NodeTypeCategory
     {
-        public VariableTypes KindVariableCategory { get; set; }
+        Primitive, Null, Array, Class, Void, This, ErrorType, ClassFieldDef, ClassMethodDef
     }
 
-    public class PrimitiveTypeDescriptor : TypeDescriptor
+    /// <summary>
+    /// Specifies if the node has type information attached to it
+    /// </summary>
+    public interface ITypeInfo
     {
-        public PrimitiveTypeDescriptor()
-        {
-            KindVariableCategory = VariableTypes.Primitive;
-        }
-        public VariablePrimitiveTypes VariableTypeOfPrimitive { get; set; }
+        // every type belongs to some kind of a category
+        NodeTypeCategory NodeTypeCategory { get; set; }
+        ITypeInfo TypeInfoRef { get; set; }
     }
 
-    public class NullTypeDescriptor : TypeDescriptor
+    public interface IPrimitiveTypeDescriptor : ITypeInfo
     {
-        public NullTypeDescriptor()
-        {
-            KindVariableCategory = VariableTypes.Null;
-        }
-
+        VariablePrimitiveTypes VariableTypePrimitive { get; set; }
     }
 
-    public class ClassTypeDescriptor : TypeDescriptor
+    public interface ITypeHasModifiers
     {
-        public ClassTypeDescriptor()
-        {
-            KindVariableCategory = VariableTypes.Class;
-        }
-    }
-    class VoidDescriptorType : TypeDescriptor
-    {
-        public VoidDescriptorType()
-        {
-            KindVariableCategory = VariableTypes.Void;
-        }
+        Modifiers Modifiers { get; set; }
+        AccessorType AccessorType { get; set; }
+        bool IsStatic { get; set; }
+        
     }
 
-    class ErrorDescriptorType : TypeDescriptor
+    public interface IClassTypeDescriptor : ITypeInfo, ITypeHasModifiers
     {
-        public ErrorDescriptorType()
-        {
-            KindVariableCategory = VariableTypes.ErrorType;
-        }
+        ISymbolTable<ITypeInfo> FieldsEnv { get; set; }
+        ISymbolTable<ITypeInfo> MethodsEnv { get; set; }
+        IClassTypeDescriptor ParentClass { get; set; }
     }
 
+    public interface IClassFieldTypeDesc : ITypeInfo, ITypeHasModifiers
+    {
+        
+    }
+
+    public interface IClassMethodTypeDesc : ITypeInfo, ITypeHasModifiers
+    {
+        ITypeInfo ReturnType { get; set; }
+    }
 
 }
