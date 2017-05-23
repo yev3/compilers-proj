@@ -10,10 +10,11 @@ using Proj3Semantics.Nodes;
 
 namespace Proj3Semantics
 {
+    using IEnv = ISymbolTable<ITypeSpecifier>;
 
     public enum NodeTypeCategory
     {
-        Primitive, Null, Array, Class, Void, This, ErrorType, ClassFieldDef, ClassMethodDef
+        NOT_SET, Primitive, Null, Array, Class, Void, This, ErrorType, ClassFieldDef, ClassMethodDef
     }
 
     public enum VariablePrimitiveTypes
@@ -29,6 +30,12 @@ namespace Proj3Semantics
         // every type belongs to some kind of a category
         NodeTypeCategory NodeTypeCategory { get; set; }
         ITypeSpecifier TypeSpecifierRef { get; set; }
+        //IEnv LocalScopeEnv { get; set; }
+    }
+
+    public interface INamedType
+    {
+        string Name { get; set; }
     }
 
     public interface IPrimitiveTypeDescriptor : ITypeSpecifier
@@ -43,18 +50,23 @@ namespace Proj3Semantics
 
     }
 
-    public interface IClassTypeDescriptor : ITypeSpecifier, ITypeHasModifiers
+    public interface IClassTypeDescriptor : ITypeSpecifier, ITypeHasModifiers, INamedType
     {
         ISymbolTable<ITypeSpecifier> NameEnv { get; set; }
         IClassTypeDescriptor ParentClass { get; set; }
     }
 
-    public interface IClassFieldTypeDesc : ITypeSpecifier, ITypeHasModifiers
+    public interface IClassMember : ITypeSpecifier, ITypeHasModifiers,
+        INamedType
     {
-        Identifier Identifier { get; set; }
+        
     }
 
-    public interface IClassMethodTypeDesc : ITypeSpecifier, ITypeHasModifiers
+    public interface IClassFieldTypeDesc : IClassMember
+    {
+    }
+
+    public interface IClassMethodTypeDesc : IClassMember
     {
         ITypeSpecifier ReturnTypeSpecifier { get; set; }
     }

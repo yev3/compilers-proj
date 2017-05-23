@@ -26,7 +26,7 @@ namespace Proj3Semantics.Nodes
             AddModType(type);
         }
     }
-    public class ClassDeclaration : AbstractNode, IClassTypeDescriptor
+    public class ClassDeclaration : AbstractNode, IClassTypeDescriptor, INamedType
     {
 
         // Interface Implementations
@@ -47,10 +47,10 @@ namespace Proj3Semantics.Nodes
         public IClassTypeDescriptor ParentClass { get; set; } = null;
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
+        public string Name { get; set; }
         #endregion
 
         public Modifiers Modifiers { get; set; }
-        public Identifier Identifier { get; set; }
         public ClassFields Fields { get; set; } = new ClassFields();
         public ClassMethods Methods { get; set; } = new ClassMethods();
         public NotImplemented NotImplemented { get; set; } = null;
@@ -60,7 +60,7 @@ namespace Proj3Semantics.Nodes
             AbstractNode classBody)
         {
             this.Modifiers = modifiers as Modifiers;
-            this.Identifier = className as Identifier;
+            this.Name = (className as Identifier)?.Name;
             foreach (var child in classBody)
             {
                 if (child is ClassFieldDeclStatement)
@@ -91,14 +91,12 @@ namespace Proj3Semantics.Nodes
     public class ClassFields : AbstractNode { }
     public class ClassMethods : AbstractNode { }
 
-    public class FieldVarDecl : AbstractNode, IClassFieldTypeDesc
+    public class FieldVarDecl : AbstractNode, IClassFieldTypeDesc, INamedType
     {
-        public Identifier Identifier { get; set; }
         public FieldVarDecl(AbstractNode identifier)
         {
-            Identifier = identifier as Identifier;
-            if (Identifier == null) throw new ArgumentException("Field variable decl without an identifier.");
-            AddChild(Identifier);
+            Name = (identifier as Identifier)?.Name;
+            if (Name == null) throw new ArgumentException("Field variable decl without an identifier.");
         }
 
         public NodeTypeCategory NodeTypeCategory
@@ -109,9 +107,10 @@ namespace Proj3Semantics.Nodes
         public ITypeSpecifier TypeSpecifierRef { get; set; } = null;
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
+        public string Name { get; set; }
     }
 
-    public class ClassFieldDeclStatement : AbstractNode, ITypeHasModifiers
+    public class ClassFieldDeclStatement : AbstractNode
     {
         public Modifiers Modifiers { get; set; }
         public AbstractNode VariableListDeclaring { get; set; }
@@ -162,7 +161,6 @@ namespace Proj3Semantics.Nodes
     {
         public Modifiers Modifiers { get; set; }
         public TypeSpecifier ReturnType { get; set; }
-        public Identifier Identifier { get; set; }
         public ParameterList ParameterList { get; set; }
         public Block MethodBody { get; set; }
 
@@ -174,13 +172,12 @@ namespace Proj3Semantics.Nodes
         {
             this.Modifiers = modifiers as Modifiers;
             this.ReturnType = typeSpecifier as TypeSpecifier;
-            this.Identifier = (methodDeclarator as MethodDeclarator)?.Identifier;
+            this.Name = (methodDeclarator as MethodDeclarator)?.Identifier?.Name;
             this.ParameterList = (methodDeclarator as MethodDeclarator)?.ParameterList;
             this.MethodBody = methodBody as Block;
 
             AddChild(modifiers);
             AddChild(typeSpecifier);
-            AddChild(Identifier);
             if (this.ParameterList != null) AddChild(this.ParameterList);
             AddChild(methodBody);
         }
@@ -196,6 +193,7 @@ namespace Proj3Semantics.Nodes
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
         public ITypeSpecifier ReturnTypeSpecifier { get; set; }
+        public string Name { get; set; }
     }
 
     public class Parameter : AbstractNode
@@ -222,3 +220,34 @@ namespace Proj3Semantics.Nodes
 
     public class LocalVarDeclOrStatement : AbstractNode { }
 }
+
+
+
+
+
+
+
+// DELETE
+
+//ITypeSpecifier typeNameDecl = vld.FieldTypeSpecifier;
+//if (typeNameDecl == null) throw new NullReferenceException("Declared class field is not ITypeInfo.");
+
+//// lookup the types
+//if (typeNameDecl.TypeSpecifierRef == null)
+//{
+//    TypeVisitor tVisitor = new TypeVisitor(TypeEnv);
+//    tVisitor.Visit(vld.FieldTypeSpecifier);
+//}
+
+
+//    FieldVarDecl fieldVarDecl = decl as FieldVarDecl;
+//    if (fieldVarDecl == null) throw new ArgumentException("Variable being declared is not an identifier.");
+
+//    string name = fieldVarDecl.Name;
+
+//    ProcessModifierTokens(fieldVarDecl, modifierTokens, name);
+
+//    // copy the link to the proper type
+//    fieldVarDecl.TypeSpecifierRef = typeNameDecl.TypeSpecifierRef;
+
+//    CheckEnterClassMemberDef(fieldVarDecl, classNameEnv);

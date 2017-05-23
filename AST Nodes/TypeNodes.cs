@@ -14,7 +14,7 @@ namespace Proj3Semantics.Nodes
 
     public class VariableListDeclaring : AbstractNode
     {
-        public TypeSpecifier TypeSpecifier { get; set; }
+        public TypeSpecifier FieldTypeSpecifier { get; set; }
         public DeclaredVars ItemIdList { get; set; }
         public Expression Initialization { get; set; }
         public VariableListDeclaring(
@@ -30,7 +30,7 @@ namespace Proj3Semantics.Nodes
             // check that the parser assigned some type of a node with type info
             var decl = typeSpecifier as ITypeSpecifier;
             Debug.Assert(decl != null);
-            TypeSpecifier = typeSpecifier as TypeSpecifier;
+            FieldTypeSpecifier = typeSpecifier as TypeSpecifier;
 
             ItemIdList = itemIdList as DeclaredVars;
             Debug.Assert(itemIdList != null);
@@ -91,7 +91,6 @@ namespace Proj3Semantics.Nodes
     public class Identifier : QualifiedName
     {
         public string Name { get; set; }
-        public NodeTypeCategory TypeCategory { get; set; }
         public Identifier(string s)
         {
             Name = s;
