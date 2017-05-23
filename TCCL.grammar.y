@@ -42,7 +42,13 @@
 %%
 
 CompilationUnit     
-    :   ClassDeclaration    { $$ = new CompilationUnit($1);}
+    :   ClassDeclarations   { $$ = $1; }
+    ;
+
+ClassDeclarations
+    :   ClassDeclaration    { $$ = new CompilationUnit($1); }
+    |   ClassDeclarations ClassDeclaration
+                            { $1.AddChild($2); $$ = $1; }
     ;
 
 ClassDeclaration    
@@ -60,12 +66,12 @@ Modifiers
     ;
 
 ClassBody           
-    :   LBRACE FieldDeclarations RBRACE     { $$ = new ClassBody($2);}
+    :   LBRACE FieldDeclarations RBRACE     { $$ = $2;}
     |   LBRACE RBRACE                       { $$ = new ClassBody();}
     ;
 
 FieldDeclarations   
-    :   FieldDeclaration                    { $$ = new FieldDeclarations($1); }
+    :   FieldDeclaration                    { $$ = new ClassBody($1); }
     |   FieldDeclarations FieldDeclaration  { $1.AddChild($2); $$ = $1;}
     ;
 
@@ -108,9 +114,9 @@ ArraySpecifier
     ;
                             
 PrimitiveType               
-    :   BOOLEAN                             { $$ = new BuiltinType(Token.BOOLEAN); }
-    |   INT                                 { $$ = new BuiltinType(Token.INT); }
-    |   VOID                                { $$ = new BuiltinType(Token.VOID); }
+    :   BOOLEAN                             { $$ = new BuiltinTypeBoolean(); }
+    |   INT                                 { $$ = new BuiltinTypeInt(); }
+    |   VOID                                { $$ = new BuiltinTypeVoid(); }
     ;
 
 FieldVariableDeclarators    
@@ -196,10 +202,10 @@ LocalVarDeclOrStatement
     |   Statement                           { $$ = $1;}
     ;
 
-LocalVariableDecl   
+LocalVariableDecl       
     :   TypeSpecifier LocalVariableDeclarators SEMICOLON    
-                                            { $$ = new LocalVariableDecl($1, $2);}
-    |   StructDeclaration                   { $$ = new LocalVariableDecl($1);}
+                                            { $$ = new VariableListDeclaring($1, $2);}
+    |   StructDeclaration                   { $$ = new NotImplemented("struct decl not supported");}
     ;
 
 LocalVariableDeclarators    

@@ -17,7 +17,7 @@ namespace Proj3Semantics
 
             bool isLastChild = (node.NextSibling == null);
 
-            using (new WithColor(ConsoleColor.DarkYellow))
+            using (OutColor.DarkYellow)
             {
                 Console.Write(prefix);
                 Console.Write(isLastChild ? "└─ " : "├─ ");
@@ -42,72 +42,93 @@ namespace Proj3Semantics
         // ============================================================
         public void VisitNode(AbstractNode node)
         {
-            if (node.Identifier == null)
+            List<string> nodeProps = new List<string>();
+            var typeDescriptor = node as ITypeInfo;
+            if (typeDescriptor != null)
+                nodeProps.Add(
+                    typeDescriptor.NodeTypeCategory.ToString());
+
+            var primitiveDescriptor = node as IPrimitiveTypeDescriptor;
+            if (primitiveDescriptor != null)
+                nodeProps.Add(
+                    primitiveDescriptor.VariableTypePrimitive.ToString());
+
+            var modifiers = node as ITypeHasModifiers;
+            if (modifiers != null)
             {
-                Console.WriteLine(node);
+                var modStr = "{" + modifiers.AccessorType + (modifiers.IsStatic ? ", static}" : "}");
+                nodeProps.Add(modStr);
+            }
+
+            var typeRef = typeDescriptor?.TypeInfoRef;
+            //if (typeRef != null)
+            nodeProps.Add("TypeRef=" + (typeRef?.GetType().Name ?? "null"));
+
+            bool hasDescriptors = nodeProps.Count > 0;
+            bool hasIdentifier = node.Identifier != null;
+
+            if (hasDescriptors || hasIdentifier)
+            {
+                Console.Write(node + ": ");
+                if (hasIdentifier)
+                {
+                    using (OutColor.Cyan)
+                        Console.Write(node.Identifier?.Name);
+                    if (hasDescriptors)
+                        Console.Write(" , ");
+                }
+                if (hasDescriptors)
+                {
+                    var descriptorStrings = "{" + string.Join(", ", nodeProps) + "}";
+                    using (OutColor.Magenta)
+                        Console.Write(descriptorStrings);
+                }
             }
             else
             {
-                Console.Write(node + ": ");
-                using (new WithColor(ConsoleColor.Cyan))
-                    Console.WriteLine(node.Identifier?.Name);
+                Console.Write(node);
             }
+            Console.WriteLine();
         }
 
         private void VisitNode(Modifiers node)
         {
             Console.Write(node + ": ");
             var stringEnums = node.ModifierTokens.Select(x => x.ToString());
-            using (new WithColor(ConsoleColor.Magenta))
+            using (OutColor.Magenta)
                 Console.WriteLine(string.Join(", ", stringEnums));
         }
 
         private void VisitNode(Identifier node)
         {
             Console.Write(node + ": ");
-            using (new WithColor(ConsoleColor.Cyan))
+            using (OutColor.Cyan)
                 Console.WriteLine(node.Name);
-        }
-        private void VisitNode(BuiltinType node)
-        {
-            Console.Write(node + ": ");
-            using (new WithColor(ConsoleColor.Magenta))
-            {
-                Console.Write(node.TypeKind);
-                if (node.TypeKind == VariableTypes.Primitive)
-                {
-                    Console.WriteLine(" / " + node.PrimitiveTypes);
-                }
-                else
-                {
-                    Console.WriteLine();
-                }
-            }
         }
         private void VisitNode(Expression node)
         {
             Console.Write(node + ": ");
-            using (new WithColor(ConsoleColor.Magenta))
+            using (OutColor.Magenta)
                 Console.WriteLine(node.ExprType);
         }
 
         private void VisitNode(SpecialName node)
         {
             Console.Write(node + ": ");
-            using (new WithColor(ConsoleColor.Yellow))
+            using (OutColor.Yellow)
                 Console.WriteLine(node.SpecialType);
         }
 
         private void VisitNode(Number node)
         {
             Console.Write(node + ": ");
-            using (new WithColor(ConsoleColor.Yellow))
+            using (OutColor.Yellow)
                 Console.WriteLine(node.Value);
         }
         private void VisitNode(Literal node)
         {
             Console.Write(node + ": ");
-            using (new WithColor(ConsoleColor.Yellow))
+            using (OutColor.Yellow)
                 Console.WriteLine("\"" + node.Name + "\"");
         }
         //private void VisitNode(ClassVarDecl node)
@@ -117,7 +138,7 @@ namespace Proj3Semantics
         //}
         private void VisitNode(NotImplemented node)
         {
-            using (new WithColor(ConsoleColor.Red))
+            using (OutColor.Red)
                 Console.WriteLine("<NOT IMPLEMENTED " + node.Msg + ">");
         }
 

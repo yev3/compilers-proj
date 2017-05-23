@@ -30,7 +30,7 @@ namespace Proj3Semantics
                 Console.WriteLine("Test case {0}:", testNbr++);
                 Console.WriteLine("========================================\n");
 
-                using (new WithColor(ConsoleColor.Cyan))
+                using (OutColor.Cyan)
                     Console.WriteLine(File.ReadAllText(file));
 
                 Console.WriteLine();
@@ -39,9 +39,17 @@ namespace Proj3Semantics
                 var nodeVisitor = new NodePrintingVisitor();
                 nodeVisitor.PreorderTraverseRoot(parser.Root);
 
-                //var symbolTable = new SymbolTable();
-                //var topDeclVisitor = new TopDeclVisitor(symbolTable);
-                //topDeclVisitor.VisitChildren(parser.Root);
+                Console.WriteLine("Start semantic analysis");
+                Console.WriteLine("========================================\n");
+
+                var typeEnv = new SymbolTable<ITypeInfo>();
+                var nameEnv = new SymbolTable<ITypeInfo>();
+                var topDeclVisitor = new TopDeclVisitor(typeEnv,nameEnv);
+                topDeclVisitor.Visit(parser.Root);
+
+                Console.WriteLine("Print Tree After Analyzing:");
+                Console.WriteLine("========================================\n");
+                nodeVisitor.PreorderTraverseRoot(parser.Root);
 
             }
 

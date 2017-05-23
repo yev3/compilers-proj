@@ -12,7 +12,9 @@ namespace Proj3Semantics
     public enum SemanticErrorTypes
     {
         VariableAlreadyDeclared,
-        IdentifierNotTypeName
+        IdentifierNotTypeName,
+        InconsistentModifiers,
+        DuplicateClassDecl
     }
 
     public static class SemanticErrorTypeMessages
@@ -25,6 +27,10 @@ namespace Proj3Semantics
                     return "Variable is already declared.";
                 case IdentifierNotTypeName:
                     return "This identifier is not a type name.";
+                case InconsistentModifiers:
+                    return "Inconsistent class declaration modifiers.";
+                case DuplicateClassDecl:
+                    return "Duplicate class declaration.";
                 default:
                     throw new NotImplementedException("TODO: add a text message for the error type");
             }
@@ -63,7 +69,7 @@ namespace Proj3Semantics
         public static void Add(SemanticErrorTypes type, string additionalMessage = null)
         {
             var newError = new SemanticError(type, additionalMessage);
-            _log.Info(newError.ToString);
+            _log.Error(newError.ToString);
             Instance.Add(newError);
         }
     }

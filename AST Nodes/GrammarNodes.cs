@@ -82,12 +82,11 @@ namespace Proj3Semantics.Nodes
     public class Identifier : QualifiedName
     {
         public string Name { get; set; }
-        public VariableTypes Type { get; set; }
+        public VariableTypeCategory TypeCategory { get; set; }
         public Identifier(string s)
         {
             Name = s;
         }
-
     }
 
     public class ClassBody : AbstractNode
@@ -126,17 +125,26 @@ namespace Proj3Semantics.Nodes
     }
     public class MethodDeclaration : FieldDeclaration
     {
+        public Modifiers Modifiers { get; set; }
+        public ITypeInfo ReturnType { get; set; }
+        public ParameterList ParameterList { get; set; }
+        public Block MethodBody { get; set; }
+
         public MethodDeclaration(
             AbstractNode modifiers,
             AbstractNode typeSpecifier,
             AbstractNode methodDeclarator,
             AbstractNode methodBody)
         {
+            this.Modifiers = modifiers as Modifiers;
+            this.ReturnType = typeSpecifier as ITypeInfo;
+            this.Identifier = methodDeclarator.Identifier;
+            this.ParameterList = (methodDeclarator as MethodDeclarator)?.ParameterList;
+            this.MethodBody = methodBody as Block;
+
             AddChild(modifiers);
             AddChild(typeSpecifier);
-
-            this.Identifier = methodDeclarator.Identifier;
-            AddChild((methodDeclarator as MethodDeclarator)?.ParameterList);
+            if (this.ParameterList != null) AddChild(this.ParameterList);
             AddChild(methodBody);
         }
 
@@ -146,43 +154,7 @@ namespace Proj3Semantics.Nodes
     public class TypeName : AbstractNode { }
     public class TypeSpecifier : AbstractNode { }
 
-    public class BuiltinType : QualifiedName
-    {
-        public VariableTypes TypeKind { get; set; }
-        public VariablePrimitiveTypes PrimitiveTypes { get; set; }
-
-        public BuiltinType(Token token)
-        {
-            switch (token)
-            {
-                case BOOLEAN:
-                    TypeKind = VariableTypes.Primitive;
-                    PrimitiveTypes = VariablePrimitiveTypes.Boolean;
-                    break;
-                case INT:
-                    TypeKind = VariableTypes.Primitive;
-                    PrimitiveTypes = VariablePrimitiveTypes.Int;
-                    break;
-                case VOID:
-                    TypeKind = VariableTypes.Void;
-                    break;
-                case NULL:
-                    TypeKind = VariableTypes.Null;
-                    break;
-                case SUPER:
-                    throw new NotImplementedException("'super' keyword not supported.");
-                    break;
-                case THIS:
-                    throw new NotImplementedException("'this' keyword not supported.");
-                    break;
-                default:
-                    throw new ArgumentException("unsupported token type.");
-                    break;
-            }
-
-        }
-
-    }
+    public class BuiltinType : QualifiedName { }
 
 
     public class Block : Statement
@@ -218,8 +190,7 @@ namespace Proj3Semantics.Nodes
 
     public class VariableListDeclaring : AbstractNode
     {
-        public bool IsPrimitiveType { get; set; }
-        public QualifiedName TypeNameDecl { get; set; }
+        public AbstractNode TypeNameDecl { get; set; }
         public DeclaredVars ItemIdList { get; set; }
         public Expression Initialization { get; set; }
         public VariableListDeclaring(
@@ -232,20 +203,9 @@ namespace Proj3Semantics.Nodes
             AddChild(itemIdList);
             if (init != null) AddChild(init);
 
-
-            BuiltinType builtin = declType as BuiltinType;
-            if (builtin != null)
-            {
-                IsPrimitiveType = true;
-                TypeNameDecl = builtin;
-            }
-            else
-            {
-                QualifiedName qualname = declType as QualifiedName;
-                IsPrimitiveType = false;
-                TypeNameDecl = qualname;
-            }
-            Debug.Assert(TypeNameDecl != null);
+            // check that the parser assigned some type of a node with type info
+            var decl = declType as ITypeInfo;
+            Debug.Assert(decl != null);
 
             ItemIdList = itemIdList as DeclaredVars;
             Debug.Assert(itemIdList != null);
@@ -254,19 +214,19 @@ namespace Proj3Semantics.Nodes
         }
     }
 
-    public class LocalVariableDecl : LocalVarDeclOrStatement
-    {
-        public LocalVariableDecl(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
+    //public class LocalVariableDecl : LocalVarDeclOrStatement
+    //{
+    //    public LocalVariableDecl(AbstractNode abstractNode)
+    //    {
+    //        AddChild(abstractNode);
+    //    }
 
-        public LocalVariableDecl(AbstractNode typeSpecifier, AbstractNode localVarDecls)
-        {
-            AddChild(typeSpecifier);
-            AddChild(localVarDecls);
-        }
-    }
+    //    public LocalVariableDecl(AbstractNode typeSpecifier, AbstractNode localVarDecls)
+    //    {
+    //        AddChild(typeSpecifier);
+    //        AddChild(localVarDecls);
+    //    }
+    //}
 
     public class DeclaredVars : AbstractNode
     {
@@ -282,10 +242,10 @@ namespace Proj3Semantics.Nodes
 
     public class EmptyStatement : Statement { }
 
-    public class QualifiedName : TypeName
+    public class QualifiedName : TypeName, ITypeInfo
     {
-        public VariableTypes VariableType { get; set; }
-        public TypeDescriptor TypeDescriptor { get; set; }
+        public VariableTypeCategory KindVariableCategory { get; set; }
+        public ITypeDescriptor TypeDescriptor { get; set; }
         public QualifiedName(AbstractNode abstractNode)
         {
             AddChild(abstractNode);
@@ -330,13 +290,21 @@ namespace Proj3Semantics.Nodes
 
     public class NotJustName : PrimaryExpression { }
 
-    public class Literal : AbstractNode
+    public class Literal : AbstractNode, ITypeInfo
     {
         public string Name { get; set; }
         public Literal(string s)
         {
             Name = s;
         }
+
+        public VariableTypeCategory KindVariableCategory
+        {
+            get => VariableTypeCategory.Class;
+            set => throw new NotImplementedException("You're not supposed to set a literal");
+        }
+
+        public ITypeDescriptor TypeDescriptor { get; set; } = null;
 
     }
 
@@ -357,14 +325,26 @@ namespace Proj3Semantics.Nodes
         }
     }
 
-    public class Number : ComplexPrimary
+    public class Number : ComplexPrimary, ITypeInfo, IPrimitiveTypeDescriptor
     {
         public int Value { get; }
         public Number(int n)
         {
             Value = n;
+            TypeDescriptor = this;
         }
 
+        public VariablePrimitiveTypes VariableTypePrimitive
+        {
+            get => VariablePrimitiveTypes.Int;
+            set => throw new NotImplementedException("You're not supposed to set a number literal");
+        }
+        public ITypeDescriptor TypeDescriptor { get; set; }
+        public VariableTypeCategory KindVariableCategory
+        {
+            get => VariableTypeCategory.Primitive;
+            set => throw new NotImplementedException("You're not supposed to set a number literal");
+        }
     }
 
     public class NotImplemented : AbstractNode
@@ -454,13 +434,6 @@ namespace Proj3Semantics.Nodes
         }
     }
 
-    public class ClassVarDecl : AbstractNode
-    {
-        public ClassVarDecl(AbstractNode identifier)
-        {
-            this.Identifier = identifier as Identifier;
-        }
-    }
 
     public class ClassFieldDecl : AbstractNode
     {
@@ -470,6 +443,48 @@ namespace Proj3Semantics.Nodes
         {
             AddChild(modifiers);
             AddChild(variableDeclarations);
+        }
+    }
+    public class BuiltinTypeVoid : AbstractNode, ITypeInfo
+    {
+        public VariableTypeCategory KindVariableCategory
+        {
+            get => VariableTypeCategory.Void;
+            set => throw new NotImplementedException();
+        }
+
+        public ITypeDescriptor TypeDescriptor { get; set; } = null;
+
+    }
+
+    public class BuiltinTypeInt : AbstractNode, ITypeInfo, IPrimitiveTypeDescriptor
+    {
+
+        public VariableTypeCategory KindVariableCategory
+        {
+            get => VariableTypeCategory.Primitive;
+            set => throw new NotImplementedException();
+        }
+
+        public ITypeDescriptor TypeDescriptor { get; set; }
+
+        public VariablePrimitiveTypes VariableTypePrimitive
+        {
+            get => VariablePrimitiveTypes.Int;
+            set => throw new NotImplementedException();
+        }
+        public BuiltinTypeInt()
+        {
+            TypeDescriptor = this;
+        }
+    }
+
+    public class BuiltinTypeBoolean : QualifiedName, ITypeInfo, IPrimitiveTypeDescriptor
+    {
+        public VariablePrimitiveTypes VariableTypePrimitive
+        {
+            get => VariablePrimitiveTypes.Boolean;
+            set { throw new NotImplementedException(); }
         }
     }
 
