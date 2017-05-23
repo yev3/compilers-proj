@@ -97,6 +97,8 @@ namespace Proj3Semantics.Nodes
         public FieldVarDecl(AbstractNode identifier)
         {
             Identifier = identifier as Identifier;
+            if (Identifier == null) throw new ArgumentException("Field variable decl without an identifier.");
+            AddChild(Identifier);
         }
 
         public NodeTypeCategory NodeTypeCategory
@@ -183,14 +185,17 @@ namespace Proj3Semantics.Nodes
             AddChild(methodBody);
         }
 
+        // INTERFACE IMPLEMENTATIONS
+        // ------------------------------------------------------------
         public NodeTypeCategory NodeTypeCategory
         {
             get => NodeTypeCategory.ClassMethodDef;
             set => throw new AccessViolationException("unable to set method node to diff type.");
-        } 
+        }
         public ITypeSpecifier TypeSpecifierRef { get; set; }
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
+        public ITypeSpecifier ReturnTypeSpecifier { get; set; }
     }
 
     public class Parameter : AbstractNode

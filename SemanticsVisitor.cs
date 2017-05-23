@@ -192,7 +192,7 @@ namespace Proj3Semantics
                 // enter each field
                 foreach (AbstractNode decl in vld.ItemIdList)
                 {
-                    Identifier declVar = decl as Identifier;
+                    Identifier declVar = (decl as FieldVarDecl)?.Identifier;
                     if (declVar == null) throw new ArgumentException("Variable being declared is not an identifier.");
                     string name = declVar.Name;
 
@@ -290,13 +290,13 @@ namespace Proj3Semantics
                 }
                 else
                 {
-                    // attributes found in the symbol table
-                    var typeDecl = decls.TypeSpecifier as ITypeSpecifier;
-                    Debug.Assert(typeDecl != null, "The node specifying the type is not of ITypeInfo");
-                    var attr = typeDecl.NodeTypeCategory;
+                    // this attrib was found in the symbol table by typevisitor
+                    var typeSpecEntry = decls.TypeSpecifier as ITypeSpecifier;
+                    Debug.Assert(typeSpecEntry != null, "The node specifying the type is not of ITypeInfo");
 
-                    // are now part of the description for this Identifier
-                    id.TypeCategory = attr;
+                    // copy the found entry to the declared var
+                    id.TypeCategory = typeSpecEntry.NodeTypeCategory;
+                    id.TypeSpecifierRef = typeSpecEntry.TypeSpecifierRef;
 
                     // and are saved in the symbol table
                     NameEnv.EnterInfo(id.Name, id);

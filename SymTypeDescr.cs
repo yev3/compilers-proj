@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.ModelBinding;
 using Proj3Semantics.Nodes;
+    // found here:
+    // http://www.ccs.neu.edu/home/riccardo/courses/csu370-fa07/lect4.pdf
 
 namespace Proj3Semantics
 {
@@ -12,6 +14,11 @@ namespace Proj3Semantics
     public enum NodeTypeCategory
     {
         Primitive, Null, Array, Class, Void, This, ErrorType, ClassFieldDef, ClassMethodDef
+    }
+
+    public enum VariablePrimitiveTypes
+    {
+        Boolean, Byte, Char, Short, Int, Long, Float, Double, NotPrimitive
     }
 
     /// <summary>
@@ -49,7 +56,7 @@ namespace Proj3Semantics
 
     public interface IClassMethodTypeDesc : ITypeSpecifier, ITypeHasModifiers
     {
-        TypeSpecifier ReturnType { get; set; }
+        ITypeSpecifier ReturnTypeSpecifier { get; set; }
     }
 
 }
