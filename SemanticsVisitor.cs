@@ -261,10 +261,13 @@ namespace Proj3Semantics
                 var methodLocalsEnv = classNameEnv.GetNewLevel();
                 ProcessClassMethodParams(mdecl.ParameterList, methodLocalsEnv);
 
-                // TODO: visit the body with the new scope
-
                 CheckEnterClassMemberDef(mdecl, classNameEnv);
 
+                // visit the body with the new scope
+                IEnv bodyNameEnv = NameEnv.GetNewLevel();
+                mdecl.LocalNameEnv = bodyNameEnv;
+                var bodyVisitor = new TopDeclVisitor(TypeEnv, bodyNameEnv);
+                bodyVisitor.VisitChildren(mdecl.MethodBody);
             }
         }
 
@@ -279,9 +282,10 @@ namespace Proj3Semantics
             var modifiers = cdecl.Modifiers.ModifierTokens;
             ProcessModifierTokens(cdecl, modifiers, name);
 
-            ProcessClassFields(cdecl.Fields, cdecl.NameEnv);
-            ProcessClassMethods(cdecl.Methods, cdecl.NameEnv);
+            cdecl.LocalNameEnv = NameEnv;
 
+            ProcessClassFields(cdecl.Fields, cdecl.LocalNameEnv);
+            ProcessClassMethods(cdecl.Methods, cdecl.LocalNameEnv);
 
         }
 
@@ -365,98 +369,6 @@ namespace Proj3Semantics
     // ======================================================
 
 
-    public class TypeVisitor : SemanticsVisitor
-    {
-        private new static Logger _log = LogManager.GetCurrentClassLogger();
-
-        private IEnv TypeEnv { get; set; }
-        public TypeVisitor(IEnv typeEnv)
-        {
-            TypeEnv = typeEnv;
-        }
-
-        public override void Visit(dynamic node)
-        {
-            _log.Trace("    -- dispatching " + node);
-            VisitNode(node);
-        }
-
-        private void VisitNode(ClassDeclaration classDecl)
-        {
-            //_log.Trace("Type visitor is visiting: " + classDecl);
-            //string name = classDecl.Identifier.Name;
-            //ITypeInfo entry = TypeEnv.Lookup(name);
-            //if (entry != null)
-            //{
-            //    CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, name);
-            //    classDecl.TypeInfoRef = null;
-            //}
-            //else
-            //{
-            //    TypeEnv.EnterInfo(name, classDecl);
-
-            //    var methodTypeVisitor = new TypeVisitor(classDecl.MethodsEnv);
-            //    methodTypeVisitor.VisitChildren(classDecl.Methods);
-
-            //    var fieldTypeVisitor = new TypeVisitor(classDecl.FieldsEnv);
-            //    fieldTypeVisitor.VisitChildren(classDecl.Fields);
-            //}
-        }
-        private void VisitNode(MethodDeclaration mdecl)
-        {
-            _log.Trace("Type visitor is visiting: " + mdecl);
-            //typeVisitor ← new TypeVisitor ( )
-
-
-            //call md.returnType.ACCEPT(typeVisitor)
-            //attr ← new Attributes ( MethodAttributes )
-            //attr.returnType ← md.returnType.type
-            //attr.modi f iers ← md.modi f iers
-            //attr.isDe f inedIn ← GETCURRENTCLASS( )
-            //attr.locals ← new SymbolTable ( )
-            //call currentSymbolTable.ENTERSYMBOL( name.name, attr ) md.name.attributeRe f ← attr
-            //call OPENSCOPE( attr.locals )
-            //oldCurrentMethod ← GETCURRENTMETHOD( )
-            //call SETCURRENTMETHOD( attr )
-            //call md.parameters.ACCEPT( this )
-            //attr.signature ← parameters.signature.ADDRETURN(attr.returntype) call md.body.ACCEPT( this )
-            //call SETCURRENTMETHOD( oldCurrentMethod )
-            //call CLOSESCOPE( )
-        }
-
-
-        private void VisitNode(Identifier id)
-        {
-            _log.Info("Type visitor is visiting: " + id);
-
-            ITypeSpecifier entry = TypeEnv.Lookup(id.Name);
-            if (entry != null)
-            {
-                id.NodeTypeCategory = entry.NodeTypeCategory;
-                id.TypeSpecifierRef = entry.TypeSpecifierRef;
-            }
-            else
-            {
-                CompilerErrors.Add(SemanticErrorTypes.IdentifierNotTypeName, id.Name);
-                id.NodeTypeCategory = NodeTypeCategory.ErrorType;
-                id.TypeSpecifierRef = null;
-            }
-        }
-
-        private void VisitNode(ArraySpecifier arrayDef)
-        {
-            throw new NotImplementedException("Arrays are not supported in this release");
-        }
-
-        /// <summary>
-        /// DEFAULT
-        /// </summary>
-        /// <param name="node"></param>
-        private void VisitNode(AbstractNode node)
-        {
-            _log.Trace("NO ACTION --- " + this.GetType().Name + " --- (abstract).");
-        }
-
-    }
+    
 }
 

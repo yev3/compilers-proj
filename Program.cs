@@ -37,7 +37,8 @@ namespace Proj3Semantics
                 parser.Parse(file);
 
                 var nodeVisitor = new NodePrintingVisitor();
-                nodeVisitor.PreorderTraverseRoot(parser.Root);
+                // show parse result
+                //nodeVisitor.PreorderTraverseRoot(parser.Root);
 
                 Console.WriteLine("Start semantic analysis");
                 Console.WriteLine("========================================\n");

@@ -40,64 +40,68 @@ namespace Proj3Semantics
         // ============================================================
         //                  VISIT METHODS BELOW
         // ============================================================
-        public void VisitNode(AbstractNode node)
+
+        private void PrintModifiers(AbstractNode node)
         {
-            List<string> nodeProps = new List<string>();
-
             var modifiers = node as ITypeHasModifiers;
-            if (modifiers != null)
+            if (modifiers == null) return;
+            using (OutColor.Magenta)
             {
-                var modStr = "{" + modifiers.AccessorType + (modifiers.IsStatic ? ", static}" : "}");
-                nodeProps.Add(modStr);
+                Console.Write("{" + modifiers.AccessorType + (modifiers.IsStatic ? ", Static}" : "}"));
             }
+        }
 
-            // type description
-            var typeDescriptor = node as ITypeSpecifier;
-            if (typeDescriptor != null)
-            {
-                var typeStrings = new List<string>();
-                typeStrings.Add(typeDescriptor.NodeTypeCategory.ToString());
+        private void PrintTypeDescr(AbstractNode node)
+        {
+            ITypeSpecifier typeDescriptor = node as ITypeSpecifier;
+            if (typeDescriptor == null) return;
 
-                var primitiveDescriptor = node as IPrimitiveTypeDescriptor;
-                if (primitiveDescriptor != null)
-                    typeStrings.Add(primitiveDescriptor.VariableTypePrimitive.ToString());
+            var typeStrings = new List<string>();
+            typeStrings.Add(typeDescriptor.NodeTypeCategory.ToString());
 
-                ITypeSpecifier typeRef = typeDescriptor?.TypeSpecifierRef;
-                typeStrings.Add(typeRef?.GetType().Name ?? "null");
+            var primitiveDescriptor = node as IPrimitiveTypeDescriptor;
+            if (primitiveDescriptor != null)
+                typeStrings.Add(primitiveDescriptor.VariableTypePrimitive.ToString());
 
-                var typeStr = "{" + string.Join(", ", typeStrings) + "}";
-                nodeProps.Add(typeStr);
-            }
+            ITypeSpecifier typeRef = typeDescriptor?.TypeSpecifierRef;
+            typeStrings.Add("tref=" + (typeRef?.ToString() ?? "**NULL**"));
 
+            var typeStr = "{" + string.Join(", ", typeStrings) + "}";
+            using (OutColor.Magenta)
+                Console.Write(typeStr);
 
+        }
 
-            bool hasDescriptors = nodeProps.Count > 0;
+        private void PrintName(AbstractNode node)
+        {
             bool hasName = node is INamedType;
-
             INamedType namedNode = node as INamedType;
             string nodeName = namedNode?.Name;
+            if (hasName)
+            {
+                using (OutColor.Cyan)
+                    Console.Write(nodeName);
+            }
 
-            if (hasDescriptors || hasName)
-            {
-                Console.Write(node + ": ");
-                if (hasName)
-                {
-                    using (OutColor.Cyan)
-                        Console.Write(nodeName);
-                    if (hasDescriptors)
-                        Console.Write(", ");
-                }
-                if (hasDescriptors)
-                {
-                    var descriptorStrings = string.Join(", ", nodeProps);
-                    using (OutColor.Magenta)
-                        Console.Write(descriptorStrings);
-                }
-            }
-            else
-            {
-                Console.Write(node);
-            }
+        }
+
+
+
+        // ============================================================
+        //                  VISIT METHODS BELOW
+        // ============================================================
+        public void VisitNode(AbstractNode node)
+        {
+
+            bool hasName = node is INamedType;
+            INamedType namedNode = node as INamedType;
+            string nodeName = namedNode?.Name;
+            Console.Write("<" + node.GetType().Name + "> ");
+            PrintName(node);
+            Console.Write(" ");
+            PrintModifiers(node);
+            Console.Write(" ");
+            PrintTypeDescr(node);
             Console.WriteLine();
         }
 
@@ -135,6 +139,19 @@ namespace Proj3Semantics
             using (OutColor.Yellow)
                 Console.WriteLine("\"" + node.Name + "\"");
         }
+
+        private void VisitNode(QualifiedName node)
+        {
+            Console.Write(node + ": ");
+            var idStr = string.Join(".", node.IdentifierList);
+            using (OutColor.Cyan)
+                Console.Write(idStr);
+
+            Console.Write(", ");
+            PrintTypeDescr(node);
+            Console.WriteLine();
+        }
+
         //private void VisitNode(ClassVarDecl node)
         //{
         //    using (new WithColor(ConsoleColor.Red))

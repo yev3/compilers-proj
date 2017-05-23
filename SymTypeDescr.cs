@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.ModelBinding;
 using Proj3Semantics.Nodes;
-    // found here:
-    // http://www.ccs.neu.edu/home/riccardo/courses/csu370-fa07/lect4.pdf
+// found here:
+// http://www.ccs.neu.edu/home/riccardo/courses/csu370-fa07/lect4.pdf
 
 namespace Proj3Semantics
 {
@@ -30,7 +30,7 @@ namespace Proj3Semantics
         // every type belongs to some kind of a category
         NodeTypeCategory NodeTypeCategory { get; set; }
         ITypeSpecifier TypeSpecifierRef { get; set; }
-        //IEnv LocalScopeEnv { get; set; }
+        IEnv LocalNameEnv { get; set; }
     }
 
     public interface INamedType
@@ -52,14 +52,12 @@ namespace Proj3Semantics
 
     public interface IClassTypeDescriptor : ITypeSpecifier, ITypeHasModifiers, INamedType
     {
-        ISymbolTable<ITypeSpecifier> NameEnv { get; set; }
         IClassTypeDescriptor ParentClass { get; set; }
     }
 
-    public interface IClassMember : ITypeSpecifier, ITypeHasModifiers,
-        INamedType
+    public interface IClassMember : ITypeSpecifier, ITypeHasModifiers, INamedType
     {
-        
+
     }
 
     public interface IClassFieldTypeDesc : IClassMember

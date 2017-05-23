@@ -14,7 +14,8 @@ namespace Proj3Semantics
         VariableAlreadyDeclared,
         IdentifierNotTypeName,
         InconsistentModifiers,
-        DuplicateClassDecl
+        DuplicateClassDecl,
+        InvalidQualifier
     }
 
     public static class SemanticErrorTypeMessages
@@ -31,6 +32,8 @@ namespace Proj3Semantics
                     return "Inconsistent class declaration modifiers.";
                 case DuplicateClassDecl:
                     return "Duplicate class declaration.";
+                case InvalidQualifier:
+                    return "Invalid qualifier access.";
                 default:
                     throw new NotImplementedException("TODO: add a text message for the error type");
             }
