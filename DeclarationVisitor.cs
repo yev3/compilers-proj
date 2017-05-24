@@ -14,13 +14,13 @@ namespace Proj3Semantics
     /// <summary>
     /// PAGE 302
     /// </summary>
-    public class DeclarationVisitor : SemanticsVisitor
+    public class DeclarationVisitor : SemanticsVisitor, IHasOwnScope
     {
 
         protected new static Logger _log = LogManager.GetCurrentClassLogger();
 
-        private IEnv NameEnv { get; set; }
-        private IEnv TypeEnv { get; set; }
+        public IEnv NameEnv { get; set; }
+        public IEnv TypeEnv { get; set; }
 
         public DeclarationVisitor(
             IEnv typeEnv,
@@ -180,7 +180,8 @@ namespace Proj3Semantics
 
         private void VisitNode(Expression expr)
         {
-            _log.Trace("Visiting Expr, not yet implemented..");
+            var typeCheckingVisitor = new TypeCheckingVisitor(this);
+            typeCheckingVisitor.Visit(expr);
         }
 
 

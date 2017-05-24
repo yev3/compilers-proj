@@ -47,7 +47,7 @@ namespace Proj3Semantics.Nodes
     {
         ASSIGNMENT, LOGICAL_OR, LOGICAL_AND, PIPE, HAT, AND, EQUALS,
         NOT_EQUALS, GREATER_THAN, LESS_THAN, LESS_EQUAL, GREATER_EQUAL, PLUSOP, MINUSOP,
-        ASTERISK, RSLASH, PERCENT, UNARY, @EVAL
+        ASTERISK, RSLASH, PERCENT, UNARY, EVALUATION
     }
     public class Expression : ExpressionStatement
     {

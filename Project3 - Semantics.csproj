@@ -74,6 +74,7 @@
     <Compile Include="CustomExtensions.cs" />
     <Compile Include="DeclarationVisitor.cs" />
     <Compile Include="GplexBuffers.cs" />
+    <Compile Include="TypeCheckingVisitor.cs" />
     <Compile Include="NodePrintingVisitor.cs" />
     <Compile Include="SemanticAnalysis.cs" />
     <Compile Include="FirstPassDeclVisitor.cs" />
