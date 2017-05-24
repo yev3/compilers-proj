@@ -1,3 +1,13 @@
+namespace xyz {
+}
+
+namespace abc {
+    namespace def {
+    }
+    private class yy{}
+}
+
+
 public class good1p {
 
     private int field1, field2;

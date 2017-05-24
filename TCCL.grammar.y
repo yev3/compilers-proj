@@ -13,7 +13,7 @@
 %start CompilationUnit
 
 /* Terminals */
-%token AND ASTERISK BANG BOOLEAN CLASS
+%token AND ASTERISK BANG BOOLEAN CLASS NAMESPACE
 %token COLON COMMA ELSE EQUALS HAT
 %token IF INSTANCEOF INT IDENTIFIER LITERAL INT_NUMBER
 %token LBRACE LBRACKET LPAREN MINUSOP
@@ -42,14 +42,40 @@
 %%
 
 CompilationUnit     
-    :   ClassDeclarations   { $$ = $1; }
+    :   NamespaceItems      { $$ = new CompilationUnit($1); }
     ;
 
-ClassDeclarations
-    :   ClassDeclaration    { $$ = new CompilationUnit($1); }
-    |   ClassDeclarations ClassDeclaration
+NamespaceDecl
+    :   NAMESPACE Identifier NamespaceBody
+                            { $$ = new NamespaceDecl($2, $3); }
+    ;
+
+NamespaceBody           
+    :   LBRACE NamespaceItems RBRACE     
+                            { $$ = $2;}
+    |   LBRACE RBRACE       { $$ = new NamespaceBody();}
+    ;
+
+NamespaceItems
+    :   NamespaceDeclStmt   { $$ = new NamespaceBody($1); }
+    |   NamespaceItems NamespaceDeclStmt
                             { $1.AddChild($2); $$ = $1; }
     ;
+
+
+NamespaceDeclStmt
+    :   NamespaceDecl       { $$ = $1; }
+    |   ClassDeclaration    { $$ = $1; }   
+    ;
+
+
+
+
+// ClassDeclarations
+//     :   ClassDeclaration    { $$ = new CompilationUnit($1); }
+//     |   ClassDeclarations ClassDeclaration
+//                             { $1.AddChild($2); $$ = $1; }
+//     ;
 
 ClassDeclaration    
     :   Modifiers CLASS Identifier ClassBody 

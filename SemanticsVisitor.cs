@@ -5,8 +5,10 @@ using System.Linq;
 using System.Runtime.Remoting;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using NLog;
 using Proj3Semantics.Nodes;
+using Parameter = Proj3Semantics.Nodes.Parameter;
 
 namespace Proj3Semantics
 {
@@ -26,6 +28,143 @@ namespace Proj3Semantics
 
         public abstract void Visit(dynamic node);
     }
+
+
+    // walks the tree. enters namespaces, classes, fields, functions
+    public class TypeDeclChecker : SemanticsVisitor
+    {
+        private new static Logger _log = LogManager.GetCurrentClassLogger();
+        private IEnv NameEnv { get; set; }
+        private IEnv TypeEnv { get; set; }
+        public TypeDeclChecker(IEnv nameEnv, IEnv typeEnv)
+        {
+            NameEnv = nameEnv;
+            TypeEnv = typeEnv;
+        }
+
+        public override void Visit(dynamic node)
+        {
+            _log.Trace(this.GetType().Name + " is visiting " + node + " in type/name env " + TypeEnv + " / " + NameEnv);
+            VisitNode(node);
+        }
+        private void VisitNode(NamespaceDecl nsdecl)
+        {
+            _log.Trace("Checking Namespace declaration in env: " + TypeEnv);
+            string name = nsdecl.Name;
+            ITypeSpecifier entry = TypeEnv.Lookup(name);
+            if (entry != null)
+            {
+                CompilerErrors.Add(SemanticErrorTypes.DuplicateNamespaceDef, name);
+                nsdecl.NodeTypeCategory = NodeTypeCategory.ErrorType;
+            }
+            else
+            {
+                TypeEnv.EnterInfo(name, nsdecl);
+                var nsTypeEnv = TypeEnv.GetNewLevel(name);
+                var nsNameEnv = NameEnv.GetNewLevel(name);
+                var visitor = new TypeDeclChecker(nsTypeEnv, nsNameEnv);
+                visitor.Visit(nsdecl.NamespaceBody);
+            }
+        }
+
+        private void VisitNode(NamespaceBody nsbody)
+        {
+            foreach (AbstractNode node in nsbody)
+            {
+                Visit(node);
+            }
+        }
+
+        private void VisitNode(ClassDeclaration cdecl)
+        {
+            _log.Trace("Checking Class declaration in env: " + TypeEnv);
+            string name = cdecl.Name;
+            ITypeSpecifier entry = TypeEnv.Lookup(name);
+            if (entry != null)
+            {
+                CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, name);
+                cdecl.TypeSpecifierRef = null;
+            }
+            else
+            {
+                TypeEnv.EnterInfo(name, cdecl);
+                var classTypeEnv = TypeEnv.GetNewLevel(name);
+                var classNameEnv = NameEnv.GetNewLevel(name);
+                var visitor = new TypeDeclChecker(classTypeEnv, classNameEnv);
+                visitor.Visit(cdecl.Fields);
+                visitor.Visit(cdecl.Methods);
+            }
+        }
+
+        private void VisitNode(ClassFields fields)
+        {
+            foreach (AbstractNode field in fields)
+            {
+                Visit(field);
+            }
+        }
+        private void VisitNode(ClassMethods methods)
+        {
+            foreach (AbstractNode method in methods)
+            {
+                Visit(method);
+            }
+        }
+        private void VisitNode(ClassFieldDeclStatement fieldDecl)
+        {
+            DeclaredVars declFields = fieldDecl.VariableListDeclaring.ItemIdList;
+            _log.Trace("Checking fields declaration in env: " + TypeEnv);
+
+            foreach (AbstractNode field in declFields)
+            {
+                FieldVarDecl fdecl = field as FieldVarDecl;
+                if (fdecl == null) throw new ArgumentNullException(nameof(fdecl));
+
+                string name = fdecl.Name;
+                ITypeSpecifier entry = TypeEnv.Lookup(name);
+
+                if (entry != null)
+                {
+                    CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, name);
+                    fdecl.NodeTypeCategory = NodeTypeCategory.ErrorType;
+                    fdecl.TypeSpecifierRef = null;
+                }
+                else
+                {
+                    TypeEnv.EnterInfo(name, fdecl);
+                }
+            }
+        }
+
+
+        private void VisitNode(MethodDeclaration methodDecl)
+        {
+            // TODO: FIX METHOD SIGS
+            _log.Trace("Checking fields declaration in env: " + TypeEnv);
+
+            string name = methodDecl.Name;
+            ITypeSpecifier entry = TypeEnv.Lookup(name);
+
+            if (entry != null)
+            {
+                CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, name);
+            }
+            else
+            {
+                TypeEnv.EnterInfo(name, methodDecl);
+            }
+
+        }
+
+
+        private void VisitNode(AbstractNode node)
+        {
+            _log.Trace("Visiting {0}, no action.", node);
+        }
+    }
+
+
+
 
     /// <summary>
     /// PAGE 302
@@ -50,6 +189,7 @@ namespace Proj3Semantics
             _log.Trace(this.GetType().Name + " is visiting " + node);
             VisitNode(node);
         }
+
 
         // VISIT METHODS
         // ============================================================
@@ -76,21 +216,29 @@ namespace Proj3Semantics
         //call CLOSESCOPE( )
         //call SETCURRENTCLASS( null ) end
 
-        private void CheckEnterClassDef(ClassDeclaration cdecl)
+
+        private void VisitNode(NamespaceBody namespaceBody)
         {
-            _log.Trace("Checking class declaration in env: " + cdecl);
-            string name = cdecl.Name;
-            ITypeSpecifier entry = TypeEnv.Lookup(name);
-            if (entry != null)
-            {
-                CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, name);
-                cdecl.TypeSpecifierRef = null;
-            }
-            else
-            {
-                TypeEnv.EnterInfo(name, cdecl);
-            }
+            // First enter all the top class declarations into the env
+            var typeDeclChecker = new TypeDeclChecker(NameEnv, TypeEnv );
+            typeDeclChecker.Visit(namespaceBody);
+
         }
+
+        private void VisitNode(NamespaceDecl namespaceDecl)
+        {
+            var nsTypeEnv = TypeEnv.GetNewLevel();
+            var nsNameEnv = NameEnv.GetNewLevel();
+            namespaceDecl.TypeEnv = nsTypeEnv;
+            namespaceDecl.NameEnv = nsNameEnv;
+            var visitor = new TopDeclVisitor(nsTypeEnv, nsNameEnv);
+
+        }
+
+        // ------------------------------------------------------------
+        // HELPER METHODS
+        // ------------------------------------------------------------
+
 
         private static void CheckEnterClassMemberDef(
             IClassMember classMember,
@@ -111,22 +259,8 @@ namespace Proj3Semantics
 
         private void VisitNode(CompilationUnit unit)
         {
-            // put class refs into the current type env
-            // no need to get the type of the class unless we change to have inheritance
-            //var typeVisitor = new TypeVisitor(TypeEnv);
-
-
-            // First enter all the top class declarations into the env
             foreach (AbstractNode child in unit)
-                CheckEnterClassDef(child as ClassDeclaration);
-
-            foreach (AbstractNode child in unit)
-            {
-                var classTypeEnv = TypeEnv.GetNewLevel();
-                var classNameEnv = NameEnv.GetNewLevel();
-                var topDeclVisitor = new TopDeclVisitor(classTypeEnv, classNameEnv);
-                topDeclVisitor.Visit(child);
-            }
+                Visit(child);
         }
 
 
@@ -265,7 +399,7 @@ namespace Proj3Semantics
 
                 // visit the body with the new scope
                 IEnv bodyNameEnv = NameEnv.GetNewLevel();
-                mdecl.LocalNameEnv = bodyNameEnv;
+                mdecl.NameEnv = bodyNameEnv;
                 var bodyVisitor = new TopDeclVisitor(TypeEnv, bodyNameEnv);
                 bodyVisitor.VisitChildren(mdecl.MethodBody);
             }
@@ -282,10 +416,10 @@ namespace Proj3Semantics
             var modifiers = cdecl.Modifiers.ModifierTokens;
             ProcessModifierTokens(cdecl, modifiers, name);
 
-            cdecl.LocalNameEnv = NameEnv;
+            cdecl.NameEnv = NameEnv;
 
-            ProcessClassFields(cdecl.Fields, cdecl.LocalNameEnv);
-            ProcessClassMethods(cdecl.Methods, cdecl.LocalNameEnv);
+            ProcessClassFields(cdecl.Fields, cdecl.NameEnv);
+            ProcessClassMethods(cdecl.Methods, cdecl.NameEnv);
 
         }
 
@@ -369,6 +503,6 @@ namespace Proj3Semantics
     // ======================================================
 
 
-    
+
 }
 

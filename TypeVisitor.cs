@@ -90,7 +90,8 @@ namespace Proj3Semantics
                     return;
                 }
 
-                curTypeEnv = curResult?.LocalNameEnv;
+                IHasOwnScope childScope = curResult as IHasOwnScope;
+                curTypeEnv = childScope?.NameEnv;
                 curScopeName = curLookupName;
             }
         }
