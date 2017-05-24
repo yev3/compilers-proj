@@ -304,7 +304,7 @@ Expression
     |   Expression PERCENT Expression       { $$ = new Expression($1, ExprType.PERCENT, $3); }   /* remainder */
     |   ArithmeticUnaryOperator Expression  %prec UNARY
                                             { $$ = new NotImplemented("ArithmeticUnaryOperator Expression  %prec UNARY"); }
-    |   PrimaryExpression                   { $$ = new Expression($1, ExprType.EVAL); }
+    |   PrimaryExpression                   { $$ = new Expression($1, ExprType.EVALUATION); }
     ;
 
 ArithmeticUnaryOperator     
