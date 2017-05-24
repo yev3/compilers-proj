@@ -171,24 +171,23 @@ namespace Proj3Semantics.Nodes
     public class MethodDeclaration : AbstractNode, IClassMethodTypeDesc, IHasOwnScope, INamedType
     {
         public Modifiers Modifiers { get; set; }
-        public TypeSpecifier ReturnType { get; set; }
         public ParameterList ParameterList { get; set; }
         public Block MethodBody { get; set; }
 
         public MethodDeclaration(
             AbstractNode modifiers,
-            AbstractNode typeSpecifier,
+            AbstractNode returnTypeSpecifier,
             AbstractNode methodDeclarator,
             AbstractNode methodBody)
         {
             this.Modifiers = modifiers as Modifiers;
-            this.ReturnType = typeSpecifier as TypeSpecifier;
+            this.ReturnTypeNode = returnTypeSpecifier as TypeSpecifier;
             this.Name = (methodDeclarator as MethodDeclarator)?.Identifier?.Name;
             this.ParameterList = (methodDeclarator as MethodDeclarator)?.ParameterList;
             this.MethodBody = methodBody as Block;
 
             AddChild(modifiers);
-            AddChild(typeSpecifier);
+            AddChild(returnTypeSpecifier);
             if (this.ParameterList != null) AddChild(this.ParameterList);
             AddChild(methodBody);
         }
@@ -203,23 +202,25 @@ namespace Proj3Semantics.Nodes
         public ITypeSpecifier TypeSpecifierRef { get; set; }
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
-        public ITypeSpecifier ReturnTypeSpecifier { get; set; }
+        public ITypeSpecifier ReturnTypeNode { get; set; }
         public string Name { get; set; }
         public ISymbolTable<ITypeSpecifier> NameEnv { get; set; } = null;
         public ISymbolTable<ITypeSpecifier> TypeEnv { get; set; } = null;
     }
 
-    public class Parameter : AbstractNode
+    public class Parameter : AbstractNode, INamedType
     {
         public TypeSpecifier TypeSpecifier { get; set; }
-        public Identifier Identifier { get; set; }
+        private Identifier Identifier { get; set; }
         public Parameter(AbstractNode typeSpec, AbstractNode declName)
         {
             TypeSpecifier = typeSpec as TypeSpecifier;
             Identifier = declName as Identifier;
             AddChild(typeSpec);
-            AddChild(declName);
+            Name = Identifier.Name;
         }
+
+        public string Name { get; set; }
     }
 
     public class ParameterList : AbstractNode

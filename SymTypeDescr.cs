@@ -72,7 +72,7 @@ namespace Proj3Semantics
 
     public interface IClassMethodTypeDesc : IClassMember
     {
-        ITypeSpecifier ReturnTypeSpecifier { get; set; }
+        ITypeSpecifier ReturnTypeNode { get; set; }
     }
 
 }

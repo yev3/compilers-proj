@@ -12,7 +12,7 @@ namespace Proj3Semantics.Nodes
     /// link itself with other siblings and adopt children.
     /// Each node gets a node number to help identify it distinctly in an AST.
     /// </summary>
-    [DebuggerDisplay("AbstrNodeType: {ToString()}")]
+    [DebuggerDisplay("{ToDebugString()}")]
     public abstract class AbstractNode : LinkedList<AbstractNode>, IVisitableNode
     {
         #region Linked List Funcs
@@ -62,6 +62,11 @@ namespace Proj3Semantics.Nodes
         public override string ToString()
         {
             return "<" + this.GetType().Name + ">";
+        }
+
+        public string ToDebugString()
+        {
+            return NodePrintingVisitor.AbstactNodeDebugString(this);
         }
 
         public virtual void Accept(IReflectiveVisitor myVisitor)

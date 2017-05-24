@@ -18,8 +18,17 @@ namespace Proj3Semantics
         {
             IEnv cuTypeEnv = new SymbolTable<ITypeSpecifier>();
             IEnv cuNameEnv = new SymbolTable<ITypeSpecifier>();
-            var visitor = new TopDeclVisitor(cuTypeEnv, cuNameEnv);
-            visitor.Visit(cu);
+
+            var preDeclVisitor = new FirstPassDeclVisitor(cuTypeEnv, cuNameEnv);
+            preDeclVisitor.Visit(cu);
+
+            var declVisitor = new DeclarationVisitor(cuTypeEnv, cuNameEnv);
+            declVisitor.Visit(cu);
+
+
+
+
+
         }
 
     }

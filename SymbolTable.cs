@@ -68,12 +68,19 @@ namespace Proj3Semantics
 
         public override string ToString()
         {
-            var names = new List<string>();
+            var names = new Stack<string>();
 
             SymbolTable<TEntry> curNode = this;
             while (curNode != null)
             {
-                names.Add(curNode.EnvName);
+                if (curNode.EnvName == null || curNode.EnvName == "")
+                {
+                    names.Push("(empty)");
+                }
+                else
+                {
+                    names.Push(curNode.EnvName);
+                }
                 curNode = curNode.Parent;
             }
             return string.Join(".", names);
