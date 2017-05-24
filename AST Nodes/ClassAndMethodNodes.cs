@@ -26,7 +26,7 @@ namespace Proj3Semantics.Nodes
             AddModType(type);
         }
     }
-    public class ClassDeclaration : AbstractNode, IClassTypeDescriptor, INamedType
+    public class ClassDeclaration : AbstractNode, IClassTypeDescriptor, INamedType, IHasOwnScope
     {
 
         // Interface Implementations
@@ -44,7 +44,8 @@ namespace Proj3Semantics.Nodes
             set => throw new AccessViolationException("unable to set the class decl to a diff class decl.");
         }
 
-        public ISymbolTable<ITypeSpecifier> LocalNameEnv { get; set; } = null;
+        public ISymbolTable<ITypeSpecifier> NameEnv { get; set; } = null;
+        public ISymbolTable<ITypeSpecifier> TypeEnv { get; set; } = null;
         public IClassTypeDescriptor ParentClass { get; set; } = null;
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
@@ -113,7 +114,7 @@ namespace Proj3Semantics.Nodes
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
         public string Name { get; set; }
-        public ISymbolTable<ITypeSpecifier> LocalNameEnv
+        public ISymbolTable<ITypeSpecifier> NameEnv
         {
             get => null;
             set => throw new AccessViolationException();
@@ -123,14 +124,14 @@ namespace Proj3Semantics.Nodes
     public class ClassFieldDeclStatement : AbstractNode
     {
         public Modifiers Modifiers { get; set; }
-        public AbstractNode VariableListDeclaring { get; set; }
+        public VariableListDeclaring VariableListDeclaring { get; set; }
 
         public ClassFieldDeclStatement(
             AbstractNode modifiers,
             AbstractNode variableDeclarations)
         {
             Modifiers = modifiers as Modifiers;
-            VariableListDeclaring = variableDeclarations;
+            VariableListDeclaring = variableDeclarations as VariableListDeclaring;
 
             AddChild(modifiers);
             AddChild(variableDeclarations);
@@ -167,7 +168,7 @@ namespace Proj3Semantics.Nodes
             this.ParameterList = paramList as ParameterList;
         }
     }
-    public class MethodDeclaration : AbstractNode, IClassMethodTypeDesc
+    public class MethodDeclaration : AbstractNode, IClassMethodTypeDesc, IHasOwnScope, INamedType
     {
         public Modifiers Modifiers { get; set; }
         public TypeSpecifier ReturnType { get; set; }
@@ -204,7 +205,8 @@ namespace Proj3Semantics.Nodes
         public bool IsStatic { get; set; }
         public ITypeSpecifier ReturnTypeSpecifier { get; set; }
         public string Name { get; set; }
-        public ISymbolTable<ITypeSpecifier> LocalNameEnv { get; set; } = null;
+        public ISymbolTable<ITypeSpecifier> NameEnv { get; set; } = null;
+        public ISymbolTable<ITypeSpecifier> TypeEnv { get; set; } = null;
     }
 
     public class Parameter : AbstractNode

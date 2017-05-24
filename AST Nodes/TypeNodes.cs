@@ -55,7 +55,8 @@ namespace Proj3Semantics.Nodes
     {
         public abstract NodeTypeCategory NodeTypeCategory { get; set; }
         public virtual ITypeSpecifier TypeSpecifierRef { get; set; } = null;
-        public ISymbolTable<ITypeSpecifier> LocalNameEnv { get; set; } = null;
+        public ISymbolTable<ITypeSpecifier> TypeEnv { get; set; } = null;
+        public ISymbolTable<ITypeSpecifier> NameEnv { get; set; } = null;
     }
 
     public abstract class TypeName : TypeSpecifier { }
@@ -151,7 +152,7 @@ namespace Proj3Semantics.Nodes
             set => throw new AccessViolationException("unable to set typeref of a string literal");
         }
 
-        public ISymbolTable<ITypeSpecifier> LocalNameEnv
+        public ISymbolTable<ITypeSpecifier> NameEnv
         {
             get => null;
             set => throw new AccessViolationException();
@@ -237,7 +238,7 @@ namespace Proj3Semantics.Nodes
             get => VariablePrimitiveTypes.Int;
             set => throw new NotImplementedException("You're not supposed to set a number literal");
         }
-        public ISymbolTable<ITypeSpecifier> LocalNameEnv
+        public ISymbolTable<ITypeSpecifier> NameEnv
         {
             get => null;
             set => throw new AccessViolationException();

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
+using Proj3Semantics.Nodes;
 
 namespace Proj3Semantics
 {
@@ -43,12 +44,10 @@ namespace Proj3Semantics
                 Console.WriteLine("Start semantic analysis");
                 Console.WriteLine("========================================\n");
 
-                var typeEnv = new SymbolTable<ITypeSpecifier>();
-                var nameEnv = new SymbolTable<ITypeSpecifier>();
-                var topDeclVisitor = new TopDeclVisitor(typeEnv,nameEnv);
-                topDeclVisitor.Visit(parser.Root);
+                // TODO: Primitive types?
+                SemanticAnalysis.Run(parser.Root as CompilationUnit);
 
-                Console.WriteLine("Print Tree After Analyzing:");
+                Console.WriteLine("\nPrint Tree After Analyzing:");
                 Console.WriteLine("========================================\n");
                 nodeVisitor.PreorderTraverseRoot(parser.Root);
 

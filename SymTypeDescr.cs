@@ -14,7 +14,7 @@ namespace Proj3Semantics
 
     public enum NodeTypeCategory
     {
-        NOT_SET, Primitive, Null, Array, Class, Void, This, ErrorType, ClassFieldDef, ClassMethodDef
+        NOT_SET, Primitive, Null, Array, Class, Void, This, ErrorType, ClassFieldDef, ClassMethodDef, NamespaceDecl
     }
 
     public enum VariablePrimitiveTypes
@@ -22,16 +22,22 @@ namespace Proj3Semantics
         Boolean, Byte, Char, Short, Int, Long, Float, Double, NotPrimitive
     }
 
+    public interface IHasOwnScope
+    {
+        IEnv NameEnv { get; set; }
+        IEnv TypeEnv { get; set; }
+    }
+
     /// <summary>
     /// Specifies if the node has type information attached to it
     /// </summary>
-    public interface ITypeSpecifier
+    public interface ITypeSpecifier 
     {
         // every type belongs to some kind of a category
         NodeTypeCategory NodeTypeCategory { get; set; }
         ITypeSpecifier TypeSpecifierRef { get; set; }
-        IEnv LocalNameEnv { get; set; }
     }
+
 
     public interface INamedType
     {

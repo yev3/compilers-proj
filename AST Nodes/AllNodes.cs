@@ -116,6 +116,42 @@ namespace Proj3Semantics.Nodes
         }
     }
 
+    public class NamespaceBody : AbstractNode
+    {
+        public NamespaceBody() { }
+
+        public NamespaceBody(AbstractNode singleItem)
+        {
+            AddChild(singleItem);
+        }
+    }
+
+    public class NamespaceDecl : AbstractNode, ITypeSpecifier, IHasOwnScope, INamedType
+    {
+        public ISymbolTable<ITypeSpecifier> NameEnv { get; set; } = null;
+        public ISymbolTable<ITypeSpecifier> TypeEnv { get; set; } = null;
+        public string Name { get; set; }
+        public NamespaceBody NamespaceBody { get; set; }
+
+        public NamespaceDecl(AbstractNode identifier, AbstractNode body)
+        {
+            Identifier id = identifier as Identifier;
+            if (id == null) throw new ArgumentNullException(nameof(id));
+            Name = id.Name;
+
+            NamespaceBody = body as NamespaceBody;
+            if (NamespaceBody == null) throw new ArgumentNullException(nameof(id));
+
+            AddChild(NamespaceBody);
+        }
+
+        public NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.NamespaceDecl;
+        public ITypeSpecifier TypeSpecifierRef
+        {
+            get => this;
+            set => throw new AccessViolationException();
+        }
+    }
 
     public class NotImplemented : AbstractNode
     {

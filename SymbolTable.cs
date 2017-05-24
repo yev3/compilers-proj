@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace Proj3Semantics
     public interface ISymbolTable<TEntry>
     {
         int CurrentNestLevel { get; }
-        ISymbolTable<TEntry> GetNewLevel();
+        ISymbolTable<TEntry> GetNewLevel(string envName = "");
         ISymbolTable<TEntry>  GetPrevLevel();
         void EnterInfo(string s, TEntry info);
         bool IsDeclaredLocally(string s);
@@ -22,21 +23,24 @@ namespace Proj3Semantics
         TEntry Lookup(string s);
     }
 
+    [DebuggerDisplay("{ToString()}")]
     public class SymbolTable<TEntry> : ISymbolTable<TEntry>
     {
+        private string EnvName { get; }
         private SymbolTable<TEntry> Parent { get; set; }
         private Dictionary<string, TEntry> Dict { get; } = new Dictionary<string, TEntry>();
         public int CurrentNestLevel { get; }
 
-        public SymbolTable(SymbolTable<TEntry> parent = null)
+        public SymbolTable(SymbolTable<TEntry> parent = null, string envName = "")
         {
             CurrentNestLevel = (parent?.CurrentNestLevel ?? 0) + 1;
             Parent = parent;
+            EnvName = envName;
         }
 
-        public ISymbolTable<TEntry> GetNewLevel()
+        public ISymbolTable<TEntry> GetNewLevel(string envName = "")
         {
-            return new SymbolTable<TEntry>(this);
+            return new SymbolTable<TEntry>(this, envName);
         }
 
         public ISymbolTable<TEntry> GetPrevLevel() => Parent;
@@ -60,6 +64,19 @@ namespace Proj3Semantics
                 curNode = curNode.Parent;
             }
             return default(TEntry);
+        }
+
+        public override string ToString()
+        {
+            var names = new List<string>();
+
+            SymbolTable<TEntry> curNode = this;
+            while (curNode != null)
+            {
+                names.Add(curNode.EnvName);
+                curNode = curNode.Parent;
+            }
+            return string.Join(".", names);
         }
     }
 

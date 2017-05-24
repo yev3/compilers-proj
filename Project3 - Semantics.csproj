@@ -74,6 +74,7 @@
     <Compile Include="CustomExtensions.cs" />
     <Compile Include="GplexBuffers.cs" />
     <Compile Include="NodePrintingVisitor.cs" />
+    <Compile Include="SemanticAnalysis.cs" />
     <Compile Include="TypeVisitor.cs" />
     <None Include="Notes\SymbolKind.cs" />
     <None Include="Notes\RoslynTypes.cs" />
