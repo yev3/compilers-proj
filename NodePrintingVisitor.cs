@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,8 +9,23 @@ using Proj3Semantics.Nodes;
 
 namespace Proj3Semantics
 {
-    class NodePrintingVisitor : IReflectiveVisitor
+    public class NodePrintingVisitor : IReflectiveVisitor
     {
+        public static string AbstactNodeDebugString(AbstractNode node)
+        {
+            TextWriter tw = new StringWriter();
+            
+            bool hasName = node is INamedType;
+            INamedType namedNode = node as INamedType;
+            string nodeName = namedNode?.Name;
+            tw.Write("<" + node.GetType().Name + "> ");
+            PrintName(node, tw);
+            tw.Write(" ");
+            PrintModifiers(node, tw);
+            tw.Write(" ");
+            PrintTypeDescr(node, tw);
+            return tw.ToString();
+        }
 
         public void PreorderTraverseRoot(AbstractNode node, string prefix = "")
         {
@@ -41,18 +57,23 @@ namespace Proj3Semantics
         //                  VISIT METHODS BELOW
         // ============================================================
 
-        private void PrintModifiers(AbstractNode node)
+
+        private static void PrintModifiers(AbstractNode node, TextWriter cout = null)
         {
+            if (cout == null) cout = Console.Out;
+
             var modifiers = node as ITypeHasModifiers;
             if (modifiers == null) return;
             using (OutColor.Magenta)
             {
-                Console.Write("{" + modifiers.AccessorType + (modifiers.IsStatic ? ", Static}" : "}"));
+                cout.Write("{" + modifiers.AccessorType + (modifiers.IsStatic ? ", Static}" : "}"));
             }
         }
 
-        private void PrintTypeDescr(AbstractNode node)
+        private static void PrintTypeDescr(AbstractNode node, TextWriter cout = null)
         {
+            if (cout == null) cout = Console.Out;
+
             ITypeSpecifier typeDescriptor = node as ITypeSpecifier;
             if (typeDescriptor == null) return;
 
@@ -68,19 +89,21 @@ namespace Proj3Semantics
 
             var typeStr = "{" + string.Join(", ", typeStrings) + "}";
             using (OutColor.Magenta)
-                Console.Write(typeStr);
+                cout.Write(typeStr);
 
         }
 
-        private void PrintName(AbstractNode node)
+        private static void PrintName(AbstractNode node, TextWriter cout = null)
         {
+            if (cout == null) cout = Console.Out;
+
             bool hasName = node is INamedType;
             INamedType namedNode = node as INamedType;
             string nodeName = namedNode?.Name;
             if (hasName)
             {
                 using (OutColor.Cyan)
-                    Console.Write(nodeName);
+                    cout.Write(nodeName);
             }
 
         }

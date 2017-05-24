@@ -101,7 +101,7 @@ namespace Proj3Semantics.Nodes
             AppendIdentifier(child);
         }
 
-        public override NodeTypeCategory NodeTypeCategory { get; set; }
+        public override NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.NOT_SET;
         public override ITypeSpecifier TypeSpecifierRef { get; set; }
     }
 

@@ -70,18 +70,13 @@ namespace Proj3Semantics
             string curScopeName = "";
             ITypeSpecifier curResult = null;
 
-            foreach (AbstractNode node in qname)
+            foreach (string curIdStr in qname.IdentifierList)
             {
-                Identifier id = node as Identifier;
-                if (id == null) throw new ArgumentNullException(nameof(id));
-
-                //  look up the id in the env
-                string curLookupName = id.Name;
-                curResult = curTypeEnv?.Lookup(curLookupName);
+                curResult = curTypeEnv?.Lookup(curIdStr);
 
                 if (curResult == null)
                 {
-                    string errMsg = curLookupName;
+                    string errMsg = curIdStr;
                     if (curScopeName != "")
                         errMsg += " in " + curScopeName;
                     CompilerErrors.Add(SemanticErrorTypes.InvalidQualifier, errMsg);
@@ -92,7 +87,12 @@ namespace Proj3Semantics
 
                 IHasOwnScope childScope = curResult as IHasOwnScope;
                 curTypeEnv = childScope?.NameEnv;
-                curScopeName = curLookupName;
+                curScopeName = curIdStr;
+            }
+            if (curResult != null)
+            {
+                qname.NodeTypeCategory = curResult.NodeTypeCategory;
+                qname.TypeSpecifierRef = curResult.TypeSpecifierRef;
             }
         }
 

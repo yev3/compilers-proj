@@ -54,6 +54,7 @@ namespace Proj3Semantics
             }
 
 
+            //Console.WriteLine("Press any key to continue..");
             //Console.ReadKey();
         }
     }
