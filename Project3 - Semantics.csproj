@@ -78,6 +78,7 @@
     <Compile Include="CustomExtensions.cs" />
     <Compile Include="Visitors\DeclarationVisitor.cs" />
     <Compile Include="GplexBuffers.cs" />
+    <Compile Include="Visitors\TypeCheckingFuncs.cs" />
     <Compile Include="Visitors\TypeCheckingVisitor.cs" />
     <Compile Include="NodePrintingVisitor.cs" />
     <Compile Include="Visitors\SemanticAnalysis.cs" />
@@ -90,7 +91,6 @@
     <Compile Include="Visitors\SemanticsVisitor.cs" />
     <Compile Include="ShiftReduceParserCode.cs" />
     <Compile Include="ASTNodes\AbstractNode.cs" />
-    <Compile Include="SymbolAttributes.cs" />
     <Compile Include="Visitors\Interfaces.cs" />
   </ItemGroup>
   <ItemGroup>

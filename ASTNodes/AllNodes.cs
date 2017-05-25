@@ -160,7 +160,6 @@ namespace Proj3Semantics.ASTNodes
 
     public class NamespaceDecl : AbstractNode, ITypeDescriptor, IHasOwnScope, INamedType
     {
-        private AbstractNode abstractNode;
 
         public ISymbolTable<ITypeDescriptor> NameEnv { get; set; } = null;
         public ISymbolTable<ITypeDescriptor> TypeEnv { get; set; } = null;

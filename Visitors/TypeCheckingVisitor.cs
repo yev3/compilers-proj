@@ -135,7 +135,15 @@ namespace Proj3Semantics
         private void VisitEvaluation(EvalExpr expr)
         {
             _log.Trace("Checking Evaluation of " + expr.ToDebugString());
+
+
             Visit(expr.Child);
+
+            var childNode = expr.Child as ITypeDescriptor;
+            if (childNode == null) throw new ArgumentNullException(nameof(childNode) + " should have a type");
+
+            expr.NodeTypeCategory = childNode.NodeTypeCategory;
+            expr.TypeDescriptorRef = childNode.TypeDescriptorRef;
         }
 
         private void VisitNode(MethodCall call)
@@ -182,29 +190,29 @@ namespace Proj3Semantics
             {
                 _log.Trace("    checking ArgumentList " + calledArgs?.ToDebugString());
                 Debug.Assert(calledArgs != null);
-                foreach (AbstractNode arg in calledArgs)
+
+                IEnumerable<Tuple<Parameter, Expression>> pairs =
+                    Enumerable.Zip(definedParams, calledArgs.Cast<Expression>(), Tuple.Create);
+
+                foreach (Tuple<Parameter, Expression> pair in pairs)
                 {
-                    // each argument is an expression
-                    Expression expr = arg as Expression;
-                    if (expr == null) throw new ArgumentNullException(nameof(expr));
+                    // type check the type of this argument expression
+                    VisitNode(pair.Item2);
 
-                    // type check this expression
-                    VisitNode(expr);
-
+                    if (!IsAssignable(pair.Item1.TypeDescriptor, pair.Item2))
+                    {
+                        CompilerErrors.Add(SemanticErrorTypes.InvalidFuncArg, pair.Item1.Name);
+                        goto ErrorOccured;
+                    }
                 }
-                
-                // TODO: HERE
-                //methodRefDescriptor.TypeDescriptorRef
-
             }
             else
             {
                 _log.Trace("    No arguments");
             }
 
-
-            _log.Trace("    checking ReturnType ");
-
+            call.NodeTypeCategory = methodDescriptor.NodeTypeCategory;
+            call.TypeDescriptorRef = methodDescriptor.TypeDescriptorRef;
             _log.Trace("Finish checking MethodCall " + call.ToDebugString());
 
             return;
@@ -213,9 +221,71 @@ namespace Proj3Semantics
             ErrorOccured:
             call.NodeTypeCategory = NodeTypeCategory.ErrorType;
             call.TypeDescriptorRef = null;
-
-
         }
+
+
+        public bool IsAssignable(ITypeDescriptor dst, ITypeDescriptor src)
+        {
+            if (dst == null || src == null) return false;
+
+            switch (src.NodeTypeCategory)
+            {
+                case NodeTypeCategory.Primitive:
+                    // for now, only can assign things from primitives
+                    break;
+                case NodeTypeCategory.NOT_SET:
+                    return false;
+                case NodeTypeCategory.Void:
+                    return false;
+                default:
+                    _log.Warn("RHS in IsAssignable is not implemented " + src.NodeTypeCategory.ToString());
+                    return false;
+            }
+
+
+            switch (dst.NodeTypeCategory)
+            {
+                case NodeTypeCategory.NOT_SET:
+                    throw new NotImplementedException("???");
+                case NodeTypeCategory.Primitive:
+                    return IsPrimitiveAssignable(dst as IPrimitiveTypeDescriptor, src);
+                case NodeTypeCategory.Null:
+                    CompilerErrors.Add(SemanticErrorTypes.BuiltinNotAssignable, "null");
+                    return false;
+                case NodeTypeCategory.Void:
+                    CompilerErrors.Add(SemanticErrorTypes.BuiltinNotAssignable, "void");
+                    return false;
+                case NodeTypeCategory.This:
+                    CompilerErrors.Add(SemanticErrorTypes.BuiltinNotAssignable, "this");
+                    return false;
+                case NodeTypeCategory.ErrorType:
+                    return true;    // can always assign to an error type
+                default:
+                    CompilerErrors.Add(SemanticErrorTypes.FeatureNotImplemented, dst.NodeTypeCategory.ToString());
+                    return false;
+            }
+        }
+
+        private bool IsPrimitiveAssignable(IPrimitiveTypeDescriptor dst, ITypeDescriptor src)
+        {
+            if (dst == null || src == null) return false;
+
+            IPrimitiveTypeDescriptor srcPrimitive = src as IPrimitiveTypeDescriptor;
+            if (srcPrimitive == null) throw new NotImplementedException("Assignment from non-primitives is not implemented");
+
+            var tsrc = dst.VariableTypePrimitive;
+            var tdst = srcPrimitive.VariableTypePrimitive;
+
+            switch (tdst)
+            {
+                case VariablePrimitiveTypes.Object:
+                    return true;    // object is the lowest
+                default:
+                    return tdst == tsrc;
+            }
+        }
+
+
     }
 
 
