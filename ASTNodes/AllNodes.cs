@@ -87,13 +87,13 @@ namespace Proj3Semantics.ASTNodes
 
 
 
-    public class QualifiedPrimaryExpr : AbstractNode, ITypeDescriptor
+    public abstract class QualifiedPrimaryExpr : AbstractNode, ITypeDescriptor
     {
         public NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.NOT_SET;
-        public ITypeDescriptor TypeDescriptorRef { get; set; } = null;
+        public abstract ITypeDescriptor TypeDescriptorRef { get; set; }
     }
 
-    public class ComplexPrimary : QualifiedPrimaryExpr { }
+    public abstract class ComplexPrimary : QualifiedPrimaryExpr { }
 
     public class MethodCall : ComplexPrimary
     {
@@ -115,6 +115,8 @@ namespace Proj3Semantics.ASTNodes
             AddChild(MethodReference);
             AddChild(ArgumentList);
         }
+
+        public override ITypeDescriptor TypeDescriptorRef { get; set; }
     }
 
 

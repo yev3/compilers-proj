@@ -101,7 +101,7 @@ namespace Proj3Semantics
             }
         }
 
-        private void VisitNode(ArrayDescriptor arrayDef)
+        private void VisitNode(ArraySpecifier arrayDef)
         {
             throw new NotImplementedException("Arrays are not supported in this release");
         }
