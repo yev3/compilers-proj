@@ -28,14 +28,22 @@ namespace Proj3Semantics.ASTNodes
         #region InterfaceImplementations
         public NodeTypeCategory NodeTypeCategory
         {
-            get => NodeTypeCategory.Class;
-            set => throw new AccessViolationException("unable to set the type category.");
+            get { return NodeTypeCategory.Class; }
+            set
+            {
+                throw new AccessViolationException(
+                    "unable to set the type category.");
+            }
         }
 
         public ITypeSpecifier TypeSpecifierRef
         {
-            get => this;
-            set => throw new AccessViolationException("unable to set the class decl to a diff class decl.");
+            get { return this; }
+            set
+            {
+                throw new AccessViolationException(
+                    "unable to set the class decl to a diff class decl.");
+            }
         }
 
         public ISymbolTable<ITypeSpecifier> NameEnv { get; set; } = null;
@@ -101,17 +109,22 @@ namespace Proj3Semantics.ASTNodes
 
         public NodeTypeCategory NodeTypeCategory
         {
-            get => NodeTypeCategory.ClassFieldDef;
-            set => throw new AccessViolationException("unable to set class field type");
+            get { return NodeTypeCategory.ClassFieldDef; }
+            set
+            {
+                throw new AccessViolationException(
+                    "unable to set class field type");
+            }
         }
+
         public ITypeSpecifier TypeSpecifierRef { get; set; } = null;
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
         public string Name { get; set; }
         public ISymbolTable<ITypeSpecifier> NameEnv
         {
-            get => null;
-            set => throw new AccessViolationException();
+            get { return null; }
+            set { throw new AccessViolationException(); }
         }
     }
 
@@ -190,9 +203,14 @@ namespace Proj3Semantics.ASTNodes
         // ------------------------------------------------------------
         public NodeTypeCategory NodeTypeCategory
         {
-            get => NodeTypeCategory.ClassMethodDef;
-            set => throw new AccessViolationException("unable to set method node to diff type.");
+            get { return NodeTypeCategory.ClassMethodDef; }
+            set
+            {
+                throw new AccessViolationException(
+                    "unable to set method node to diff type.");
+            }
         }
+
         public ITypeSpecifier TypeSpecifierRef { get; set; }
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }

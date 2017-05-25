@@ -11,8 +11,8 @@ namespace Proj3Semantics.ASTNodes
     {
         public override ExprType ExprType
         {
-            get => ExprType.EVALUATION;
-            set => throw new AccessViolationException();
+            get { return ExprType.EVALUATION; }
+            set { throw new AccessViolationException(); }
         }
 
         public AbstractNode Child { get; set; }

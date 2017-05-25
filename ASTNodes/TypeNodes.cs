@@ -64,8 +64,12 @@ namespace Proj3Semantics.ASTNodes
 
         public override NodeTypeCategory NodeTypeCategory
         {
-            get => NodeTypeCategory.Array;
-            set => throw new InvalidOperationException("unable to set node type cat");
+            get { return NodeTypeCategory.Array; }
+            set
+            {
+                throw new InvalidOperationException(
+                    "unable to set node type cat");
+            }
         }
     }
 
@@ -121,22 +125,34 @@ namespace Proj3Semantics.ASTNodes
 
         public NodeTypeCategory NodeTypeCategory
         {
-            get => NodeTypeCategory.Primitive;
-            set => throw new NotImplementedException("You're not supposed to set a literal");
+            get { return NodeTypeCategory.Primitive; }
+            set
+            {
+                throw new NotImplementedException(
+                    "You're not supposed to set a literal");
+            }
         }
 
 
         public virtual ITypeSpecifier TypeSpecifierRef
         {
-            get => this;
-            set => throw new AccessViolationException("unable to set typeref of a string literal");
+            get { return this; }
+            set
+            {
+                throw new AccessViolationException(
+                    "unable to set typeref of a string literal");
+            }
         }
 
 
         public VariablePrimitiveTypes VariableTypePrimitive
         {
-            get => VariablePrimitiveTypes.String;
-            set => throw new NotImplementedException("You're not supposed to set a number literal");
+            get { return VariablePrimitiveTypes.String; }
+            set
+            {
+                throw new NotImplementedException(
+                    "You're not supposed to set a number literal");
+            }
         }
     }
 

@@ -14,8 +14,12 @@ namespace Proj3Semantics.ASTNodes
         public abstract override NodeTypeCategory NodeTypeCategory { get; set; }
         public sealed override ITypeSpecifier TypeSpecifierRef
         {
-            get => this;
-            set => throw new AccessViolationException("unable to set typeref of a builtin");
+            get { return this; }
+            set
+            {
+                throw new AccessViolationException(
+                    "unable to set typeref of a builtin");
+            }
         }
     }
 
@@ -23,16 +27,16 @@ namespace Proj3Semantics.ASTNodes
     {
         public override NodeTypeCategory NodeTypeCategory
         {
-            get => NodeTypeCategory.Null;
-            set => throw new InvalidOperationException();
+            get { return NodeTypeCategory.Null; }
+            set { throw new InvalidOperationException(); }
         }
     }
     public class BuiltInTypeThis : BuiltInType
     {
         public override NodeTypeCategory NodeTypeCategory
         {
-            get => NodeTypeCategory.This;
-            set => throw new InvalidOperationException();
+            get { return NodeTypeCategory.This; }
+            set { throw new InvalidOperationException(); }
         }
     }
 
@@ -40,16 +44,16 @@ namespace Proj3Semantics.ASTNodes
     {
         public override NodeTypeCategory NodeTypeCategory
         {
-            get => NodeTypeCategory.Void;
-            set => throw new InvalidOperationException();
+            get { return NodeTypeCategory.Void; }
+            set { throw new InvalidOperationException(); }
         }
     }
     public abstract class PrimitiveType : BuiltInType, IPrimitiveTypeDescriptor
     {
         public override NodeTypeCategory NodeTypeCategory
         {
-            get => NodeTypeCategory.Primitive;
-            set => throw new InvalidOperationException();
+            get { return NodeTypeCategory.Primitive; }
+            set { throw new InvalidOperationException(); }
         }
 
         public abstract VariablePrimitiveTypes VariableTypePrimitive { get; set; }
@@ -59,8 +63,8 @@ namespace Proj3Semantics.ASTNodes
     {
         public override VariablePrimitiveTypes VariableTypePrimitive
         {
-            get => VariablePrimitiveTypes.String;
-            set => throw new AccessViolationException();
+            get { return VariablePrimitiveTypes.String; }
+            set { throw new AccessViolationException(); }
         }
     }
 
@@ -68,8 +72,8 @@ namespace Proj3Semantics.ASTNodes
     {
         public override VariablePrimitiveTypes VariableTypePrimitive
         {
-            get => VariablePrimitiveTypes.Int;
-            set => throw new AccessViolationException();
+            get { return VariablePrimitiveTypes.Int; }
+            set { throw new AccessViolationException(); }
         }
     }
 
@@ -77,38 +81,54 @@ namespace Proj3Semantics.ASTNodes
     {
         public override VariablePrimitiveTypes VariableTypePrimitive
         {
-            get => VariablePrimitiveTypes.Boolean;
-            set => throw new NotImplementedException();
+            get { return VariablePrimitiveTypes.Boolean; }
+            set { throw new NotImplementedException(); }
         }
     }
 
     public class NumberLiteral : ComplexPrimary, IPrimitiveTypeDescriptor
     {
         public int Value { get; }
-        public NumberLiteral(int n) => Value = n;
+        public NumberLiteral(int n)
+        {
+            Value = n;
+        }
 
         public NodeTypeCategory NodeTypeCategory
         {
-            get => NodeTypeCategory.Primitive;
-            set => throw new NotImplementedException("You're not supposed to set a number literal");
+            get { return NodeTypeCategory.Primitive; }
+            set
+            {
+                throw new NotImplementedException(
+                    "You're not supposed to set a number literal");
+            }
         }
 
         public ITypeSpecifier TypeSpecifierRef
         {
-            get => this;
-            set => throw new AccessViolationException("unable to set typeref of a builtin");
+            get { return this; }
+            set
+            {
+                throw new AccessViolationException(
+                    "unable to set typeref of a builtin");
+            }
         }
 
 
         public VariablePrimitiveTypes VariableTypePrimitive
         {
-            get => VariablePrimitiveTypes.Int;
-            set => throw new NotImplementedException("You're not supposed to set a number literal");
+            get { return VariablePrimitiveTypes.Int; }
+            set
+            {
+                throw new NotImplementedException(
+                    "You're not supposed to set a number literal");
+            }
         }
+
         public ISymbolTable<ITypeSpecifier> NameEnv
         {
-            get => null;
-            set => throw new AccessViolationException();
+            get { return null; }
+            set { throw new AccessViolationException(); }
         }
     }
 }
