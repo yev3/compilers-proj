@@ -9,10 +9,10 @@ namespace Proj3Semantics.ASTNodes
     // BUILT INS
     // =========================================
 
-    public abstract class BuiltInType : TypeSpecifier
+    public abstract class BuiltInType : TypeDescriptor
     {
         public abstract override NodeTypeCategory NodeTypeCategory { get; set; }
-        public sealed override ITypeSpecifier TypeSpecifierRef
+        public sealed override ITypeDescriptor TypeDescriptorRef
         {
             get { return this; }
             set
@@ -104,7 +104,7 @@ namespace Proj3Semantics.ASTNodes
             }
         }
 
-        public ITypeSpecifier TypeSpecifierRef
+        public ITypeDescriptor TypeDescriptorRef
         {
             get { return this; }
             set
@@ -125,7 +125,7 @@ namespace Proj3Semantics.ASTNodes
             }
         }
 
-        public ISymbolTable<ITypeSpecifier> NameEnv
+        public ISymbolTable<ITypeDescriptor> NameEnv
         {
             get { return null; }
             set { throw new AccessViolationException(); }

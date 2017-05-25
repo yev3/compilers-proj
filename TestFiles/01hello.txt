@@ -1,14 +1,8 @@
 /*Tests calls to Writeline with a string */
 
-public class Console{
-    public void WriteLine(string msg){}
-}
-
 public class Hello {
     public void Main () {
-        Console.WriteLine("Hello, World");
-        this;
-        null;
+        WriteLine("Hello, World");
     }
 }
 

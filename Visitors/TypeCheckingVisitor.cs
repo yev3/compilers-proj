@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,16 +9,16 @@ using Proj3Semantics.ASTNodes;
 
 namespace Proj3Semantics
 {
-    
-    using IEnv = ISymbolTable<ITypeSpecifier>;
+
+    using IEnv = ISymbolTable<ITypeDescriptor>;
 
 
-    public class TypeCheckingVisitor
+    public class TypeCheckingVisitor : IHasOwnScope
     {
         protected static Logger _log = LogManager.GetCurrentClassLogger();
 
-        private IEnv NameEnv { get; set; }
-        private IEnv TypeEnv { get; set; }
+        public IEnv NameEnv { get; set; }
+        public IEnv TypeEnv { get; set; }
 
         public TypeCheckingVisitor(
             IEnv typeEnv,
@@ -79,7 +80,7 @@ namespace Proj3Semantics
                     VisitAssignment(expr);
                     return;
                 case ExprType.EVALUATION:
-                    VisitEvaluation(expr);
+                    VisitEvaluation(expr as EvalExpr);
                     return;
                 case ExprType.LOGICAL_OR:
                     break;
@@ -119,22 +120,88 @@ namespace Proj3Semantics
                     throw new ArgumentOutOfRangeException();
             }
             _log.Trace("Unsupported expression type: " + expr.ExprType.ToString());
-            
+
         }
 
         private void VisitAssignment(Expression expr)
         {
-            _log.Trace("Checking assignment..", expr);
-            
+            _log.Trace("Checking assignment of " + expr.ToDebugString());
+
         }
-        private void VisitEvaluation(Expression expr)
+        private void VisitEvaluation(EvalExpr expr)
         {
-            _log.Trace("Checking Evaluation..", expr);
-            
+            _log.Trace("Checking Evaluation of " + expr.ToDebugString());
+            Visit(expr.Child);
+        }
+
+        private void VisitNode(MethodCall call)
+        {
+            _log.Trace("Start checking MethodCall " + call.ToDebugString());
+
+            // MethodReference             
+            //       :   ComplexPrimaryNoParenthesis     { $$ = $1;}
+            //       |   QualifiedName                   { $$ = $1;}
+            //       |   SpecialBuiltinName              { $$ = $1;}
+            //       |   BuiltinSystemCall               { $$ = $1;}
+
+            ITypeDescriptor methodRefDescriptor = call.MethodReference as ITypeDescriptor;
+            if (methodRefDescriptor == null) throw new ArgumentNullException(nameof(methodRefDescriptor) + " is not a valid type descriptor");
+            _log.Trace("    checking MethodReference " + call.MethodReference.ToDebugString());
+            var typeVisitor = new TypeVisitor(this);
+            typeVisitor.Visit(call.MethodReference);
+            if (methodRefDescriptor.NodeTypeCategory == NodeTypeCategory.NOT_SET ||
+                methodRefDescriptor.NodeTypeCategory == NodeTypeCategory.ErrorType ||
+                methodRefDescriptor.TypeDescriptorRef == null)
+            {
+                _log.Trace("    Quitting method call type checking, should have emitted an error..");
+                Debug.Assert(methodRefDescriptor.NodeTypeCategory == NodeTypeCategory.ErrorType);
+                goto ErrorOccured;
+            }
+
+            IClassMethodTypeDesc methodDescriptor = methodRefDescriptor.TypeDescriptorRef as IClassMethodTypeDesc;
+            if (methodDescriptor == null) throw new ArgumentNullException(nameof(methodDescriptor));
+
+            List<Parameter> definedParams = methodDescriptor.MethodParameters;
+            ArgumentList calledArgs = call.ArgumentList;
+
+            // CHECKING # of args matches
+            int numParams = definedParams.Count;
+            int numArgs = calledArgs?.Count ?? 0;
+
+            if (numParams != numArgs)
+            {
+                CompilerErrors.Add(SemanticErrorTypes.NoMethodWithNumArgs, methodDescriptor.Name);
+                goto ErrorOccured;
+            }
+
+            if (calledArgs != null)
+            {
+                //methodParams != null && methodParams.Count > 0
+                //_log.Trace("    checking ArgumentList " + argList.ToDebugString());
+                // TODO: HERE
+                //methodRefDescriptor.TypeDescriptorRef
+
+            }
+            else
+            {
+                _log.Trace("    No arguments");
+            }
+
+
+            _log.Trace("    checking ReturnType ");
+
+            _log.Trace("Finish checking MethodCall " + call.ToDebugString());
+
+            return;
+
+            // set the return to error type
+            ErrorOccured:
+            call.NodeTypeCategory = NodeTypeCategory.ErrorType;
+            call.TypeDescriptorRef = null;
+
+
         }
     }
-
-
 
 
     /// <summary>

@@ -13,6 +13,7 @@
 %start CompilationUnit
 
 /* Terminals */
+%token WRITE WRITE_LINE  // builtin calls
 %token AND ASTERISK BANG BOOLEAN CLASS NAMESPACE
 %token COLON COMMA ELSE EQUALS HAT
 %token IF INSTANCEOF INT STRING IDENTIFIER STR_LITERAL INT_NUMBER
@@ -48,6 +49,8 @@ CompilationUnit
 NamespaceDecl
     :   NAMESPACE Identifier NamespaceBody
                             { $$ = new NamespaceDecl($2, $3); }
+    |   NAMESPACE NamespaceBody
+                            { $$ = new NamespaceDecl($2); }
     ;
 
 NamespaceBody           
@@ -350,6 +353,12 @@ MethodReference
     :   ComplexPrimaryNoParenthesis     { $$ = $1;}
     |   QualifiedName                   { $$ = $1;}
     |   SpecialBuiltinName              { $$ = $1;}
+    |   BuiltinSystemCall               { $$ = $1;}
+    ;
+
+BuiltinSystemCall                 
+    :   WRITE                           { $$ = $1;}
+    |   WRITE_LINE                      { $$ = $1;}
     ;
 
 SpecialBuiltinName                 

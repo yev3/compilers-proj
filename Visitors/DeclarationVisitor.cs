@@ -10,7 +10,7 @@ using Proj3Semantics.ASTNodes;
 
 namespace Proj3Semantics
 {
-    using IEnv = ISymbolTable<ITypeSpecifier>;
+    using IEnv = ISymbolTable<ITypeDescriptor>;
     /// <summary>
     /// PAGE 302
     /// </summary>
@@ -96,13 +96,13 @@ namespace Proj3Semantics
 
             VariableListDeclaring vld = fieldDecl.VariableListDeclaring;
 
-            ITypeSpecifier typeNameDecl = vld.FieldTypeSpecifier;
+            ITypeDescriptor typeNameDecl = vld.FieldTypeDescriptor;
             if (typeNameDecl == null) throw new NullReferenceException("Declared class field is not ITypeInfo.");
 
-            if (typeNameDecl.TypeSpecifierRef == null)
+            if (typeNameDecl.TypeDescriptorRef == null)
             {
                 TypeVisitor tVisitor = new TypeVisitor(TypeEnv);
-                tVisitor.Visit(vld.FieldTypeSpecifier);
+                tVisitor.Visit(vld.FieldTypeDescriptor);
             }
 
             DeclaredVars declFields = vld.ItemIdList;
@@ -113,7 +113,7 @@ namespace Proj3Semantics
                 if (fdecl == null) throw new ArgumentNullException(nameof(fdecl));
 
                 // copy over from the decl
-                fdecl.TypeSpecifierRef = typeNameDecl.TypeSpecifierRef;
+                fdecl.TypeDescriptorRef = typeNameDecl.TypeDescriptorRef;
             }
         }
 
@@ -126,8 +126,8 @@ namespace Proj3Semantics
 
             string name = mdecl.Name;
 
-            ITypeSpecifier retType = mdecl.ReturnTypeNode;
-            if (retType.TypeSpecifierRef == null)
+            ITypeDescriptor retType = mdecl.ReturnTypeNode;
+            if (retType.TypeDescriptorRef == null)
             {
                 var tVisitor = new TypeVisitor(TypeEnv);
                 tVisitor.Visit(retType);
@@ -153,10 +153,10 @@ namespace Proj3Semantics
 
         private void VisitNode(Parameter p)
         {
-            if (p.TypeSpecifier.TypeSpecifierRef == null)
+            if (p.TypeDescriptor.TypeDescriptorRef == null)
             {
                 var tVisitor = new TypeVisitor(TypeEnv);
-                tVisitor.Visit(p.TypeSpecifier);
+                tVisitor.Visit(p.TypeDescriptor);
             }
 
             string pname = p.Name;
@@ -167,7 +167,7 @@ namespace Proj3Semantics
             }
             else
             {
-                NameEnv.EnterInfo(pname, p.TypeSpecifier);
+                NameEnv.EnterInfo(pname, p.TypeDescriptor);
             }
         }
 
@@ -187,7 +187,7 @@ namespace Proj3Semantics
             _log.Trace("Analyzing VariableDecls");
 
             var typeVisitor = new TypeVisitor(TypeEnv);
-            decls.FieldTypeSpecifier.Accept(typeVisitor);
+            decls.FieldTypeDescriptor.Accept(typeVisitor);
 
             foreach (AbstractNode node in decls.ItemIdList)
             {
@@ -202,12 +202,12 @@ namespace Proj3Semantics
                 else
                 {
                     // this attrib was found in the symbol table by typevisitor
-                    var typeSpecEntry = decls.FieldTypeSpecifier as ITypeSpecifier;
+                    var typeSpecEntry = decls.FieldTypeDescriptor as ITypeDescriptor;
                     Debug.Assert(typeSpecEntry != null, "The node specifying the type is not of ITypeInfo");
 
                     // copy the found entry to the declared var
                     id.NodeTypeCategory = typeSpecEntry.NodeTypeCategory;
-                    id.TypeSpecifierRef = typeSpecEntry.TypeSpecifierRef;
+                    id.TypeDescriptorRef = typeSpecEntry.TypeDescriptorRef;
 
                     // and are saved in the symbol table
                     NameEnv.EnterInfo(id.Name, id);

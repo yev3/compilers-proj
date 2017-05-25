@@ -9,7 +9,7 @@ using Proj3Semantics.ASTNodes;
 
 namespace Proj3Semantics
 {
-    using IEnv = ISymbolTable<ITypeSpecifier>;
+    using IEnv = ISymbolTable<ITypeDescriptor>;
     /// <summary>
     /// PAGE 302
     /// </summary>
@@ -46,7 +46,7 @@ namespace Proj3Semantics
         {
             _log.Trace("Checking Namespace declaration in env: " + TypeEnv);
             string name = nsdecl.Name;
-            ITypeSpecifier entry = TypeEnv.Lookup(name);
+            ITypeDescriptor entry = TypeEnv.Lookup(name);
             if (entry != null)
             {
                 CompilerErrors.Add(SemanticErrorTypes.DuplicateNamespaceDef, name);
@@ -76,11 +76,11 @@ namespace Proj3Semantics
         {
             _log.Trace("Checking Class declaration in env: " + TypeEnv);
             string name = cdecl.Name;
-            ITypeSpecifier entry = TypeEnv.Lookup(name);
+            ITypeDescriptor entry = TypeEnv.Lookup(name);
             if (entry != null)
             {
                 CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, name);
-                cdecl.TypeSpecifierRef = null;
+                cdecl.TypeDescriptorRef = null;
                 return;
             }
             TypeEnv.EnterInfo(name, cdecl);
@@ -119,7 +119,7 @@ namespace Proj3Semantics
             VariableListDeclaring vld = fieldDecl.VariableListDeclaring;
             DeclaredVars declFields = vld.ItemIdList;
 
-            ITypeSpecifier typeNameDecl = vld.FieldTypeSpecifier;
+            ITypeDescriptor typeNameDecl = vld.FieldTypeDescriptor;
             if (typeNameDecl == null) throw new NullReferenceException("Declared class field is not ITypeInfo.");
 
             var modifierTokens = fieldDecl.Modifiers.ModifierTokens;
@@ -141,12 +141,12 @@ namespace Proj3Semantics
                 string name = fdecl.Name;
                 ProcessModifierTokens(fdecl, modifierTokens, name);
 
-                ITypeSpecifier entry = TypeEnv.Lookup(name);
+                ITypeDescriptor entry = TypeEnv.Lookup(name);
                 if (entry != null)
                 {
                     CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, name);
                     fdecl.NodeTypeCategory = NodeTypeCategory.ErrorType;
-                    fdecl.TypeSpecifierRef = null;
+                    fdecl.TypeDescriptorRef = null;
                 }
                 else
                 {
@@ -181,14 +181,14 @@ namespace Proj3Semantics
             //}
 
             // the type of this 
-            mdecl.TypeSpecifierRef = mdecl;
+            mdecl.TypeDescriptorRef = mdecl;
 
-            ITypeSpecifier entry = TypeEnv.Lookup(name);
+            ITypeDescriptor entry = TypeEnv.Lookup(name);
             if (entry != null)
             {
                 CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, name);
                 //mdecl.NodeTypeCategory = NodeTypeCategory.ErrorType;
-                mdecl.TypeSpecifierRef = null;
+                mdecl.TypeDescriptorRef = null;
             }
             else
             {
@@ -241,12 +241,12 @@ namespace Proj3Semantics
                 else
                 {
                     // this attrib was found in the symbol table by typevisitor
-                    var typeSpecEntry = decls.FieldTypeSpecifier as ITypeSpecifier;
+                    var typeSpecEntry = decls.FieldTypeDescriptor as ITypeDescriptor;
                     Debug.Assert(typeSpecEntry != null, "The node specifying the type is not of ITypeInfo");
 
                     // copy the found entry to the declared var
                     id.NodeTypeCategory = typeSpecEntry.NodeTypeCategory;
-                    id.TypeSpecifierRef = typeSpecEntry.TypeSpecifierRef;
+                    id.TypeDescriptorRef = typeSpecEntry.TypeDescriptorRef;
 
                     // and are saved in the symbol table
                     NameEnv.EnterInfo(id.Name, id);

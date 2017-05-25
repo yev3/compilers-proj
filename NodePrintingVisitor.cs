@@ -74,7 +74,7 @@ namespace Proj3Semantics
         {
             if (cout == null) cout = Console.Out;
 
-            ITypeSpecifier typeDescriptor = node as ITypeSpecifier;
+            ITypeDescriptor typeDescriptor = node as ITypeDescriptor;
             if (typeDescriptor == null) return;
 
             var typeStrings = new List<string>();
@@ -84,7 +84,7 @@ namespace Proj3Semantics
             if (primitiveDescriptor != null)
                 typeStrings.Add(primitiveDescriptor.VariableTypePrimitive.ToString());
 
-            ITypeSpecifier typeRef = typeDescriptor?.TypeSpecifierRef;
+            ITypeDescriptor typeRef = typeDescriptor?.TypeDescriptorRef;
             typeStrings.Add("tref=" + (typeRef?.ToString() ?? "**NULL**"));
 
             var typeStr = "{" + string.Join(", ", typeStrings) + "}";

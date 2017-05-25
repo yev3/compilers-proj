@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ASTNodes\AllNodes.cs" />
+    <Compile Include="ASTNodes\BuiltinCalls.cs" />
     <Compile Include="ASTNodes\BuiltinsLIterals.cs" />
     <Compile Include="ASTNodes\ClassAndMethodNodes.cs" />
     <Compile Include="ASTNodes\ControlStatementNodes.cs" />

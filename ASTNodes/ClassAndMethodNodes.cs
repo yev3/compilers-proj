@@ -36,7 +36,7 @@ namespace Proj3Semantics.ASTNodes
             }
         }
 
-        public ITypeSpecifier TypeSpecifierRef
+        public ITypeDescriptor TypeDescriptorRef
         {
             get { return this; }
             set
@@ -46,8 +46,8 @@ namespace Proj3Semantics.ASTNodes
             }
         }
 
-        public ISymbolTable<ITypeSpecifier> NameEnv { get; set; } = null;
-        public ISymbolTable<ITypeSpecifier> TypeEnv { get; set; } = null;
+        public ISymbolTable<ITypeDescriptor> NameEnv { get; set; } = null;
+        public ISymbolTable<ITypeDescriptor> TypeEnv { get; set; } = null;
         public IClassTypeDescriptor ParentClass { get; set; } = null;
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
@@ -117,11 +117,11 @@ namespace Proj3Semantics.ASTNodes
             }
         }
 
-        public ITypeSpecifier TypeSpecifierRef { get; set; } = null;
+        public ITypeDescriptor TypeDescriptorRef { get; set; } = null;
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
         public string Name { get; set; }
-        public ISymbolTable<ITypeSpecifier> NameEnv
+        public ISymbolTable<ITypeDescriptor> NameEnv
         {
             get { return null; }
             set { throw new AccessViolationException(); }
@@ -188,14 +188,18 @@ namespace Proj3Semantics.ASTNodes
             AbstractNode methodBody)
         {
             this.Modifiers = modifiers as Modifiers;
-            this.ReturnTypeNode = returnTypeSpecifier as TypeSpecifier;
+            this.ReturnTypeNode = returnTypeSpecifier as TypeDescriptor;
             this.Name = (methodDeclarator as MethodDeclarator)?.Identifier?.Name;
             this.ParameterList = (methodDeclarator as MethodDeclarator)?.ParameterList;
             this.MethodBody = methodBody as Block;
 
             AddChild(modifiers);
             AddChild(returnTypeSpecifier);
-            if (this.ParameterList != null) AddChild(this.ParameterList);
+            if (this.ParameterList != null)
+            {
+                AddChild(this.ParameterList);
+                MethodParameters.AddRange(ParameterList.Parameters);
+            }
             AddChild(methodBody);
         }
 
@@ -211,22 +215,23 @@ namespace Proj3Semantics.ASTNodes
             }
         }
 
-        public ITypeSpecifier TypeSpecifierRef { get; set; }
+        public ITypeDescriptor TypeDescriptorRef { get; set; }
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
-        public ITypeSpecifier ReturnTypeNode { get; set; }
+        public List<Parameter> MethodParameters { get; set; } = new List<Parameter>();
+        public ITypeDescriptor ReturnTypeNode { get; set; }
         public string Name { get; set; }
-        public ISymbolTable<ITypeSpecifier> NameEnv { get; set; } = null;
-        public ISymbolTable<ITypeSpecifier> TypeEnv { get; set; } = null;
+        public ISymbolTable<ITypeDescriptor> NameEnv { get; set; } = null;
+        public ISymbolTable<ITypeDescriptor> TypeEnv { get; set; } = null;
     }
 
     public class Parameter : AbstractNode, INamedType
     {
-        public TypeSpecifier TypeSpecifier { get; set; }
+        public ITypeDescriptor TypeDescriptor { get; set; }
         private Identifier Identifier { get; set; }
         public Parameter(AbstractNode typeSpec, AbstractNode declName)
         {
-            TypeSpecifier = typeSpec as TypeSpecifier;
+            TypeDescriptor = typeSpec as TypeDescriptor;
             Identifier = declName as Identifier;
             AddChild(typeSpec);
             Name = Identifier.Name;
@@ -235,11 +240,26 @@ namespace Proj3Semantics.ASTNodes
         public string Name { get; set; }
     }
 
-    public class ParameterList : AbstractNode
+    public class ParameterList : AbstractNode 
     {
+        public List<Parameter> Parameters { get; set; } = new List<Parameter>();
         public ParameterList(AbstractNode parameter)
         {
-            AddChild(parameter);
+            AddParameter(parameter);
+            base.AddChild(parameter);
+        }
+
+        private void AddParameter(AbstractNode node)
+        {
+            Parameter p = node as Parameter;
+            if (p == null) throw new ArgumentNullException(nameof(p));
+            Parameters.Add(p);
+        }
+
+        public override void AddChild(AbstractNode child)
+        {
+            AddParameter(child);
+            base.AddChild(child);
         }
     }
 

@@ -8,7 +8,7 @@ namespace Proj3Semantics.ASTNodes
 
     public class VariableListDeclaring : AbstractNode
     {
-        public TypeSpecifier FieldTypeSpecifier { get; set; }
+        public TypeDescriptor FieldTypeDescriptor { get; set; }
         public DeclaredVars ItemIdList { get; set; }
         public Expression Initialization { get; set; }
         public VariableListDeclaring(
@@ -22,9 +22,9 @@ namespace Proj3Semantics.ASTNodes
             if (init != null) AddChild(init);
 
             // check that the parser assigned some type of a node with type info
-            var decl = typeSpecifier as ITypeSpecifier;
+            var decl = typeSpecifier as ITypeDescriptor;
             Debug.Assert(decl != null);
-            FieldTypeSpecifier = typeSpecifier as TypeSpecifier;
+            FieldTypeDescriptor = typeSpecifier as TypeDescriptor;
 
             ItemIdList = itemIdList as DeclaredVars;
             Debug.Assert(itemIdList != null);
@@ -45,19 +45,19 @@ namespace Proj3Semantics.ASTNodes
 
 
 
-    public abstract class TypeSpecifier : AbstractNode, ITypeSpecifier
+    public abstract class TypeDescriptor : AbstractNode, ITypeDescriptor
     {
         public abstract NodeTypeCategory NodeTypeCategory { get; set; }
-        public virtual ITypeSpecifier TypeSpecifierRef { get; set; } = null;
-        public ISymbolTable<ITypeSpecifier> TypeEnv { get; set; } = null;
-        public ISymbolTable<ITypeSpecifier> NameEnv { get; set; } = null;
+        public virtual ITypeDescriptor TypeDescriptorRef { get; set; } = null;
+        public ISymbolTable<ITypeDescriptor> TypeEnv { get; set; } = null;
+        public ISymbolTable<ITypeDescriptor> NameEnv { get; set; } = null;
     }
 
-    public abstract class TypeName : TypeSpecifier { }
+    public abstract class TypeName : TypeDescriptor { }
 
-    public class ArraySpecifier : TypeSpecifier
+    public class ArrayDescriptor : TypeDescriptor
     {
-        public ArraySpecifier(AbstractNode abstractNode)
+        public ArrayDescriptor(AbstractNode abstractNode)
         {
             AddChild(abstractNode);
         }
@@ -96,7 +96,7 @@ namespace Proj3Semantics.ASTNodes
         }
 
         public override NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.NOT_SET;
-        public override ITypeSpecifier TypeSpecifierRef { get; set; }
+        public override ITypeDescriptor TypeDescriptorRef { get; set; }
     }
 
 
@@ -134,7 +134,7 @@ namespace Proj3Semantics.ASTNodes
         }
 
 
-        public virtual ITypeSpecifier TypeSpecifierRef
+        public virtual ITypeDescriptor TypeDescriptorRef
         {
             get { return this; }
             set
