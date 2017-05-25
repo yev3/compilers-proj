@@ -73,10 +73,6 @@ namespace Proj3Semantics.ASTNodes
     {
         public List<string> IdentifierList { get; set; } = new List<string>();
 
-        public QualifiedName(string s)
-        {
-            IdentifierList.Add(s);
-        }
         public QualifiedName(AbstractNode node)
         {
             AppendIdentifier(node);
@@ -103,27 +99,29 @@ namespace Proj3Semantics.ASTNodes
     /// <summary>
     /// (Page 303)
     /// </summary>
-    public class Identifier : QualifiedName
+    public class Identifier : TypeName
     {
         public string Name { get; set; }
-        public Identifier(string s) : base(s)
+        public Identifier(string s)
         {
             Name = s;
         }
+
+        public override NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.NOT_SET;
     }
 
 
-    public class Literal : AbstractNode, ITypeSpecifier
+    public class StringLiteral : AbstractNode, IPrimitiveTypeDescriptor
     {
         public string Name { get; set; }
-        public Literal(string s)
+        public StringLiteral(string s)
         {
             Name = s;
         }
 
         public NodeTypeCategory NodeTypeCategory
         {
-            get => NodeTypeCategory.Class;
+            get => NodeTypeCategory.Primitive;
             set => throw new NotImplementedException("You're not supposed to set a literal");
         }
 
@@ -134,10 +132,11 @@ namespace Proj3Semantics.ASTNodes
             set => throw new AccessViolationException("unable to set typeref of a string literal");
         }
 
-        public ISymbolTable<ITypeSpecifier> NameEnv
+
+        public VariablePrimitiveTypes VariableTypePrimitive
         {
-            get => null;
-            set => throw new AccessViolationException();
+            get => VariablePrimitiveTypes.String;
+            set => throw new NotImplementedException("You're not supposed to set a number literal");
         }
     }
 

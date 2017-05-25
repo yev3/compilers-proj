@@ -55,6 +55,15 @@ namespace Proj3Semantics.ASTNodes
         public abstract VariablePrimitiveTypes VariableTypePrimitive { get; set; }
     }
 
+    public class BuiltinTypeString : PrimitiveType
+    {
+        public override VariablePrimitiveTypes VariableTypePrimitive
+        {
+            get => VariablePrimitiveTypes.String;
+            set => throw new AccessViolationException();
+        }
+    }
+
     public class BuiltinTypeInt : PrimitiveType
     {
         public override VariablePrimitiveTypes VariableTypePrimitive

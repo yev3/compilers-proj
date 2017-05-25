@@ -1,5 +1,5 @@
 %namespace Proj3Semantics
-%using Proj3Semantics.AST_Nodes
+%using Proj3Semantics.ASTNodes
 %partial
 %parsertype TCCLParser
 %visibility public
@@ -15,7 +15,7 @@
 /* Terminals */
 %token AND ASTERISK BANG BOOLEAN CLASS NAMESPACE
 %token COLON COMMA ELSE EQUALS HAT
-%token IF INSTANCEOF INT IDENTIFIER STR_LITERAL INT_NUMBER
+%token IF INSTANCEOF INT STRING IDENTIFIER STR_LITERAL INT_NUMBER
 %token LBRACE LBRACKET LPAREN MINUSOP
 %token NEW NULL OP_EQ OP_GE OP_GT
 %token OP_LAND OP_LE OP_LOR OP_LT OP_NE
@@ -142,6 +142,7 @@ ArraySpecifier
 PrimitiveType               
     :   BOOLEAN                             { $$ = new BuiltinTypeBoolean(); }
     |   INT                                 { $$ = new BuiltinTypeInt(); }
+    |   STRING                              { $$ = new BuiltinTypeString(); }
     |   VOID                                { $$ = new BuiltinTypeVoid(); }
     ;
 

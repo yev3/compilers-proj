@@ -1,5 +1,5 @@
 %namespace Proj3Semantics
-%using Proj3Semantics.AST_Nodes;
+%using Proj3Semantics.ASTNodes;
 %scannertype TCCLScanner
 %visibility public
 %tokentype Token 
@@ -37,6 +37,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 "-"             { return (int)Token.MINUSOP; }
 "null"          { return (int)Token.NULL; }
 "int"           { return (int)Token.INT; }
+"string"        { return (int)Token.STRING; }
 "=="            { return (int)Token.OP_EQ; }
 "<"             { return (int)Token.OP_LT; }
 ":"             { return (int)Token.COLON; }
