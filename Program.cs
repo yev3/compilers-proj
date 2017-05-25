@@ -14,9 +14,21 @@ namespace Proj3Semantics
 
         private static List<string> test_files = new List<string>()
         {
-            @"TestFiles\good1p.txt",
-            //@"TestFiles\iftest.txt",
-            //@"TestFiles\logictest.txt"
+            "01hello.txt",
+            //"02errors1.txt",
+            //"03writenums.txt",
+            //"04twomethods0.txt",
+            //"05twomethods1.txt",
+            //"06compute.txt",
+            //"07iftest.txt",
+            //"08loop.txt",
+            //"ms3_good1p.txt",
+            //"ms3_iftest.txt",
+            //"ms3_logictest.txt",
+            //@"TestFiles\good1pms3.txt",
+            //@"TestFiles\iftestms3.txt",
+            //@"TestFiles\logictestms3.txt"
+            
         };
 
 
