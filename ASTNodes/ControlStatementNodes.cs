@@ -1,4 +1,4 @@
-﻿namespace Proj3Semantics.AST_Nodes
+﻿namespace Proj3Semantics.ASTNodes
 {
     public class SelectionStatement : AbstractNode { }
 

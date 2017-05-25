@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Proj3Semantics;
-using Proj3Semantics.AST_Nodes;
+using Proj3Semantics.ASTNodes;
 
 namespace Proj3Semantics
 {
@@ -140,7 +140,12 @@ namespace Proj3Semantics
         {
             Console.Write(node + ": ");
             using (OutColor.Magenta)
-                Console.WriteLine(node.ExprType);
+            {
+                Console.Write(node.ExprType);
+                Console.Write(" ");
+                PrintTypeDescr(node);
+                Console.WriteLine();
+            }
         }
 
 

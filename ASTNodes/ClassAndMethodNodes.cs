@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Proj3Semantics.AST_Nodes
+namespace Proj3Semantics.ASTNodes
 {
     public enum ModifierType { PUBLIC, STATIC, PRIVATE }
     public enum AccessorType { Public, Private }

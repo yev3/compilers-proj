@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Proj3Semantics.AST_Nodes
+namespace Proj3Semantics.ASTNodes
 {
     /// <summary>
     /// All AST nodes are subclasses of this node.  This node knows how to

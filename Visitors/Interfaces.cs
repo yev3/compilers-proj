@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.ModelBinding;
-using Proj3Semantics.AST_Nodes;
+using Proj3Semantics.ASTNodes;
 
 // found here:
 // http://www.ccs.neu.edu/home/riccardo/courses/csu370-fa07/lect4.pdf
@@ -21,6 +21,17 @@ namespace Proj3Semantics
     public enum VariablePrimitiveTypes
     {
         Boolean, Byte, Char, Short, Int, Long, Float, Double, NotPrimitive
+    }
+
+	public interface IVisitableNode
+	{
+	   void Accept(IReflectiveVisitor rv);
+	}
+
+    public interface IReflectiveVisitor
+    {
+        void Visit(dynamic node);
+        
     }
 
     public interface IHasOwnScope

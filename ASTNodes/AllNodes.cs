@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Proj3Semantics.AST_Nodes
+namespace Proj3Semantics.ASTNodes
 {
     public class CompilationUnit : AbstractNode
     {

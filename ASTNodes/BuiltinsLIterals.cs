@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Proj3Semantics.AST_Nodes
+namespace Proj3Semantics.ASTNodes
 {
     // BUILT INS
     // =========================================

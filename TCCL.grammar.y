@@ -313,8 +313,8 @@ ArithmeticUnaryOperator
     ;
                             
 EvalExpression           
-    :   QualifiedName                   { $$ = new EvalExpr(EvaluationNodeTypes.QualifiedName, $1);}   
-    |   QualifiedPrimaryExpr            { $$ = new EvalExpr(EvaluationNodeTypes.QualifiedPrimaryExpr, $1);}
+    :   QualifiedName                   { $$ = new EvalExpr($1);}   
+    |   QualifiedPrimaryExpr            { $$ = new EvalExpr($1);}
     ;
 
 QualifiedPrimaryExpr                 

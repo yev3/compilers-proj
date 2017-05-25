@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
-using Proj3Semantics.AST_Nodes;
+using Proj3Semantics.ASTNodes;
 
 namespace Proj3Semantics
 {
@@ -37,8 +37,30 @@ namespace Proj3Semantics
         {
             if (node == null) return;
 
-            _log.Trace(this.GetType().Name + " is visiting " + node);
             VisitNode(node);
+        }
+
+        // continue checking the tree until we find something interesting
+        private void VisitNode(AbstractNode node)
+        {
+            _log.Trace("visiting children of" + (node as AbstractNode)?.ToDebugString());
+            foreach (AbstractNode child in node)
+            {
+                Visit(child);
+            }
+        }
+
+        private void VisitNode(ClassDeclaration cdecl)
+        {
+            _log.Info("Found a class, visiting Methods of" + (cdecl as AbstractNode)?.ToDebugString());
+            Visit(cdecl.Methods);
+        }
+
+        private void VisitNode(MethodDeclaration mdecl)
+        {
+            _log.Info("Found a class method body, visiting block " + (mdecl as AbstractNode)?.ToDebugString());
+            var blockVisitor = new TypeCheckingVisitor(mdecl);
+            blockVisitor.Visit(mdecl.MethodBody);
         }
 
 
@@ -57,7 +79,7 @@ namespace Proj3Semantics
                     VisitAssignment(expr);
                     return;
                 case ExprType.EVALUATION:
-                    VisitAssignment(expr);
+                    VisitEvaluation(expr);
                     return;
                 case ExprType.LOGICAL_OR:
                     break;
@@ -110,10 +132,6 @@ namespace Proj3Semantics
             _log.Trace("Checking Evaluation..", expr);
             
         }
-        private void VisitNode(AbstractNode node)
-        {
-            _log.Trace("Visiting {0}, no action.", node);
-        }
     }
 
 
@@ -147,7 +165,7 @@ namespace Proj3Semantics
         {
             if (node == null) return;
 
-            _log.Trace(this.GetType().Name + " is visiting " + node);
+            _log.Trace("visiting " + node);
             VisitNode(node);
         }
 
@@ -159,7 +177,7 @@ namespace Proj3Semantics
 
         private void VisitNode(AbstractNode node)
         {
-            _log.Trace("Visiting {0}, no action.", node);
+            _log.Info("Visiting {0}, no action.", node);
         }
     }
 }
