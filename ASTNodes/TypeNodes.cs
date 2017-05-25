@@ -48,16 +48,16 @@ namespace Proj3Semantics.ASTNodes
     public abstract class TypeDescriptor : AbstractNode, ITypeDescriptor
     {
         public abstract NodeTypeCategory NodeTypeCategory { get; set; }
-        public virtual ITypeDescriptor TypeDescriptorRef { get; set; } = null;
+        public abstract ITypeDescriptor TypeDescriptorRef { get; set; }
         public ISymbolTable<ITypeDescriptor> TypeEnv { get; set; } = null;
         public ISymbolTable<ITypeDescriptor> NameEnv { get; set; } = null;
     }
 
     public abstract class TypeName : TypeDescriptor { }
 
-    public class ArrayDescriptor : TypeDescriptor
+    public class ArraySpecifier : TypeDescriptor
     {
-        public ArrayDescriptor(AbstractNode abstractNode)
+        public ArraySpecifier(AbstractNode abstractNode)
         {
             AddChild(abstractNode);
         }
@@ -71,6 +71,8 @@ namespace Proj3Semantics.ASTNodes
                     "unable to set node type cat");
             }
         }
+
+        public override ITypeDescriptor TypeDescriptorRef { get; set; } = null;
     }
 
     public class QualifiedName : TypeName
@@ -112,6 +114,7 @@ namespace Proj3Semantics.ASTNodes
         }
 
         public override NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.NOT_SET;
+        public override ITypeDescriptor TypeDescriptorRef { get; set; } = null;
     }
 
 

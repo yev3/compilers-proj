@@ -12,7 +12,7 @@ namespace Proj3Semantics.ASTNodes
     public abstract class BuiltInType : TypeDescriptor
     {
         public abstract override NodeTypeCategory NodeTypeCategory { get; set; }
-        public sealed override ITypeDescriptor TypeDescriptorRef
+        public override ITypeDescriptor TypeDescriptorRef
         {
             get { return this; }
             set
@@ -37,6 +37,21 @@ namespace Proj3Semantics.ASTNodes
         {
             get { return NodeTypeCategory.This; }
             set { throw new InvalidOperationException(); }
+        }
+    }
+
+    public class BuiltInTypeObject : BuiltInType, IPrimitiveTypeDescriptor
+    {
+        public override NodeTypeCategory NodeTypeCategory
+        {
+            get { return NodeTypeCategory.Primitive; }
+            set { throw new InvalidOperationException(); }
+        }
+
+        public VariablePrimitiveTypes VariableTypePrimitive
+        {
+            get { return VariablePrimitiveTypes.Object; }
+            set { throw new AccessViolationException(); }
         }
     }
 
@@ -104,16 +119,6 @@ namespace Proj3Semantics.ASTNodes
             }
         }
 
-        public ITypeDescriptor TypeDescriptorRef
-        {
-            get { return this; }
-            set
-            {
-                throw new AccessViolationException(
-                    "unable to set typeref of a builtin");
-            }
-        }
-
 
         public VariablePrimitiveTypes VariableTypePrimitive
         {
@@ -130,5 +135,18 @@ namespace Proj3Semantics.ASTNodes
             get { return null; }
             set { throw new AccessViolationException(); }
         }
+
+        public override ITypeDescriptor TypeDescriptorRef
+        {
+            get { return this; }
+            set
+            {
+                throw new AccessViolationException(
+                    "unable to set typeref of a builtin");
+            }
+        }
     }
+
+
+
 }

@@ -180,7 +180,13 @@ namespace Proj3Semantics
                 Debug.Assert(calledArgs != null);
                 foreach (AbstractNode arg in calledArgs)
                 {
-                    
+                    // each argument is an expression
+                    Expression expr = arg as Expression;
+                    if (expr == null) throw new ArgumentNullException(nameof(expr));
+
+                    // type check this expression
+                    VisitNode(expr);
+
                 }
                 
                 // TODO: HERE
