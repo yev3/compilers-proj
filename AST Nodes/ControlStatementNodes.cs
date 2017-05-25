@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Proj3Semantics;
-
-namespace Proj3Semantics.Nodes
+﻿namespace Proj3Semantics.AST_Nodes
 {
     public class SelectionStatement : AbstractNode { }
 

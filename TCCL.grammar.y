@@ -1,5 +1,5 @@
 %namespace Proj3Semantics
-%using Proj3Semantics.Nodes
+%using Proj3Semantics.AST_Nodes
 %partial
 %parsertype TCCLParser
 %visibility public
@@ -15,7 +15,7 @@
 /* Terminals */
 %token AND ASTERISK BANG BOOLEAN CLASS NAMESPACE
 %token COLON COMMA ELSE EQUALS HAT
-%token IF INSTANCEOF INT IDENTIFIER LITERAL INT_NUMBER
+%token IF INSTANCEOF INT IDENTIFIER STR_LITERAL INT_NUMBER
 %token LBRACE LBRACKET LPAREN MINUSOP
 %token NEW NULL OP_EQ OP_GE OP_GT
 %token OP_LAND OP_LE OP_LOR OP_LT OP_NE
@@ -285,26 +285,26 @@ ArgumentList
     ;
 
 Expression                  
-    :   QualifiedName EQUALS Expression     { $$ = new Expression($1, ExprType.ASSIGNMENT, $3); }
-    |   Expression OP_LOR Expression        { $$ = new Expression($1, ExprType.LOGICAL_OR, $3); }   /* short-circuit OR  */  
-    |   Expression OP_LAND Expression       { $$ = new Expression($1, ExprType.LOGICAL_AND, $3); }   /* short-circuit AND */  
-    |   Expression PIPE Expression          { $$ = new Expression($1, ExprType.PIPE, $3); }                
-    |   Expression HAT Expression           { $$ = new Expression($1, ExprType.HAT, $3); }                
-    |   Expression AND Expression           { $$ = new Expression($1, ExprType.AND, $3); }                
-    |   Expression OP_EQ Expression         { $$ = new Expression($1, ExprType.EQUALS, $3); }                
-    |   Expression OP_NE Expression         { $$ = new Expression($1, ExprType.NOT_EQUALS, $3); }                
-    |   Expression OP_GT Expression         { $$ = new Expression($1, ExprType.GREATER_THAN, $3); }                
-    |   Expression OP_LT Expression         { $$ = new Expression($1, ExprType.LESS_THAN, $3); }                
-    |   Expression OP_LE Expression         { $$ = new Expression($1, ExprType.LESS_EQUAL, $3); }                
-    |   Expression OP_GE Expression         { $$ = new Expression($1, ExprType.GREATER_EQUAL, $3); }                
-    |   Expression PLUSOP Expression        { $$ = new Expression($1, ExprType.PLUSOP, $3); }                
-    |   Expression MINUSOP Expression       { $$ = new Expression($1, ExprType.MINUSOP, $3); }                
-    |   Expression ASTERISK Expression      { $$ = new Expression($1, ExprType.ASTERISK, $3); }                
-    |   Expression RSLASH Expression        { $$ = new Expression($1, ExprType.RSLASH, $3); }                
-    |   Expression PERCENT Expression       { $$ = new Expression($1, ExprType.PERCENT, $3); }   /* remainder */
+    :   QualifiedName EQUALS Expression     { $$ = new AssignExpr($1, $3); }
+    |   Expression OP_LOR Expression        { $$ = new BinaryExpr($1, ExprType.LOGICAL_OR, $3); }   /* short-circuit OR  */  
+    |   Expression OP_LAND Expression       { $$ = new BinaryExpr($1, ExprType.LOGICAL_AND, $3); }   /* short-circuit AND */  
+    |   Expression PIPE Expression          { $$ = new BinaryExpr($1, ExprType.PIPE, $3); }                
+    |   Expression HAT Expression           { $$ = new BinaryExpr($1, ExprType.HAT, $3); }                
+    |   Expression AND Expression           { $$ = new BinaryExpr($1, ExprType.AND, $3); }                
+    |   Expression OP_EQ Expression         { $$ = new BinaryExpr($1, ExprType.EQUALS, $3); }                
+    |   Expression OP_NE Expression         { $$ = new BinaryExpr($1, ExprType.NOT_EQUALS, $3); }                
+    |   Expression OP_GT Expression         { $$ = new BinaryExpr($1, ExprType.GREATER_THAN, $3); }                
+    |   Expression OP_LT Expression         { $$ = new BinaryExpr($1, ExprType.LESS_THAN, $3); }                
+    |   Expression OP_LE Expression         { $$ = new BinaryExpr($1, ExprType.LESS_EQUAL, $3); }                
+    |   Expression OP_GE Expression         { $$ = new BinaryExpr($1, ExprType.GREATER_EQUAL, $3); }                
+    |   Expression PLUSOP Expression        { $$ = new BinaryExpr($1, ExprType.PLUSOP, $3); }                
+    |   Expression MINUSOP Expression       { $$ = new BinaryExpr($1, ExprType.MINUSOP, $3); }                
+    |   Expression ASTERISK Expression      { $$ = new BinaryExpr($1, ExprType.ASTERISK, $3); }                
+    |   Expression RSLASH Expression        { $$ = new BinaryExpr($1, ExprType.RSLASH, $3); }                
+    |   Expression PERCENT Expression       { $$ = new BinaryExpr($1, ExprType.PERCENT, $3); }   /* remainder */
     |   ArithmeticUnaryOperator Expression  %prec UNARY
                                             { $$ = new NotImplemented("ArithmeticUnaryOperator Expression  %prec UNARY"); }
-    |   PrimaryExpression                   { $$ = new Expression($1, ExprType.EVALUATION); }
+    |   EvalExpression                      { $$ = $1; }
     ;
 
 ArithmeticUnaryOperator     
@@ -312,14 +312,14 @@ ArithmeticUnaryOperator
     |   MINUSOP                         { $$ = new NotImplemented("ArithmeticUnaryOperator"); }
     ;
                             
-PrimaryExpression           
-    :   QualifiedName                   { $$ = $1;}   
+EvalExpression           
+    :   QualifiedName                   { $$ = new EvalExpr(EvalExprType.QualifiedName, $1);}   
     |   NotJustName                     { $$ = $1;}
     ;
 
 NotJustName                 
-    :   SpecialName                     { $$ = $1;}
-    |   ComplexPrimary                  { $$ = $1;}
+    :   SpecialName                     { $$ = new EvalExpr(EvalExprType.SpecialName, $1); }
+    |   ComplexPrimary                  { $$ = new EvalExpr(EvalExprType.ComplexPrimary, $1); }
     ;
 
 ComplexPrimary              
@@ -328,7 +328,7 @@ ComplexPrimary
     ;
 
 ComplexPrimaryNoParenthesis 
-    :   LITERAL                         { $$ = $1;}
+    :   STR_LITERAL                     { $$ = $1;}
     |   Number                          { $$ = $1;}
     |   FieldAccess                     { $$ = $1;}    
     |   MethodCall                      { $$ = $1;}    
@@ -351,8 +351,8 @@ MethodReference
     ;
 
 SpecialName                 
-    :   THIS                            { $$ = new SpecialName(SpecialNameType.THIS);}
-    |   NULL                            { $$ = new SpecialName(SpecialNameType.NULL);}
+    :   THIS                            { $$ = new BuiltInTypeThis();}
+    |   NULL                            { $$ = new BuiltInTypeNull();}
     ;
 
 Identifier                  

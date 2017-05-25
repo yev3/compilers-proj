@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AST Nodes\AllNodes.cs" />
+    <Compile Include="AST Nodes\BuiltinsLIterals.cs" />
     <Compile Include="AST Nodes\ClassAndMethodNodes.cs" />
     <Compile Include="AST Nodes\ControlStatementNodes.cs" />
     <Compile Include="AST Nodes\TypeNodes.cs" />
@@ -85,7 +86,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SemanticsVisitor.cs" />
     <Compile Include="ShiftReduceParserCode.cs" />
-    <Compile Include="AbstractNode.cs" />
+    <Compile Include="AST Nodes\AbstractNode.cs" />
     <Compile Include="IVisitableNode.cs" />
     <Compile Include="SymbolAttributes.cs" />
     <Compile Include="SymTypeDescr.cs" />

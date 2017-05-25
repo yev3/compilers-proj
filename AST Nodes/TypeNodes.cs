@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using Proj3Semantics;
 
-namespace Proj3Semantics.Nodes
+namespace Proj3Semantics.AST_Nodes
 {
     // TYPE DECLARATIONS
 
@@ -118,18 +112,6 @@ namespace Proj3Semantics.Nodes
         }
     }
 
-    // TODO: fix
-    public enum SpecialNameType { THIS, NULL }
-
-    public class SpecialName : NotJustName
-    {
-        public SpecialNameType SpecialType { get; set; }
-        public SpecialName(SpecialNameType specialType)
-        {
-            SpecialType = specialType;
-        }
-
-    }
 
     public class Literal : AbstractNode, ITypeSpecifier
     {
@@ -159,90 +141,6 @@ namespace Proj3Semantics.Nodes
         }
     }
 
-    public abstract class PrimitiveType : TypeSpecifier, IPrimitiveTypeDescriptor
-    {
-        public override NodeTypeCategory NodeTypeCategory
-        {
-            get => NodeTypeCategory.Primitive;
-            set => throw new InvalidOperationException();
-        }
 
-        public abstract VariablePrimitiveTypes VariableTypePrimitive { get; set; }
-    }
-
-    public class BuiltinTypeVoid : TypeSpecifier
-    {
-        public override NodeTypeCategory NodeTypeCategory
-        {
-            get => NodeTypeCategory.Void;
-            set => throw new InvalidOperationException();
-        }
-
-        public override ITypeSpecifier TypeSpecifierRef
-        {
-            get => this;
-            set => throw new AccessViolationException("unable to set typeref of a builtin");
-        }
-    }
-
-    public class BuiltinTypeInt : PrimitiveType
-    {
-        public override ITypeSpecifier TypeSpecifierRef
-        {
-            get => this;
-            set => throw new AccessViolationException("unable to set typeref of a builtin");
-        }
-
-        public override VariablePrimitiveTypes VariableTypePrimitive
-        {
-            get => VariablePrimitiveTypes.Int;
-            set => throw new NotImplementedException();
-        }
-    }
-
-    public class BuiltinTypeBoolean : PrimitiveType
-    {
-        public override VariablePrimitiveTypes VariableTypePrimitive
-        {
-            get => VariablePrimitiveTypes.Boolean;
-            set => throw new NotImplementedException();
-        }
-
-        public override ITypeSpecifier TypeSpecifierRef
-        {
-            get => this;
-            set => throw new AccessViolationException("unable to set typeref of a builtin");
-        }
-    }
-
-    public class Number : ComplexPrimary, IPrimitiveTypeDescriptor
-    {
-        public int Value { get; }
-        public Number(int n) => Value = n;
-
-        public NodeTypeCategory NodeTypeCategory
-        {
-            get => NodeTypeCategory.Primitive;
-            set => throw new NotImplementedException("You're not supposed to set a number literal");
-        }
-
-        public ITypeSpecifier TypeSpecifierRef
-        {
-            get => this;
-            set => throw new AccessViolationException("unable to set typeref of a builtin");
-        }
-
-
-        public VariablePrimitiveTypes VariableTypePrimitive
-        {
-            get => VariablePrimitiveTypes.Int;
-            set => throw new NotImplementedException("You're not supposed to set a number literal");
-        }
-        public ISymbolTable<ITypeSpecifier> NameEnv
-        {
-            get => null;
-            set => throw new AccessViolationException();
-        }
-    }
 
 }
