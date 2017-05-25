@@ -119,8 +119,12 @@ namespace Proj3Semantics
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            _log.Trace("Unsupported expression type: " + expr.ExprType.ToString());
+            _log.Error("Unsupported expression type: " + expr.ExprType.ToString());
+        }
 
+        void VisitNode(BuiltInType node)
+        {
+            _log.Trace("Checking a primitive node, nothing needs to be done for " + (node as AbstractNode)?.ToDebugString());
         }
 
         private void VisitAssignment(Expression expr)

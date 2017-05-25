@@ -118,44 +118,12 @@ namespace Proj3Semantics.ASTNodes
     }
 
 
-    public class StringLiteral : AbstractNode, IPrimitiveTypeDescriptor
+    public class StringLiteral : BuiltinTypeString
     {
         public string Name { get; set; }
         public StringLiteral(string s)
         {
             Name = s;
-        }
-
-        public NodeTypeCategory NodeTypeCategory
-        {
-            get { return NodeTypeCategory.Primitive; }
-            set
-            {
-                throw new NotImplementedException(
-                    "You're not supposed to set a literal");
-            }
-        }
-
-
-        public virtual ITypeDescriptor TypeDescriptorRef
-        {
-            get { return this; }
-            set
-            {
-                throw new AccessViolationException(
-                    "unable to set typeref of a string literal");
-            }
-        }
-
-
-        public VariablePrimitiveTypes VariableTypePrimitive
-        {
-            get { return VariablePrimitiveTypes.String; }
-            set
-            {
-                throw new NotImplementedException(
-                    "You're not supposed to set a number literal");
-            }
         }
     }
 
