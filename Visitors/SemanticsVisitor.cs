@@ -12,7 +12,7 @@ using Parameter = Proj3Semantics.ASTNodes.Parameter;
 
 namespace Proj3Semantics
 {
-    using IEnv = ISymbolTable<ITypeSpecifier>;
+    using IEnv = ISymbolTable<ITypeDescriptor>;
     public abstract class SemanticsVisitor : IReflectiveVisitor
     {
         protected static Logger _log = LogManager.GetCurrentClassLogger();

@@ -8,7 +8,7 @@ using Proj3Semantics.ASTNodes;
 
 namespace Proj3Semantics
 {
-    using IEnv = ISymbolTable<ITypeSpecifier>;
+    using IEnv = ISymbolTable<ITypeDescriptor>;
 
 
     /// <summary>
@@ -31,6 +31,11 @@ namespace Proj3Semantics
             TypeEnv = typeEnv;
         }
 
+        public TypeVisitor(IHasOwnScope refWithScope)
+        {
+            TypeEnv = refWithScope.TypeEnv;
+        }
+
         public override void Visit(dynamic node)
         {
             _log.Trace("    -- dispatching " + node);
@@ -46,17 +51,17 @@ namespace Proj3Semantics
         {
             _log.Info("Type visitor is visiting: " + id);
 
-            ITypeSpecifier entry = TypeEnv.Lookup(id.Name);
+            ITypeDescriptor entry = TypeEnv.Lookup(id.Name);
             if (entry != null)
             {
                 id.NodeTypeCategory = entry.NodeTypeCategory;
-                id.TypeSpecifierRef = entry.TypeSpecifierRef;
+                id.TypeDescriptorRef = entry.TypeDescriptorRef;
             }
             else
             {
                 CompilerErrors.Add(SemanticErrorTypes.IdentifierNotTypeName, id.Name);
                 id.NodeTypeCategory = NodeTypeCategory.ErrorType;
-                id.TypeSpecifierRef = null;
+                id.TypeDescriptorRef = null;
             }
         }
         private void VisitNode(PrimitiveType arrayDef)
@@ -68,7 +73,7 @@ namespace Proj3Semantics
         {
             var curTypeEnv = TypeEnv;
             string curScopeName = "";
-            ITypeSpecifier curResult = null;
+            ITypeDescriptor curResult = null;
 
             foreach (string curIdStr in qname.IdentifierList)
             {
@@ -81,7 +86,7 @@ namespace Proj3Semantics
                         errMsg += " in " + curScopeName;
                     CompilerErrors.Add(SemanticErrorTypes.InvalidQualifier, errMsg);
                     qname.NodeTypeCategory = NodeTypeCategory.ErrorType;
-                    qname.TypeSpecifierRef = null;
+                    qname.TypeDescriptorRef = null;
                     return;
                 }
 
@@ -92,11 +97,11 @@ namespace Proj3Semantics
             if (curResult != null)
             {
                 qname.NodeTypeCategory = curResult.NodeTypeCategory;
-                qname.TypeSpecifierRef = curResult.TypeSpecifierRef;
+                qname.TypeDescriptorRef = curResult.TypeDescriptorRef;
             }
         }
 
-        private void VisitNode(ArraySpecifier arrayDef)
+        private void VisitNode(ArrayDescriptor arrayDef)
         {
             throw new NotImplementedException("Arrays are not supported in this release");
         }

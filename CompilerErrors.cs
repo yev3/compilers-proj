@@ -17,7 +17,8 @@ namespace Proj3Semantics
         DuplicateClassDecl,
         InvalidQualifier,
         DuplicateNamespaceDef,
-        DuplicateParamName
+        DuplicateParamName,
+        NoMethodWithNumArgs
     }
 
     public static class SemanticErrorTypeMessages
@@ -40,6 +41,8 @@ namespace Proj3Semantics
                     return "Duplicate namespace declaration.";
                 case DuplicateParamName:
                     return "Duplicate method parameter name declaration.";
+                case NoMethodWithNumArgs:
+                    return "No method found with the required number of args.";
                 default:
                     throw new NotImplementedException("TODO: add a text message for the error type");
             }

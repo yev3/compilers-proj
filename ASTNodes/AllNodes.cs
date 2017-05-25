@@ -41,12 +41,12 @@ namespace Proj3Semantics.ASTNodes
         NOT_EQUALS, GREATER_THAN, LESS_THAN, LESS_EQUAL, GREATER_EQUAL, PLUSOP, MINUSOP,
         ASTERISK, RSLASH, PERCENT, UNARY, EVALUATION
     }
-    public abstract class Expression : ExpressionStatement, ITypeSpecifier
+    public abstract class Expression : ExpressionStatement, ITypeDescriptor
     {
         public abstract ExprType ExprType { get; set; }
 
         public NodeTypeCategory NodeTypeCategory { get; set; }
-        public ITypeSpecifier TypeSpecifierRef { get; set; }
+        public ITypeDescriptor TypeDescriptorRef { get; set; }
     }
 
     public class BinaryExpr : Expression
@@ -87,22 +87,33 @@ namespace Proj3Semantics.ASTNodes
 
 
 
-    public class QualifiedPrimaryExpr : AbstractNode { }
+    public class QualifiedPrimaryExpr : AbstractNode, ITypeDescriptor
+    {
+        public NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.NOT_SET;
+        public ITypeDescriptor TypeDescriptorRef { get; set; } = null;
+    }
 
     public class ComplexPrimary : QualifiedPrimaryExpr { }
 
     public class MethodCall : ComplexPrimary
     {
+        public AbstractNode MethodReference { get; set; }
+        public ArgumentList ArgumentList { get; set; } = null;
+        public bool HasArguments => ArgumentList == null;
 
-        public MethodCall(AbstractNode abstractNode)
+        public MethodCall(AbstractNode methodReference)
         {
-            AddChild(abstractNode);
+            MethodReference = methodReference;
+            AddChild(MethodReference);
         }
 
         public MethodCall(AbstractNode methodRef, AbstractNode argList)
         {
-            AddChild(methodRef);
-            AddChild(argList);
+            MethodReference = methodRef;
+            ArgumentList = argList as ArgumentList;
+            if (ArgumentList == null) throw new NullReferenceException(typeof(ArgumentList).ToString());
+            AddChild(MethodReference);
+            AddChild(ArgumentList);
         }
     }
 
@@ -145,10 +156,12 @@ namespace Proj3Semantics.ASTNodes
         }
     }
 
-    public class NamespaceDecl : AbstractNode, ITypeSpecifier, IHasOwnScope, INamedType
+    public class NamespaceDecl : AbstractNode, ITypeDescriptor, IHasOwnScope, INamedType
     {
-        public ISymbolTable<ITypeSpecifier> NameEnv { get; set; } = null;
-        public ISymbolTable<ITypeSpecifier> TypeEnv { get; set; } = null;
+        private AbstractNode abstractNode;
+
+        public ISymbolTable<ITypeDescriptor> NameEnv { get; set; } = null;
+        public ISymbolTable<ITypeDescriptor> TypeEnv { get; set; } = null;
         public string Name { get; set; }
         public NamespaceBody NamespaceBody { get; set; }
 
@@ -164,8 +177,17 @@ namespace Proj3Semantics.ASTNodes
             AddChild(NamespaceBody);
         }
 
+        public NamespaceDecl(AbstractNode body)
+        {
+            Name = "";
+            NamespaceBody = body as NamespaceBody;
+            if (NamespaceBody == null) throw new ArgumentNullException();
+
+            AddChild(NamespaceBody);
+        }
+
         public NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.NamespaceDecl;
-        public ITypeSpecifier TypeSpecifierRef
+        public ITypeDescriptor TypeDescriptorRef
         {
             get { return this; }
             set { throw new AccessViolationException(); }

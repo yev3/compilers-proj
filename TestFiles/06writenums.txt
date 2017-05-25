@@ -2,8 +2,8 @@
 /* computation with constants */
 
 public class Writenums {
-	public void Main () {
-		WriteLine(5);
-		WriteLine(5*2+6/4);
-	}
+    public void Main () {
+        WriteLine(5);
+        WriteLine(5 * 2 + 6 / 4);
+    }
 }

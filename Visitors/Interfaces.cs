@@ -11,7 +11,7 @@ using Proj3Semantics.ASTNodes;
 
 namespace Proj3Semantics
 {
-    using IEnv = ISymbolTable<ITypeSpecifier>;
+    using IEnv = ISymbolTable<ITypeDescriptor>;
 
     public enum NodeTypeCategory
     {
@@ -20,7 +20,7 @@ namespace Proj3Semantics
 
     public enum VariablePrimitiveTypes
     {
-        Boolean, Byte, Char, Short, Int, Long, Float, Double, NotPrimitive,
+        Object, Boolean, Byte, Char, Short, Int, Long, Float, Double, NotPrimitive,
         String
     }
 
@@ -44,11 +44,11 @@ namespace Proj3Semantics
     /// <summary>
     /// Specifies if the node has type information attached to it
     /// </summary>
-    public interface ITypeSpecifier 
+    public interface ITypeDescriptor 
     {
         // every type belongs to some kind of a category
         NodeTypeCategory NodeTypeCategory { get; set; }
-        ITypeSpecifier TypeSpecifierRef { get; set; }
+        ITypeDescriptor TypeDescriptorRef { get; set; }
     }
 
 
@@ -57,7 +57,7 @@ namespace Proj3Semantics
         string Name { get; set; }
     }
 
-    public interface IPrimitiveTypeDescriptor : ITypeSpecifier
+    public interface IPrimitiveTypeDescriptor : ITypeDescriptor
     {
         VariablePrimitiveTypes VariableTypePrimitive { get; set; }
     }
@@ -69,12 +69,12 @@ namespace Proj3Semantics
 
     }
 
-    public interface IClassTypeDescriptor : ITypeSpecifier, ITypeHasModifiers, INamedType
+    public interface IClassTypeDescriptor : ITypeDescriptor, ITypeHasModifiers, INamedType
     {
         IClassTypeDescriptor ParentClass { get; set; }
     }
 
-    public interface IClassMember : ITypeSpecifier, ITypeHasModifiers, INamedType
+    public interface IClassMember : ITypeDescriptor, ITypeHasModifiers, INamedType
     {
 
     }
@@ -85,7 +85,8 @@ namespace Proj3Semantics
 
     public interface IClassMethodTypeDesc : IClassMember
     {
-        ITypeSpecifier ReturnTypeNode { get; set; }
+        List<Parameter> MethodParameters { get; set; }
+        ITypeDescriptor ReturnTypeNode { get; set; }
     }
 
 }

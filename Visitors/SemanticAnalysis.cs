@@ -8,7 +8,7 @@ using Proj3Semantics.ASTNodes;
 
 namespace Proj3Semantics
 {
-    using IEnv = ISymbolTable<ITypeSpecifier>;
+    using IEnv = ISymbolTable<ITypeDescriptor>;
 
     // perform semantic analysis on the compilation unit
     public class SemanticAnalysis
@@ -16,8 +16,8 @@ namespace Proj3Semantics
 
         public static void Run(CompilationUnit cu)
         {
-            IEnv cuTypeEnv = new SymbolTable<ITypeSpecifier>();
-            IEnv cuNameEnv = new SymbolTable<ITypeSpecifier>();
+            IEnv cuTypeEnv = new SymbolTable<ITypeDescriptor>();
+            IEnv cuNameEnv = new SymbolTable<ITypeDescriptor>();
 
             var preDeclVisitor = new FirstPassDeclVisitor(cuTypeEnv, cuNameEnv);
             preDeclVisitor.Visit(cu);

@@ -1,0 +1,7 @@
++- <Block>
+  +- <EvalExpr>: EVALUATION {NOT_SET, tref=**NULL**}
+     +- <MethodCall>
+        +- <BuiltinCallWriteLine>   {NOT_SET, tref=<BuiltinCallWriteLine>}
+        +- <ArgumentList>
+           +- <EvalExpr>: EVALUATION {NOT_SET, tref=**NULL**}
+              +- <StringLiteral>: "Hello, World"
