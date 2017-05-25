@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.UI.WebControls;
 using NLog;
-using Proj3Semantics.AST_Nodes;
-using Parameter = Proj3Semantics.AST_Nodes.Parameter;
+using Proj3Semantics.ASTNodes;
+using Parameter = Proj3Semantics.ASTNodes.Parameter;
 
 namespace Proj3Semantics
 {

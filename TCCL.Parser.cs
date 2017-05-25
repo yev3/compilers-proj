@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Proj3Semantics.AST_Nodes;
+using Proj3Semantics.ASTNodes;
 
 namespace Proj3Semantics
 {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
-using Proj3Semantics.AST_Nodes;
+using Proj3Semantics.ASTNodes;
 
 namespace Proj3Semantics
 {

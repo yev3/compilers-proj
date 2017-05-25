@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
-using Proj3Semantics.AST_Nodes;
+using Proj3Semantics.ASTNodes;
 
 namespace Proj3Semantics
 {
@@ -137,7 +137,6 @@ namespace Proj3Semantics
 
             var methodVisitor = new DeclarationVisitor(mdecl);
             methodVisitor.Visit(mdecl.ParameterList);
-            methodVisitor.Visit(mdecl.MethodBody);
         }
 
 
@@ -174,14 +173,12 @@ namespace Proj3Semantics
 
         private void VisitNode(Block body)
         {
-            foreach (AbstractNode node in body)
-                Visit(node);
+            _log.Error("Why are we visiting a body in decl?");
         }
 
         private void VisitNode(Expression expr)
         {
-            var typeCheckingVisitor = new TypeCheckingVisitor(this);
-            typeCheckingVisitor.Visit(expr);
+            _log.Error("Why are we visiting an expr in decl?");
         }
 
 

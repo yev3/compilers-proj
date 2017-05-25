@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
-using Proj3Semantics.AST_Nodes;
+using Proj3Semantics.ASTNodes;
 
 namespace Proj3Semantics
 {
@@ -87,6 +87,7 @@ namespace Proj3Semantics
 
             var modifiers = cdecl.Modifiers.ModifierTokens;
             ProcessModifierTokens(cdecl, modifiers, name);
+            cdecl.Remove(cdecl.Modifiers);
 
             // open new scope
             var classTypeEnv = TypeEnv.GetNewLevel(name);
@@ -99,6 +100,7 @@ namespace Proj3Semantics
             visitor.Visit(cdecl.Methods);
 
         }
+
 
         private void VisitNode(ClassFields fields)
         {
@@ -121,6 +123,7 @@ namespace Proj3Semantics
             if (typeNameDecl == null) throw new NullReferenceException("Declared class field is not ITypeInfo.");
 
             var modifierTokens = fieldDecl.Modifiers.ModifierTokens;
+            fieldDecl.Remove(fieldDecl.Modifiers);
 
             // lookup the types
             // TODO: done on the second pass?
@@ -167,6 +170,7 @@ namespace Proj3Semantics
             string name = mdecl.Name;
             var modifierTokens = mdecl.Modifiers.ModifierTokens;
             ProcessModifierTokens(mdecl, modifierTokens, name);
+            mdecl.Remove(mdecl.Modifiers);
 
             // TODO: second pass?
             //TypeSpecifier retType = mdecl.ReturnType;
