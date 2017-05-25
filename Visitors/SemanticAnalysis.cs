@@ -29,8 +29,6 @@ namespace Proj3Semantics
             typeCheckVisitor.Visit(cu);
 
 
-
-
         }
 
     }

@@ -11,6 +11,7 @@ namespace Proj3Semantics
     using ErrList = List<CompilerError>;
     public enum SemanticErrorTypes
     {
+        FeatureNotImplemented,
         VariableAlreadyDeclared,
         IdentifierNotTypeName,
         InconsistentModifiers,
@@ -18,7 +19,9 @@ namespace Proj3Semantics
         InvalidQualifier,
         DuplicateNamespaceDef,
         DuplicateParamName,
-        NoMethodWithNumArgs
+        NoMethodWithNumArgs,
+        BuiltinNotAssignable,
+        InvalidFuncArg
     }
 
     public static class SemanticErrorTypeMessages
@@ -27,6 +30,8 @@ namespace Proj3Semantics
         {
             switch (type)
             {
+                case FeatureNotImplemented:
+                    return "This feature is not implemented.";
                 case VariableAlreadyDeclared:
                     return "Variable is already declared.";
                 case IdentifierNotTypeName:
@@ -43,6 +48,10 @@ namespace Proj3Semantics
                     return "Duplicate method parameter name declaration.";
                 case NoMethodWithNumArgs:
                     return "No method found with the required number of args.";
+                case BuiltinNotAssignable:
+                    return "Built in type is not assignable.";
+                case InvalidFuncArg:
+                    return "Invalid function argument.";
                 default:
                     throw new NotImplementedException("TODO: add a text message for the error type");
             }

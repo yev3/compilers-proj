@@ -101,7 +101,7 @@ namespace Proj3Semantics.ASTNodes
         }
     }
 
-    public class NumberLiteral : ComplexPrimary, IPrimitiveTypeDescriptor
+    public class NumberLiteral : PrimitiveType, IPrimitiveTypeDescriptor
     {
         public int Value { get; }
         public NumberLiteral(int n)
@@ -109,18 +109,8 @@ namespace Proj3Semantics.ASTNodes
             Value = n;
         }
 
-        public NodeTypeCategory NodeTypeCategory
-        {
-            get { return NodeTypeCategory.Primitive; }
-            set
-            {
-                throw new NotImplementedException(
-                    "You're not supposed to set a number literal");
-            }
-        }
 
-
-        public VariablePrimitiveTypes VariableTypePrimitive
+        public override VariablePrimitiveTypes VariableTypePrimitive
         {
             get { return VariablePrimitiveTypes.Int; }
             set
@@ -128,12 +118,6 @@ namespace Proj3Semantics.ASTNodes
                 throw new NotImplementedException(
                     "You're not supposed to set a number literal");
             }
-        }
-
-        public ISymbolTable<ITypeDescriptor> NameEnv
-        {
-            get { return null; }
-            set { throw new AccessViolationException(); }
         }
 
         public override ITypeDescriptor TypeDescriptorRef
@@ -145,6 +129,8 @@ namespace Proj3Semantics.ASTNodes
                     "unable to set typeref of a builtin");
             }
         }
+
+
     }
 
 
