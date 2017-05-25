@@ -174,10 +174,15 @@ namespace Proj3Semantics
                 goto ErrorOccured;
             }
 
-            if (calledArgs != null)
+            if (numParams > 0)
             {
-                //methodParams != null && methodParams.Count > 0
-                //_log.Trace("    checking ArgumentList " + argList.ToDebugString());
+                _log.Trace("    checking ArgumentList " + calledArgs?.ToDebugString());
+                Debug.Assert(calledArgs != null);
+                foreach (AbstractNode arg in calledArgs)
+                {
+                    
+                }
+                
                 // TODO: HERE
                 //methodRefDescriptor.TypeDescriptorRef
 
