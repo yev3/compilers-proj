@@ -1,16 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Proj3Semantics;
 
-namespace Proj3Semantics.Nodes
+namespace Proj3Semantics.AST_Nodes
 {
-    using static Token;
-
     public class CompilationUnit : AbstractNode
     {
         // just for the compilation unit because it's the top node
@@ -49,26 +41,69 @@ namespace Proj3Semantics.Nodes
         NOT_EQUALS, GREATER_THAN, LESS_THAN, LESS_EQUAL, GREATER_EQUAL, PLUSOP, MINUSOP,
         ASTERISK, RSLASH, PERCENT, UNARY, EVALUATION
     }
-    public class Expression : ExpressionStatement
+    public abstract class Expression : ExpressionStatement, ITypeSpecifier
     {
-        public ExprType ExprType { get; set; }
-        public Expression(AbstractNode expr, ExprType type)
-        {
-            AddChild(expr);
-            ExprType = type;
-        }
-        public Expression(AbstractNode lhs, ExprType type, AbstractNode rhs)
-        {
-            AddChild(lhs);
-            AddChild(rhs);
-            ExprType = type;
-        }
+        public abstract ExprType ExprType { get; set; }
 
+        public NodeTypeCategory NodeTypeCategory { get; set; }
+        public ITypeSpecifier TypeSpecifierRef { get; set; }
     }
-    public class PrimaryExpression : AbstractNode { }
 
-    public class NotJustName : PrimaryExpression { }
+    public class BinaryExpr : Expression
+    {
+        public sealed override ExprType ExprType { get; set; }
+        public Expression LhsExpression { get; set; }
+        public Expression RhsExpression { get; set; }
+        public BinaryExpr(AbstractNode lhs, ExprType exprType, AbstractNode rhs)
+        {
+            LhsExpression = lhs as Expression;
+            RhsExpression = rhs as Expression;
+            Debug.Assert(LhsExpression != null);
+            Debug.Assert(RhsExpression != null);
+            ExprType = exprType;
+        }
+    }
 
+    public class AssignExpr : Expression
+    {
+        public override ExprType ExprType
+        {
+            get => ExprType.ASSIGNMENT;
+            set => throw new AccessViolationException();
+        }
+        public QualifiedName LhsQualName { get; set; }
+        public Expression RhsExpression { get; set; }
+
+        public AssignExpr(AbstractNode lhs, AbstractNode rhs)
+        {
+            LhsQualName = lhs as QualifiedName;
+            RhsExpression = rhs as Expression;
+            Debug.Assert(LhsQualName != null);
+            Debug.Assert(RhsExpression != null);
+        }
+    }
+
+
+
+    public enum EvalExprType { QualifiedName, SpecialName, ComplexPrimary }
+    public class EvalExpr : Expression
+    {
+        public EvalExprType EvalExprType { get; set; }
+        public override ExprType ExprType
+        {
+            get => ExprType.EVALUATION;
+            set => throw new AccessViolationException();
+        }
+
+        public AbstractNode EvalNode { get; set; }
+        public EvalExpr(EvalExprType type, AbstractNode node)
+        {
+            EvalNode = node;
+            EvalExprType = type;
+        }
+    }
+
+    public class NotJustName : AbstractNode { }
 
     public class ComplexPrimary : NotJustName { }
 

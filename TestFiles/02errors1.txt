@@ -1,11 +1,9 @@
-/*Tests for handling undeclared variables and erroneous use of */
-/*  strings and booleans        */
+/* Tests for handling undeclared variables and erroneous use of */
+/* strings and booleans */
 
-public class compute {
-    
-    public void main ()
-    {
-        int w,x;
+public class Compute {
+    public void Main () {
+        int w, x;
         x = 3 + 4;  
         w = x * x;  
         WriteLine("Trying to use undeclared variables");
@@ -19,6 +17,5 @@ public class compute {
         x = "a string";  
         WriteLine("Trying to assign a boolean to a variable");
         x = w > 5;  
-
     }
 }

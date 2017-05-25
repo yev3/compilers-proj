@@ -1,5 +1,5 @@
 %namespace Proj3Semantics
-%using Proj3Semantics.Nodes;
+%using Proj3Semantics.AST_Nodes;
 %scannertype TCCLScanner
 %visibility public
 %tokentype Token 
@@ -84,7 +84,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 <INITIAL> {
 {Identifier}        { yylval = new Identifier(yytext); return (int)Token.IDENTIFIER; }
 
-{DecIntegerLiteral} { yylval = new Number(int.Parse(yytext)); return (int)Token.INT_NUMBER; }
+{DecIntegerLiteral} { yylval = new NumberLiteral(int.Parse(yytext)); return (int)Token.INT_NUMBER; }
 
 \"                  { stringval.Length = 0; BEGIN(STRING); }
 
@@ -101,7 +101,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
   \"                { BEGIN(INITIAL); 
                       yystringval = stringval.ToString();
                       yylval = new Literal(yystringval);
-                      return (int)Token.LITERAL; }
+                      return (int)Token.STR_LITERAL; }
   [^\n\r\"\\]+      { stringval.Append(yytext); }
   \\t               { stringval.Append('\t'); }
   \\n               { stringval.Append('\n'); }

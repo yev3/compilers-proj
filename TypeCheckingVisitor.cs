@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
-using Proj3Semantics.Nodes;
+using Proj3Semantics.AST_Nodes;
 
 namespace Proj3Semantics
 {
@@ -14,7 +14,7 @@ namespace Proj3Semantics
 
     public class TypeCheckingVisitor
     {
-        protected new static Logger _log = LogManager.GetCurrentClassLogger();
+        protected static Logger _log = LogManager.GetCurrentClassLogger();
 
         private IEnv NameEnv { get; set; }
         private IEnv TypeEnv { get; set; }
@@ -124,7 +124,7 @@ namespace Proj3Semantics
     /// </summary>
     public class TypeCheckingLhsVisitor
     {
-        protected new static Logger _log = LogManager.GetCurrentClassLogger();
+        protected static Logger _log = LogManager.GetCurrentClassLogger();
 
         private IEnv NameEnv { get; set; }
         private IEnv TypeEnv { get; set; }

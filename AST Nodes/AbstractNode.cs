@@ -1,11 +1,8 @@
 ﻿using System;
-using System.CodeDom;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
-namespace Proj3Semantics.Nodes
+namespace Proj3Semantics.AST_Nodes
 {
     /// <summary>
     /// All AST nodes are subclasses of this node.  This node knows how to
