@@ -313,29 +313,30 @@ ArithmeticUnaryOperator
     ;
                             
 EvalExpression           
-    :   QualifiedName                   { $$ = new EvalExpr(EvalExprType.QualifiedName, $1);}   
-    |   NotJustName                     { $$ = $1;}
+    :   QualifiedName                   { $$ = new EvalExpr(EvaluationNodeTypes.QualifiedName, $1);}   
+    |   QualifiedPrimaryExpr            { $$ = new EvalExpr(EvaluationNodeTypes.QualifiedPrimaryExpr, $1);}
     ;
 
-NotJustName                 
-    :   SpecialName                     { $$ = new EvalExpr(EvalExprType.SpecialName, $1); }
-    |   ComplexPrimary                  { $$ = new EvalExpr(EvalExprType.ComplexPrimary, $1); }
+QualifiedPrimaryExpr                 
+    :   SpecialBuiltinName              { $$ = $1; }
+    |   ComplexPrimary                  { $$ = $1; }
     ;
 
 ComplexPrimary              
-    :   LPAREN Expression RPAREN        { $$ = $2;}
+    :   LPAREN Expression RPAREN        { $$ = $2; }
     |   ComplexPrimaryNoParenthesis     { $$ = $1;}
     ;
 
 ComplexPrimaryNoParenthesis 
-    :   STR_LITERAL                     { $$ = $1;}
-    |   Number                          { $$ = $1;}
-    |   FieldAccess                     { $$ = $1;}    
-    |   MethodCall                      { $$ = $1;}    
+    :   STR_LITERAL                     { $$ = $1; }
+    |   Number                          { $$ = $1; }
+    |   FieldAccess                     { $$ = $1; }    
+    |   MethodCall                      { $$ = $1; }    
     ;
 
 FieldAccess                 
-    :   NotJustName PERIOD Identifier   { $$ = new NotImplemented("FieldAccess");}   
+    :   QualifiedPrimaryExpr PERIOD Identifier   
+                                        { $$ = new NotImplemented("FieldAccess");}   
     ;       
 
 MethodCall                  
@@ -347,10 +348,10 @@ MethodCall
 MethodReference             
     :   ComplexPrimaryNoParenthesis     { $$ = $1;}
     |   QualifiedName                   { $$ = $1;}
-    |   SpecialName                     { $$ = $1;}
+    |   SpecialBuiltinName              { $$ = $1;}
     ;
 
-SpecialName                 
+SpecialBuiltinName                 
     :   THIS                            { $$ = new BuiltInTypeThis();}
     |   NULL                            { $$ = new BuiltInTypeNull();}
     ;

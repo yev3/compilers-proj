@@ -70,6 +70,7 @@
     <Compile Include="AST Nodes\BuiltinsLIterals.cs" />
     <Compile Include="AST Nodes\ClassAndMethodNodes.cs" />
     <Compile Include="AST Nodes\ControlStatementNodes.cs" />
+    <Compile Include="AST Nodes\PrimaryExpressions.cs" />
     <Compile Include="AST Nodes\TypeNodes.cs" />
     <Compile Include="CompilerErrors.cs" />
     <Compile Include="CustomExtensions.cs" />

@@ -85,27 +85,10 @@ namespace Proj3Semantics.AST_Nodes
 
 
 
-    public enum EvalExprType { QualifiedName, SpecialName, ComplexPrimary }
-    public class EvalExpr : Expression
-    {
-        public EvalExprType EvalExprType { get; set; }
-        public override ExprType ExprType
-        {
-            get => ExprType.EVALUATION;
-            set => throw new AccessViolationException();
-        }
 
-        public AbstractNode EvalNode { get; set; }
-        public EvalExpr(EvalExprType type, AbstractNode node)
-        {
-            EvalNode = node;
-            EvalExprType = type;
-        }
-    }
+    public class QualifiedPrimaryExpr : AbstractNode { }
 
-    public class NotJustName : AbstractNode { }
-
-    public class ComplexPrimary : NotJustName { }
+    public class ComplexPrimary : QualifiedPrimaryExpr { }
 
     public class MethodCall : ComplexPrimary
     {
