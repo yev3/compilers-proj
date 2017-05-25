@@ -68,9 +68,10 @@ namespace Proj3Semantics.ASTNodes
     {
         public override ExprType ExprType
         {
-            get => ExprType.ASSIGNMENT;
-            set => throw new AccessViolationException();
+            get { return ExprType.ASSIGNMENT; }
+            set { throw new AccessViolationException(); }
         }
+
         public QualifiedName LhsQualName { get; set; }
         public Expression RhsExpression { get; set; }
 
@@ -166,8 +167,8 @@ namespace Proj3Semantics.ASTNodes
         public NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.NamespaceDecl;
         public ITypeSpecifier TypeSpecifierRef
         {
-            get => this;
-            set => throw new AccessViolationException();
+            get { return this; }
+            set { throw new AccessViolationException(); }
         }
     }
 
