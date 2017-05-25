@@ -101,7 +101,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 <STRING> {
   \"                { BEGIN(INITIAL); 
                       yystringval = stringval.ToString();
-                      yylval = new Literal(yystringval);
+                      yylval = new StringLiteral(yystringval);
                       return (int)Token.STR_LITERAL; }
   [^\n\r\"\\]+      { stringval.Append(yytext); }
   \\t               { stringval.Append('\t'); }
