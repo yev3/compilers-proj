@@ -20,7 +20,8 @@ namespace Proj3Semantics
 
     public enum VariablePrimitiveTypes
     {
-        Boolean, Byte, Char, Short, Int, Long, Float, Double, NotPrimitive
+        Boolean, Byte, Char, Short, Int, Long, Float, Double, NotPrimitive,
+        String
     }
 
 	public interface IVisitableNode

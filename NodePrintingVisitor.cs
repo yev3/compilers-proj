@@ -155,7 +155,7 @@ namespace Proj3Semantics
             using (OutColor.Yellow)
                 Console.WriteLine(node.Value);
         }
-        private void VisitNode(Literal node)
+        private void VisitNode(StringLiteral node)
         {
             Console.Write(node + ": ");
             using (OutColor.Yellow)
