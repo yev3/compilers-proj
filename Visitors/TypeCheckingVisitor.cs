@@ -64,13 +64,19 @@ namespace Proj3Semantics
             blockVisitor.Visit(mdecl.MethodBody);
         }
 
-
-
         private void VisitNode(Identifier id)
         {
-            _log.Trace("Visiting {0}.", id);
-            // TODO
+            _log.Trace("Visiting {0}.    **** TODO ****", id);
         }
+
+        private void VisitNode(VariableListDeclaring vld)
+        {
+            var visitor = new DeclarationVisitor(this);
+            visitor.Visit(vld);
+        }
+
+
+
 
         private void VisitNode(Expression expr)
         {
@@ -82,6 +88,41 @@ namespace Proj3Semantics
                 case ExprType.EVALUATION:
                     VisitEvaluation(expr as EvalExpr);
                     return;
+                case ExprType.PLUSOP:
+                case ExprType.LOGICAL_OR:
+                case ExprType.LOGICAL_AND:
+                case ExprType.PIPE:
+                case ExprType.HAT:
+                case ExprType.AND:
+                case ExprType.EQUALS:
+                case ExprType.NOT_EQUALS:
+                case ExprType.GREATER_THAN:
+                case ExprType.LESS_THAN:
+                case ExprType.LESS_EQUAL:
+                case ExprType.GREATER_EQUAL:
+                case ExprType.MINUSOP:
+                case ExprType.ASTERISK:
+                case ExprType.RSLASH:
+                case ExprType.PERCENT:
+                    VisitBinaryExpr(expr as BinaryExpr);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void VisitBinaryExpr(BinaryExpr binaryExpr)
+        {
+            switch (binaryExpr.ExprType)
+            {
+                case ExprType.PLUSOP:
+                    VisitPlusOp(binaryExpr);
+                    break;
+                case ExprType.ASTERISK:
+                    VisitPlusOp(binaryExpr);    // TODO: separate in code gen
+                    break;
+                case ExprType.ASSIGNMENT:
+                    break;
                 case ExprType.LOGICAL_OR:
                     break;
                 case ExprType.LOGICAL_AND:
@@ -104,22 +145,41 @@ namespace Proj3Semantics
                     break;
                 case ExprType.GREATER_EQUAL:
                     break;
-                case ExprType.PLUSOP:
-                    break;
                 case ExprType.MINUSOP:
-                    break;
-                case ExprType.ASTERISK:
+                    VisitPlusOp(binaryExpr);    // TODO: separate in code gen
                     break;
                 case ExprType.RSLASH:
+                    VisitPlusOp(binaryExpr);    // TODO: separate in code gen
                     break;
                 case ExprType.PERCENT:
                     break;
                 case ExprType.UNARY:
                     break;
+                case ExprType.EVALUATION:
+                    break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new NotImplementedException();
+                    break;
             }
-            _log.Error("Unsupported expression type: " + expr.ExprType.ToString());
+        }
+
+        private void VisitPlusOp(BinaryExpr binaryExpr)
+        {
+            var lft = binaryExpr.LhsExpression;
+            Visit(lft);
+            var rgt = binaryExpr.RhsExpression;
+            Visit(rgt);
+            if (IsArithmeticCompatible(lft, rgt))
+            {
+                // for now, just return the type of one of the operands, since we know they will be same
+                binaryExpr.TypeDescriptorRef = lft.TypeDescriptorRef;
+                binaryExpr.NodeTypeCategory = lft.NodeTypeCategory;
+            }
+            else
+            {
+                binaryExpr.NodeTypeCategory = NodeTypeCategory.ErrorType;
+                binaryExpr.TypeDescriptorRef = null;
+            }
         }
 
         void VisitNode(BuiltInType node)
@@ -130,12 +190,43 @@ namespace Proj3Semantics
         private void VisitAssignment(Expression expr)
         {
             _log.Trace("Checking assignment of " + expr.ToDebugString());
+            AssignExpr assnExpr = expr as AssignExpr;
+            if (assnExpr == null) throw new ArgumentNullException(nameof(assnExpr));
+
+
+            QualifiedName lhsQname = assnExpr.LhsQualName;
+            string lhsName = string.Join(".", lhsQname.IdentifierList);
+            var typeVisitor = new TypeVisitor(this);
+            typeVisitor.Visit(lhsQname);
+            ITypeDescriptor lhs = lhsQname.TypeDescriptorRef;
+
+            if (lhs == null)
+            {
+                CompilerErrors.Add(SemanticErrorTypes.UndeclaredVariable, lhsName);
+                expr.NodeTypeCategory = NodeTypeCategory.ErrorType;
+                return;
+            }
+
+
+            Expression rhs = assnExpr.RhsExpression;
+            Visit(rhs);
+
+            if (!IsAssignable(lhs, rhs))
+            {
+                CompilerErrors.Add(SemanticErrorTypes.IncompatibleAssignment, lhsName);
+                lhs.NodeTypeCategory = NodeTypeCategory.ErrorType;
+                expr.NodeTypeCategory = NodeTypeCategory.ErrorType;
+            }
+            else
+            {
+                expr.NodeTypeCategory = lhs.NodeTypeCategory;
+                expr.TypeDescriptorRef = lhs;
+            }
 
         }
         private void VisitEvaluation(EvalExpr expr)
         {
             _log.Trace("Checking Evaluation of " + expr.ToDebugString());
-
 
             Visit(expr.Child);
 
@@ -211,8 +302,8 @@ namespace Proj3Semantics
                 _log.Trace("    No arguments");
             }
 
-            call.NodeTypeCategory = methodDescriptor.NodeTypeCategory;
-            call.TypeDescriptorRef = methodDescriptor.TypeDescriptorRef;
+            call.NodeTypeCategory = methodDescriptor.ReturnTypeNode.NodeTypeCategory;
+            call.TypeDescriptorRef = methodDescriptor.ReturnTypeNode.TypeDescriptorRef;
             _log.Trace("Finish checking MethodCall " + call.ToDebugString());
 
             return;
@@ -224,6 +315,13 @@ namespace Proj3Semantics
         }
 
 
+        private void VisitNode(QualifiedName qn)
+        {
+            var tvisitor = new TypeVisitor(this);
+            tvisitor.Visit(qn);
+            
+        }
+        // HELPERS
         public bool IsAssignable(ITypeDescriptor dst, ITypeDescriptor src)
         {
             if (dst == null || src == null) return false;
@@ -248,7 +346,7 @@ namespace Proj3Semantics
                 case NodeTypeCategory.NOT_SET:
                     throw new NotImplementedException("???");
                 case NodeTypeCategory.Primitive:
-                    return IsPrimitiveAssignable(dst as IPrimitiveTypeDescriptor, src);
+                    return IsPrimitiveAssignable(dst.TypeDescriptorRef as IPrimitiveTypeDescriptor, src.TypeDescriptorRef);
                 case NodeTypeCategory.Null:
                     CompilerErrors.Add(SemanticErrorTypes.BuiltinNotAssignable, "null");
                     return false;
@@ -270,19 +368,30 @@ namespace Proj3Semantics
         {
             if (dst == null || src == null) return false;
 
-            IPrimitiveTypeDescriptor srcPrimitive = src as IPrimitiveTypeDescriptor;
+            IPrimitiveTypeDescriptor srcPrimitive = src.TypeDescriptorRef as IPrimitiveTypeDescriptor;
             if (srcPrimitive == null) throw new NotImplementedException("Assignment from non-primitives is not implemented");
 
-            var tsrc = dst.VariableTypePrimitive;
-            var tdst = srcPrimitive.VariableTypePrimitive;
+            var tdst = dst.VariablePrimitiveType;
+            var tsrc = srcPrimitive.VariablePrimitiveType;
 
             switch (tdst)
             {
-                case VariablePrimitiveTypes.Object:
+                case VariablePrimitiveType.Object:
                     return true;    // object is the lowest
                 default:
                     return tdst == tsrc;
             }
+        }
+
+        private bool IsArithmeticCompatible(ITypeDescriptor arg1, ITypeDescriptor arg2)
+        {
+            IPrimitiveTypeDescriptor primitive1 = arg1.TypeDescriptorRef as IPrimitiveTypeDescriptor;
+            IPrimitiveTypeDescriptor primitive2 = arg2.TypeDescriptorRef as IPrimitiveTypeDescriptor;
+
+            if (primitive1 == null || primitive2 == null) return false;
+
+            return primitive1.VariablePrimitiveType == VariablePrimitiveType.Int &&
+                   primitive2.VariablePrimitiveType == VariablePrimitiveType.Int;
         }
 
 

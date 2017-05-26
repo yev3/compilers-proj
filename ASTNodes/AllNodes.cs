@@ -61,6 +61,9 @@ namespace Proj3Semantics.ASTNodes
             Debug.Assert(LhsExpression != null);
             Debug.Assert(RhsExpression != null);
             ExprType = exprType;
+
+            AddChild(lhs);
+            AddChild(rhs);
         }
     }
 
@@ -81,6 +84,9 @@ namespace Proj3Semantics.ASTNodes
             RhsExpression = rhs as Expression;
             Debug.Assert(LhsQualName != null);
             Debug.Assert(RhsExpression != null);
+
+            AddChild(LhsQualName);
+            AddChild(RhsExpression);
         }
     }
 

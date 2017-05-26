@@ -18,7 +18,7 @@ namespace Proj3Semantics
         NOT_SET, Primitive, Null, Array, Class, Void, This, ErrorType, ClassFieldDef, ClassMethodDef, NamespaceDecl
     }
 
-    public enum VariablePrimitiveTypes
+    public enum VariablePrimitiveType
     {
         Object, Boolean, String, Int 
         //Byte, Char, Short, Long, Float, Double 
@@ -59,7 +59,7 @@ namespace Proj3Semantics
 
     public interface IPrimitiveTypeDescriptor : ITypeDescriptor
     {
-        VariablePrimitiveTypes VariableTypePrimitive { get; set; }
+        VariablePrimitiveType VariablePrimitiveType { get; set; }
     }
 
     public interface ITypeHasModifiers
