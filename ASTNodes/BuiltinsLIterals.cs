@@ -48,9 +48,9 @@ namespace Proj3Semantics.ASTNodes
             set { throw new InvalidOperationException(); }
         }
 
-        public VariablePrimitiveTypes VariableTypePrimitive
+        public VariablePrimitiveType VariablePrimitiveType
         {
-            get { return VariablePrimitiveTypes.Object; }
+            get { return VariablePrimitiveType.Object; }
             set { throw new AccessViolationException(); }
         }
     }
@@ -71,32 +71,32 @@ namespace Proj3Semantics.ASTNodes
             set { throw new InvalidOperationException(); }
         }
 
-        public abstract VariablePrimitiveTypes VariableTypePrimitive { get; set; }
+        public abstract VariablePrimitiveType VariablePrimitiveType { get; set; }
     }
 
     public class BuiltinTypeString : PrimitiveType
     {
-        public override VariablePrimitiveTypes VariableTypePrimitive
+        public override VariablePrimitiveType VariablePrimitiveType
         {
-            get { return VariablePrimitiveTypes.String; }
+            get { return VariablePrimitiveType.String; }
             set { throw new AccessViolationException(); }
         }
     }
 
     public class BuiltinTypeInt : PrimitiveType
     {
-        public override VariablePrimitiveTypes VariableTypePrimitive
+        public override VariablePrimitiveType VariablePrimitiveType
         {
-            get { return VariablePrimitiveTypes.Int; }
+            get { return VariablePrimitiveType.Int; }
             set { throw new AccessViolationException(); }
         }
     }
 
     public class BuiltinTypeBoolean : PrimitiveType
     {
-        public override VariablePrimitiveTypes VariableTypePrimitive
+        public override VariablePrimitiveType VariablePrimitiveType
         {
-            get { return VariablePrimitiveTypes.Boolean; }
+            get { return VariablePrimitiveType.Boolean; }
             set { throw new NotImplementedException(); }
         }
     }
@@ -110,9 +110,9 @@ namespace Proj3Semantics.ASTNodes
         }
 
 
-        public override VariablePrimitiveTypes VariableTypePrimitive
+        public override VariablePrimitiveType VariablePrimitiveType
         {
-            get { return VariablePrimitiveTypes.Int; }
+            get { return VariablePrimitiveType.Int; }
             set
             {
                 throw new NotImplementedException(

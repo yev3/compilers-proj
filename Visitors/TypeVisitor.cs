@@ -25,15 +25,21 @@ namespace Proj3Semantics
         /// <summary>
         /// The current scope that is being searched
         /// </summary>
-        private IEnv TypeEnv { get; set; }
-        public TypeVisitor(IEnv typeEnv)
+        public IEnv NameEnv { get; set; }
+        public IEnv TypeEnv { get; set; }
+
+        public TypeVisitor(
+            IEnv typeEnv,
+            IEnv nameEnv)
         {
+            NameEnv = nameEnv;
             TypeEnv = typeEnv;
         }
 
-        public TypeVisitor(IHasOwnScope refWithScope)
+        public TypeVisitor(IHasOwnScope node)
         {
-            TypeEnv = refWithScope.TypeEnv;
+            NameEnv = node.NameEnv;
+            TypeEnv = node.TypeEnv;
         }
 
         public override void Visit(dynamic node)
@@ -72,12 +78,16 @@ namespace Proj3Semantics
         private void VisitNode(QualifiedName qname)
         {
             var curTypeEnv = TypeEnv;
+            var curNameEnv = NameEnv;
+
             string curScopeName = "";
             ITypeDescriptor curResult = null;
 
             foreach (string curIdStr in qname.IdentifierList)
             {
-                curResult = curTypeEnv?.Lookup(curIdStr);
+                curResult =
+                    curTypeEnv?.Lookup(curIdStr) ??
+                    curNameEnv?.Lookup(curIdStr);
 
                 if (curResult == null)
                 {
@@ -91,13 +101,15 @@ namespace Proj3Semantics
                 }
 
                 IHasOwnScope childScope = curResult as IHasOwnScope;
-                curTypeEnv = childScope?.NameEnv;
+                curTypeEnv = childScope?.TypeEnv;
+                curNameEnv = childScope?.NameEnv;
+
                 curScopeName = curIdStr;
             }
             if (curResult != null)
             {
                 qname.NodeTypeCategory = curResult.NodeTypeCategory;
-                qname.TypeDescriptorRef = curResult.TypeDescriptorRef;
+                qname.TypeDescriptorRef = curResult;
             }
         }
 

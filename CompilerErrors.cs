@@ -21,7 +21,9 @@ namespace Proj3Semantics
         DuplicateParamName,
         NoMethodWithNumArgs,
         BuiltinNotAssignable,
-        InvalidFuncArg
+        InvalidFuncArg,
+        IncompatibleAssignment,
+        UndeclaredVariable
     }
 
     public static class SemanticErrorTypeMessages
@@ -52,6 +54,10 @@ namespace Proj3Semantics
                     return "Built in type is not assignable.";
                 case InvalidFuncArg:
                     return "Invalid function argument.";
+                case IncompatibleAssignment:
+                    return "Incompatible assignment.";
+                case UndeclaredVariable:
+                    return "Undeclared variable.";
                 default:
                     throw new NotImplementedException("TODO: add a text message for the error type");
             }

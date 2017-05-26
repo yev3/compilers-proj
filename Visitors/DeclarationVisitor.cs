@@ -101,7 +101,7 @@ namespace Proj3Semantics
 
             if (typeNameDecl.TypeDescriptorRef == null)
             {
-                TypeVisitor tVisitor = new TypeVisitor(TypeEnv);
+                TypeVisitor tVisitor = new TypeVisitor(this);
                 tVisitor.Visit(vld.FieldTypeDescriptor);
             }
 
@@ -129,7 +129,7 @@ namespace Proj3Semantics
             ITypeDescriptor retType = mdecl.ReturnTypeNode;
             if (retType.TypeDescriptorRef == null)
             {
-                var tVisitor = new TypeVisitor(TypeEnv);
+                var tVisitor = new TypeVisitor(this);
                 tVisitor.Visit(retType);
             }
 
@@ -155,7 +155,7 @@ namespace Proj3Semantics
         {
             if (p.TypeDescriptor.TypeDescriptorRef == null)
             {
-                var tVisitor = new TypeVisitor(TypeEnv);
+                var tVisitor = new TypeVisitor(this);
                 tVisitor.Visit(p.TypeDescriptor);
             }
 
@@ -186,7 +186,7 @@ namespace Proj3Semantics
         {
             _log.Trace("Analyzing VariableDecls");
 
-            var typeVisitor = new TypeVisitor(TypeEnv);
+            var typeVisitor = new TypeVisitor(this);
             decls.FieldTypeDescriptor.Accept(typeVisitor);
 
             foreach (AbstractNode node in decls.ItemIdList)

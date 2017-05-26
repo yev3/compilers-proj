@@ -82,7 +82,7 @@ namespace Proj3Semantics
 
             var primitiveDescriptor = node as IPrimitiveTypeDescriptor;
             if (primitiveDescriptor != null)
-                typeStrings.Add(primitiveDescriptor.VariableTypePrimitive.ToString());
+                typeStrings.Add(primitiveDescriptor.VariablePrimitiveType.ToString());
 
             ITypeDescriptor typeRef = typeDescriptor?.TypeDescriptorRef;
             typeStrings.Add("tref=" + (typeRef?.ToString() ?? "**NULL**"));
