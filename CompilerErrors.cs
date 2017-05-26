@@ -16,14 +16,15 @@ namespace Proj3Semantics
         IdentifierNotTypeName,
         InconsistentModifiers,
         DuplicateClassDecl,
-        InvalidQualifier,
+        UndeclaredIdentifier,
         DuplicateNamespaceDef,
         DuplicateParamName,
         NoMethodWithNumArgs,
         BuiltinNotAssignable,
         InvalidFuncArg,
         IncompatibleAssignment,
-        UndeclaredVariable
+        IncompatibleOperands,
+        BooleanExpected
     }
 
     public static class SemanticErrorTypeMessages
@@ -33,31 +34,33 @@ namespace Proj3Semantics
             switch (type)
             {
                 case FeatureNotImplemented:
-                    return "This feature is not implemented.";
+                    return "This feature is not implemented";
                 case VariableAlreadyDeclared:
-                    return "Variable is already declared.";
+                    return "Variable is already declared";
                 case IdentifierNotTypeName:
-                    return "This identifier is not a type name.";
+                    return "This identifier is not a type name";
                 case InconsistentModifiers:
-                    return "Inconsistent class declaration modifiers.";
+                    return "Inconsistent class declaration modifiers";
                 case DuplicateClassDecl:
-                    return "Duplicate class declaration.";
-                case InvalidQualifier:
-                    return "Invalid qualifier access.";
+                    return "Duplicate class declaration";
+                case UndeclaredIdentifier:
+                    return "Undeclared identifier";
                 case DuplicateNamespaceDef:
-                    return "Duplicate namespace declaration.";
+                    return "Duplicate namespace declaration";
                 case DuplicateParamName:
-                    return "Duplicate method parameter name declaration.";
+                    return "Duplicate method parameter name declaration";
                 case NoMethodWithNumArgs:
-                    return "No method found with the required number of args.";
+                    return "No method found with the required number of args";
                 case BuiltinNotAssignable:
-                    return "Built in type is not assignable.";
+                    return "Built in type is not assignable";
                 case InvalidFuncArg:
-                    return "Invalid function argument.";
+                    return "Invalid function argument";
                 case IncompatibleAssignment:
-                    return "Incompatible assignment.";
-                case UndeclaredVariable:
-                    return "Undeclared variable.";
+                    return "Incompatible assignment";
+                case IncompatibleOperands:
+                    return "Incompatible operands";
+                case BooleanExpected:
+                    return "Boolean expected";
                 default:
                     throw new NotImplementedException("TODO: add a text message for the error type");
             }
