@@ -88,16 +88,18 @@ namespace Proj3Semantics
                 case ExprType.EVALUATION:
                     VisitEvaluation(expr as EvalExpr);
                     return;
+                case ExprType.EQUALS:
+                case ExprType.LESS_THAN:
+                case ExprType.GREATER_THAN:
+                    VisitComparison(expr as BinaryExpr);
+                    return;
                 case ExprType.PLUSOP:
                 case ExprType.LOGICAL_OR:
                 case ExprType.LOGICAL_AND:
                 case ExprType.PIPE:
                 case ExprType.HAT:
                 case ExprType.AND:
-                case ExprType.EQUALS:
                 case ExprType.NOT_EQUALS:
-                case ExprType.GREATER_THAN:
-                case ExprType.LESS_THAN:
                 case ExprType.LESS_EQUAL:
                 case ExprType.GREATER_EQUAL:
                 case ExprType.MINUSOP:
@@ -108,6 +110,26 @@ namespace Proj3Semantics
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void VisitComparison(BinaryExpr binaryExpr)
+        {
+            var lft = binaryExpr.LhsExpression;
+            Visit(lft);
+            var rgt = binaryExpr.RhsExpression;
+            Visit(rgt);
+
+            if (IsArithmeticCompatible(lft, rgt))
+            {
+                binaryExpr.NodeTypeCategory = NodeTypeCategory.Primitive;
+                binaryExpr.TypeDescriptorRef = new BuiltinTypeBoolean();
+            }
+            else
+            {
+                CompilerErrors.Add(SemanticErrorTypes.IncompatibleOperands, binaryExpr.ExprType.ToString());
+                binaryExpr.NodeTypeCategory = NodeTypeCategory.ErrorType;
+                binaryExpr.TypeDescriptorRef = null;
             }
         }
 
@@ -159,7 +181,6 @@ namespace Proj3Semantics
                     break;
                 default:
                     throw new NotImplementedException();
-                    break;
             }
         }
 
@@ -177,6 +198,7 @@ namespace Proj3Semantics
             }
             else
             {
+                CompilerErrors.Add(SemanticErrorTypes.IncompatibleOperands, binaryExpr.ExprType.ToString());
                 binaryExpr.NodeTypeCategory = NodeTypeCategory.ErrorType;
                 binaryExpr.TypeDescriptorRef = null;
             }
@@ -202,7 +224,7 @@ namespace Proj3Semantics
 
             if (lhs == null)
             {
-                CompilerErrors.Add(SemanticErrorTypes.UndeclaredVariable, lhsName);
+                // the type visitor should have declared an error for us already
                 expr.NodeTypeCategory = NodeTypeCategory.ErrorType;
                 return;
             }
@@ -214,7 +236,7 @@ namespace Proj3Semantics
             if (!IsAssignable(lhs, rhs))
             {
                 CompilerErrors.Add(SemanticErrorTypes.IncompatibleAssignment, lhsName);
-                lhs.NodeTypeCategory = NodeTypeCategory.ErrorType;
+                //lhs.NodeTypeCategory = NodeTypeCategory.ErrorType;
                 expr.NodeTypeCategory = NodeTypeCategory.ErrorType;
             }
             else
@@ -319,9 +341,46 @@ namespace Proj3Semantics
         {
             var tvisitor = new TypeVisitor(this);
             tvisitor.Visit(qn);
+        }
+
+        private void VisitNode(IfStatementElse ifStatementElse)
+        {
+            CheckBoolean(ifStatementElse.Predicate);
+            Visit(ifStatementElse.ThenStatement);
+            Visit(ifStatementElse.ElseStatement);
+        }
+
+        private void VisitNode(IfStatement ifStatement)
+        {
+            CheckBoolean(ifStatement.Predicate);
+            Visit(ifStatement.ThenStatement);
+        }
+
+        private void VisitNode(WhileLoop loop)
+        {
+            CheckBoolean(loop.Predicate);
+            Visit(loop.BodyStatement);
+        }
+
+
+        // ------------------------------------------------------------
+        // HELPERS
+        // ------------------------------------------------------------
+
+        private void CheckBoolean(Expression expr)
+        {
+            Visit(expr);
+            if (expr.NodeTypeCategory == NodeTypeCategory.Primitive)
+            {
+                var tref = expr.TypeDescriptorRef as IPrimitiveTypeDescriptor;
+                if (tref == null || tref.VariablePrimitiveType != VariablePrimitiveType.Boolean)
+                {
+                    CompilerErrors.Add(SemanticErrorTypes.BooleanExpected);
+                }
+            }
             
         }
-        // HELPERS
+
         public bool IsAssignable(ITypeDescriptor dst, ITypeDescriptor src)
         {
             if (dst == null || src == null) return false;
@@ -393,8 +452,6 @@ namespace Proj3Semantics
             return primitive1.VariablePrimitiveType == VariablePrimitiveType.Int &&
                    primitive2.VariablePrimitiveType == VariablePrimitiveType.Int;
         }
-
-
     }
 
 

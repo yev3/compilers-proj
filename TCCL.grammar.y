@@ -275,7 +275,7 @@ SelectionStatement
 
 IterationStatement          
     :   WHILE LPAREN Expression RPAREN Statement
-                                            { $$ = new NotImplemented("IterationStatement"); }
+                                            { $$ = new WhileLoop($3, $5); }
     ;
 
 ReturnStatement         

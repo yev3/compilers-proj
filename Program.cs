@@ -15,12 +15,12 @@ namespace Proj3Semantics
         private static List<string> test_files = new List<string>()
         {
             //"01hello.txt",
-            "02errors1.txt",
-            //"03writenums.txt",
+            //"02errors1.txt",
+            //"03compute.txt",
             //"04twomethods0.txt",
             //"05twomethods1.txt",
-            //"06compute.txt",
-            //"07iftest.txt",
+            //"06writenums.txt",
+            "07iftest.txt",
             //"08loop.txt",
             //"ms3_good1p.txt",
             //"ms3_iftest.txt",

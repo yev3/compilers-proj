@@ -11,5 +11,8 @@ public class loop {
             i = i + 1;
             gobble = gobble * i;
         }   
+
+        // This should fail
+        while (5) { z; }
     }
 }

@@ -94,7 +94,7 @@ namespace Proj3Semantics
                     string errMsg = curIdStr;
                     if (curScopeName != "")
                         errMsg += " in " + curScopeName;
-                    CompilerErrors.Add(SemanticErrorTypes.InvalidQualifier, errMsg);
+                    CompilerErrors.Add(SemanticErrorTypes.UndeclaredIdentifier, errMsg);
                     qname.NodeTypeCategory = NodeTypeCategory.ErrorType;
                     qname.TypeDescriptorRef = null;
                     return;
@@ -109,7 +109,7 @@ namespace Proj3Semantics
             if (curResult != null)
             {
                 qname.NodeTypeCategory = curResult.NodeTypeCategory;
-                qname.TypeDescriptorRef = curResult;
+                qname.TypeDescriptorRef = curResult.TypeDescriptorRef;
             }
         }
 
