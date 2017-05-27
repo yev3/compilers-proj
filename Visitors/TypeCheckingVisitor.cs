@@ -478,49 +478,4 @@ namespace Proj3Semantics
                    primitive2.VariablePrimitiveType == VariablePrimitiveType.Int;
         }
     }
-
-
-    /// <summary>
-    /// P. 326
-    /// </summary>
-    public class TypeCheckingLhsVisitor
-    {
-        protected static Logger _log = LogManager.GetCurrentClassLogger();
-
-        private IEnv NameEnv { get; set; }
-        private IEnv TypeEnv { get; set; }
-
-        public TypeCheckingLhsVisitor(
-            IEnv typeEnv,
-            IEnv nameEnv)
-        {
-            NameEnv = nameEnv;
-            TypeEnv = typeEnv;
-        }
-
-        public TypeCheckingLhsVisitor(IHasOwnScope node)
-        {
-            NameEnv = node.NameEnv;
-            TypeEnv = node.TypeEnv;
-        }
-
-        public void Visit(dynamic node)
-        {
-            if (node == null) return;
-
-            _log.Trace("visiting " + node);
-            VisitNode(node);
-        }
-
-        private void VisitNode(Identifier id)
-        {
-            _log.Trace("LHS Visiting {0}.", id);
-            // TODO
-        }
-
-        private void VisitNode(AbstractNode node)
-        {
-            _log.Info("Visiting {0}, no action.", node);
-        }
-    }
 }

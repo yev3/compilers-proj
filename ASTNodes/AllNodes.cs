@@ -125,8 +125,6 @@ namespace Proj3Semantics.ASTNodes
         public override ITypeDescriptor TypeDescriptorRef { get; set; }
     }
 
-
-
     public class ReturnStatement : Statement
     {
         public ReturnStatement() { }
