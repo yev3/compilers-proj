@@ -94,13 +94,14 @@ namespace Proj3Semantics
     {
         private static Logger _log = LogManager.GetCurrentClassLogger();
 
-        public static ErrList Instance { get; } = new ErrList();
+        public static void ClearAll() => ErrList.Clear();
+        public static ErrList ErrList { get; } = new ErrList();
 
         public static void Add(SemanticErrorTypes type, string additionalMessage = null)
         {
             var newError = new SemanticError(type, additionalMessage);
             _log.Error(newError.ToString);
-            Instance.Add(newError);
+            ErrList.Add(newError);
         }
     }
 }
