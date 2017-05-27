@@ -99,8 +99,6 @@
     <Compile Include="Visitors\SemanticAnalysis.cs" />
     <Compile Include="Visitors\FirstPassDeclVisitor.cs" />
     <Compile Include="Visitors\TypeVisitor.cs" />
-    <None Include="Notes\SymbolKind.cs" />
-    <None Include="Notes\RoslynTypes.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Visitors\SemanticsVisitor.cs" />
@@ -109,9 +107,16 @@
     <Compile Include="Visitors\Interfaces.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="TestFiles\good1p.txt" />
-    <Content Include="TestFiles\iftest.txt" />
-    <Content Include="TestFiles\logictest.txt" />
+    <Content Include="TestFiles\01hello-tree.txt" />
+    <Content Include="TestFiles\01hello.txt" />
+    <Content Include="TestFiles\02errors1.txt" />
+    <Content Include="TestFiles\03compute.txt" />
+    <Content Include="TestFiles\04twomethods0.txt" />
+    <Content Include="TestFiles\05twomethods1.txt" />
+    <Content Include="TestFiles\06writenums.txt" />
+    <Content Include="TestFiles\07iftest.txt" />
+    <Content Include="TestFiles\08loop.txt" />
+    <None Include=".gitignore" />
     <None Include="App.config" />
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -27,6 +27,7 @@ namespace Proj3Semantics
                 Console.Write("Enter a file name: ");
 
                 string input = Console.ReadLine();
+                if (input == null) continue;
                 string cmd = input.ToLower().Trim();
                 if (cmd == "exit" || cmd == "quit") return;
                 string fname = input + ".txt";
@@ -92,14 +93,14 @@ namespace Proj3Semantics
 
             List<string> testFiles = new List<string>()
             {
-                //"01hello.txt",
+                "01hello.txt",
                 "02errors1.txt",
-                //"03compute.txt",
-                //"04twomethods0.txt",
-                //"05twomethods1.txt",
-                //"06writenums.txt",
-                //"07iftest.txt",
-                //"08loop.txt",
+                "03compute.txt",
+                "04twomethods0.txt",
+                "05twomethods1.txt",
+                "06writenums.txt",
+                "07iftest.txt",
+                "08loop.txt",
             };
 
             var testNbr = 1;
