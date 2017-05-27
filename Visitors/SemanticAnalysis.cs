@@ -28,7 +28,6 @@ namespace Proj3Semantics
             var typeCheckVisitor = new TypeCheckingVisitor(cuTypeEnv, cuNameEnv);
             typeCheckVisitor.Visit(cu);
 
-
         }
 
     }

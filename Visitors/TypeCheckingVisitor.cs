@@ -184,12 +184,32 @@ namespace Proj3Semantics
             }
         }
 
+        private void NodeSetErrorType(ITypeDescriptor node)
+        {
+            node.NodeTypeCategory = NodeTypeCategory.ErrorType;
+            node.TypeDescriptorRef = null;
+        }
+
         private void VisitPlusOp(BinaryExpr binaryExpr)
         {
             var lft = binaryExpr.LhsExpression;
             Visit(lft);
+
+            if (lft.NodeTypeCategory == NodeTypeCategory.ErrorType)
+            {
+                NodeSetErrorType(binaryExpr);
+                return;
+            }
+
             var rgt = binaryExpr.RhsExpression;
             Visit(rgt);
+
+            if (rgt.NodeTypeCategory == NodeTypeCategory.ErrorType)
+            {
+                NodeSetErrorType(binaryExpr);
+                return;
+            }
+
             if (IsArithmeticCompatible(lft, rgt))
             {
                 // for now, just return the type of one of the operands, since we know they will be same
@@ -199,8 +219,7 @@ namespace Proj3Semantics
             else
             {
                 CompilerErrors.Add(SemanticErrorTypes.IncompatibleOperands, binaryExpr.ExprType.ToString());
-                binaryExpr.NodeTypeCategory = NodeTypeCategory.ErrorType;
-                binaryExpr.TypeDescriptorRef = null;
+                NodeSetErrorType(binaryExpr);
             }
         }
 
@@ -212,20 +231,19 @@ namespace Proj3Semantics
         private void VisitAssignment(Expression expr)
         {
             _log.Trace("Checking assignment of " + expr.ToDebugString());
+
             AssignExpr assnExpr = expr as AssignExpr;
             if (assnExpr == null) throw new ArgumentNullException(nameof(assnExpr));
 
-
             QualifiedName lhsQname = assnExpr.LhsQualName;
-            string lhsName = string.Join(".", lhsQname.IdentifierList);
             var typeVisitor = new TypeVisitor(this);
             typeVisitor.Visit(lhsQname);
-            ITypeDescriptor lhs = lhsQname.TypeDescriptorRef;
 
+            ITypeDescriptor lhs = lhsQname.TypeDescriptorRef;
             if (lhs == null)
             {
                 // the type visitor should have declared an error for us already
-                expr.NodeTypeCategory = NodeTypeCategory.ErrorType;
+                NodeSetErrorType(expr);
                 return;
             }
 
@@ -233,8 +251,15 @@ namespace Proj3Semantics
             Expression rhs = assnExpr.RhsExpression;
             Visit(rhs);
 
+            if (rhs.NodeTypeCategory == NodeTypeCategory.ErrorType)
+            {
+                NodeSetErrorType(expr);
+                return;
+            }
+
             if (!IsAssignable(lhs, rhs))
             {
+            string lhsName = string.Join(".", lhsQname.IdentifierList);
                 CompilerErrors.Add(SemanticErrorTypes.IncompatibleAssignment, lhsName);
                 //lhs.NodeTypeCategory = NodeTypeCategory.ErrorType;
                 expr.NodeTypeCategory = NodeTypeCategory.ErrorType;
@@ -378,7 +403,7 @@ namespace Proj3Semantics
                     CompilerErrors.Add(SemanticErrorTypes.BooleanExpected);
                 }
             }
-            
+
         }
 
         public bool IsAssignable(ITypeDescriptor dst, ITypeDescriptor src)
