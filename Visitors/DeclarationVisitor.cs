@@ -2,223 +2,272 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
-using Proj3Semantics.ASTNodes;
+using Proj3Semantics.AST;
 
 namespace Proj3Semantics
 {
-    using IEnv = ISymbolTable<ITypeDescriptor>;
-    /// <summary>
-    /// PAGE 302
-    /// </summary>
-    public class DeclarationVisitor : SemanticsVisitor, IHasOwnScope
+    using IEnv = ISymbolTable<Symbol>;
+
+    public class DeclarationVisitor : IReflectiveVisitor
     {
 
-        protected new static Logger _log = LogManager.GetCurrentClassLogger();
+        protected static Logger Log = LogManager.GetCurrentClassLogger();
+        private IEnv Env { get; set; }
 
-        public IEnv NameEnv { get; set; }
-        public IEnv TypeEnv { get; set; }
-
-        public DeclarationVisitor(
-            IEnv typeEnv,
-            IEnv nameEnv)
+        public DeclarationVisitor(IEnv env)
         {
-            NameEnv = nameEnv;
-            TypeEnv = typeEnv;
+            Env = env;
         }
 
-        public DeclarationVisitor(IHasOwnScope node)
+        public void Visit(dynamic node)
         {
-            NameEnv = node.NameEnv;
-            TypeEnv = node.TypeEnv;
-        }
-
-        public override void Visit(dynamic node)
-        {
+            Log.Trace(this.GetType().Name + " is visiting " + node + " in env " + Env);
             if (node == null) return;
-
-            _log.Trace(this.GetType().Name + " is visiting " + node);
             VisitNode(node);
         }
 
-        private void VisitNode(CompilationUnit unit)
+
+        private void VisitNode(Node node)
         {
-            foreach (AbstractNode child in unit)
+            Log.Trace("Abstract -- visiting all children");
+            foreach (Node child in node.Children)
                 Visit(child);
-        }
-
-
-        private void VisitNode(NamespaceDecl nsdecl)
-        {
-            _log.Trace("Checking Namespace declaration in env: " + nsdecl.TypeEnv + "/" + nsdecl.NameEnv);
-            var visitor = new DeclarationVisitor(nsdecl);
-            foreach (AbstractNode child in nsdecl)
-                visitor.Visit(child);
-        }
-
-        private void VisitNode(NamespaceBody namespaceBody)
-        {
-            _log.Trace("Checking Namespace body in env: " + TypeEnv + "/" + NameEnv);
-            foreach (AbstractNode node in namespaceBody)
-            {
-                // each namespace body node should have their own env
-                (new DeclarationVisitor(node as IHasOwnScope)).Visit(node);
-            }
         }
 
 
         private void VisitNode(ClassDeclaration cdecl)
         {
-            _log.Trace("Checking Class declaration in env: " + TypeEnv);
-            var visitor = new DeclarationVisitor(cdecl);
-            visitor.Visit(cdecl.Fields);
-            visitor.Visit(cdecl.Methods);
+            Log.Trace("Checking Class declaration in env: " + Env);
+            string cname = cdecl.Name;
 
-        }
-
-        private void VisitNode(ClassFields fields)
-        {
-            foreach (AbstractNode field in fields)
-                Visit(field);
-        }
-        private void VisitNode(ClassMethods methods)
-        {
-            foreach (AbstractNode method in methods)
-                Visit(method);
-        }
-
-        private void VisitNode(ClassFieldDeclStatement fieldDecl)
-        {
-            _log.Trace("Checking fields declaration in env: " + TypeEnv);
-
-            VariableListDeclaring vld = fieldDecl.VariableListDeclaring;
-
-            ITypeDescriptor typeNameDecl = vld.FieldTypeDescriptor;
-            if (typeNameDecl == null) throw new NullReferenceException("Declared class field is not ITypeInfo.");
-
-            if (typeNameDecl.TypeDescriptorRef == null)
+            var localClassDecls = Env.LookupLocalTypes(cname, SymbolType.Class);
+            if (localClassDecls.Count > 0)
             {
-                TypeVisitor tVisitor = new TypeVisitor(this);
-                tVisitor.Visit(vld.FieldTypeDescriptor);
+                CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, cname);
+                return;
             }
 
-            DeclaredVars declFields = vld.ItemIdList;
+            IEnv newScope = Env.GetNewLevel(cname);
+            cdecl.Env = newScope;
+            Env.EnterInfo(cname, new Symbol(SymbolType.Class, cdecl, newScope));
 
-            foreach (AbstractNode field in declFields)
-            {
-                FieldVarDecl fdecl = field as FieldVarDecl;
-                if (fdecl == null) throw new ArgumentNullException(nameof(fdecl));
-
-                // copy over from the decl
-                fdecl.TypeDescriptorRef = typeNameDecl.TypeDescriptorRef;
-            }
+            var newScopeDeclVisitor = new DeclarationVisitor(newScope);
+            newScopeDeclVisitor.Visit(cdecl.ClassBody);
         }
 
-
-
-        // TODO: FIX METHOD SIGS
-        private void VisitNode(MethodDeclaration mdecl)
+        private void VisitNode(FunctionDecl fdecl)
         {
-            _log.Trace("Checking method declaration in env: " + TypeEnv);
+            Log.Trace("Visiting function declaration");
+            string fname = fdecl.Identifier.Name;
 
-            string name = mdecl.Name;
+            var localFunctions = from s in Env.LookupLocalTypes(fname, SymbolType.Function)
+                                 let f = s.DeclNode as FunctionDecl
+                                 where f != null
+                                 select f;
 
-            ITypeDescriptor retType = mdecl.ReturnTypeNode;
-            if (retType.TypeDescriptorRef == null)
+            // check if any other functions have the same signature as me
+            foreach (FunctionDecl declared in localFunctions)
             {
-                var tVisitor = new TypeVisitor(this);
-                tVisitor.Visit(retType);
+                if (declared.ParamListNode == fdecl.ParamListNode)
+                {
+                    CompilerErrors.Add(SemanticErrorTypes.DuplicateFunctionDecl, fname);
+                    return;
+                }
             }
 
-            mdecl.ReturnTypeNode = retType;
+            IEnv newScope = Env.GetNewLevel(fname);
+            fdecl.Env = newScope;
+            Env.EnterInfo(fname, new Symbol(SymbolType.Function, fdecl, newScope));
 
-            var methodVisitor = new DeclarationVisitor(mdecl);
-            methodVisitor.Visit(mdecl.ParameterList);
+            var newScopeDeclVisitor = new DeclarationVisitor(newScope);
+            newScopeDeclVisitor.Visit(fdecl.ParamListNode);
+            newScopeDeclVisitor.Visit(fdecl.MethodBody);
         }
 
-
-        /// <summary>
-        /// Do all the parameter processing on the second pass b/c can't declare things in the method
-        /// </summary>
-        private void VisitNode(ParameterList paramList)
+        private void VisitNode(ParamListNode paramsNode)
         {
-
-            if (paramList == null) return;
-            foreach (AbstractNode node in paramList)
-                Visit(node);
+            Log.Trace("Visiting parameters");
+            foreach (ParamDecl decl in paramsNode.ParamDeclList)
+                Visit(decl);
         }
 
-        private void VisitNode(Parameter p)
+        private void VisitNode(ParamDecl decl)
         {
-            if (p.TypeDescriptor.TypeDescriptorRef == null)
-            {
-                var tVisitor = new TypeVisitor(this);
-                tVisitor.Visit(p.TypeDescriptor);
-            }
+            Log.Trace("Visiting parameter declaration");
+            var name = decl.Identifier.Name;
+            var locals = Env.LookupLocalTypes(name, SymbolType.Variable);
 
-            string pname = p.Name;
-
-            if (NameEnv.IsDeclaredLocally(pname))
+            if (locals.Count > 0)
             {
-                CompilerErrors.Add(SemanticErrorTypes.DuplicateParamName, pname);
+                CompilerErrors.Add(SemanticErrorTypes.DuplicateParamName, name);
             }
             else
             {
-                NameEnv.EnterInfo(pname, p.TypeDescriptor);
+                var symbol = new Symbol(SymbolType.Variable, decl);
+                Env.EnterInfo(name, symbol);
             }
         }
 
-        private void VisitNode(Block body)
+        private void VisitNode(Block blk)
         {
-            _log.Error("Why are we visiting a body in decl?");
+            Log.Trace("Visiting block");
+            foreach (Node child in blk.Children)
+                Visit(child);
         }
 
-        private void VisitNode(Expression expr)
+        private void VisitNode(LocalVarDecl declVars)
         {
-            _log.Error("Why are we visiting an expr in decl?");
-        }
+            Log.Trace("Visiting VarDeclList");
 
+            // TODO: process later
+            //var typeVisitor = new TypeVisitor(TypeEnv);
+            //decls.FieldTypeSpecifier.Accept(typeVisitor);
 
-        private void VisitNode(VariableListDeclaring decls)
-        {
-            _log.Trace("Analyzing VariableDecls");
+            var typeNode = declVars.TypeSpecifier;
 
-            var typeVisitor = new TypeVisitor(this);
-            decls.FieldTypeDescriptor.Accept(typeVisitor);
-
-            foreach (AbstractNode node in decls.ItemIdList)
+            foreach (VarDecl decl in declVars.VarDeclList.Children.Cast<VarDecl>())
             {
-                Identifier id = node as Identifier;
-                Debug.Assert(id != null, "DeclaredVars node children should be Identifiers");
-
-                if (NameEnv.IsDeclaredLocally(id.Name))
+                decl.DeclTypeNode = typeNode;
+                string name = decl.Identifier.Name;
+                if (!Env.IsVarDeclaredLocally(name))
                 {
-                    CompilerErrors.Add(SemanticErrorTypes.VariableAlreadyDeclared, id.Name);
-                    id.NodeTypeCategory = NodeTypeCategory.ErrorType;
+                    var sym = new Symbol(SymbolType.Variable, decl);
+                    Env.EnterInfo(name, sym);
                 }
                 else
                 {
-                    // this attrib was found in the symbol table by typevisitor
-                    var typeSpecEntry = decls.FieldTypeDescriptor as ITypeDescriptor;
-                    Debug.Assert(typeSpecEntry != null, "The node specifying the type is not of ITypeInfo");
-
-                    // copy the found entry to the declared var
-                    id.NodeTypeCategory = typeSpecEntry.NodeTypeCategory;
-                    id.TypeDescriptorRef = typeSpecEntry.TypeDescriptorRef;
-
-                    // and are saved in the symbol table
-                    NameEnv.EnterInfo(id.Name, id);
+                    CompilerErrors.Add(SemanticErrorTypes.VariableAlreadyDeclared, name);
                 }
             }
+
         }
 
-        private void VisitNode(AbstractNode node)
+
+
+
+        // TODO BELOW
+        // ------------------------------------------------------------
+
+
+
+
+        private void VisitNode(NamespaceDecl nsdecl)
         {
-            _log.Trace("Visiting {0}, no action.", node);
+            //_log.Trace("Checking Namespace declaration in env: " + TypeEnv);
+            //string name = nsdecl.Name;
+            //ITypeDescriptor entry = TypeEnv.Lookup(name);
+            //if (entry != null)
+            //{
+            //    CompilerErrors.Add(SemanticErrorTypes.DuplicateNamespaceDef, name);
+            //    nsdecl.NodeTypeCategory = NodeTypeCategory.Error;
+            //}
+            //else
+            //{
+            //    TypeEnv.EnterInfo(name, nsdecl);
+            //    var nsTypeEnv = TypeEnv.GetNewLevel(name);
+            //    var nsNameEnv = NameEnv.GetNewLevel(name);
+            //    nsdecl.TypeEnv = nsTypeEnv;
+            //    nsdecl.NameEnv = nsNameEnv;
+            //    var visitor = new FirstPassDeclVisitor(nsTypeEnv, nsNameEnv);
+            //    visitor.Visit(nsdecl.NamespaceBody);
+            //}
         }
+
+        private void VisitNode(NamespaceBody namespaceBody)
+        {
+            Log.Trace("Checking Namespace declaration in env: " + Env);
+            foreach (Node node in namespaceBody.Children)
+                Visit(node);
+        }
+
+
+
+
+
+        private void VisitNode(ClassFieldDeclStatement fieldDecl)
+        {
+            //_log.Trace("Checking fields declaration in env: " + TypeEnv);
+            //VariableListDeclaring vld = fieldDecl.VariableListDeclaring;
+            //DeclaredVars declFields = vld.ItemIdList;
+
+            //ITypeDescriptor typeNameDecl = vld.TypeSpecifier;
+            //if (typeNameDecl == null) throw new NullReferenceException("Declared class field is not ITypeInfo.");
+
+            //var modifierTokens = fieldDecl.Modifiers.ModifierTokens;
+            //fieldDecl.Children?.Remove(fieldDecl.Modifiers);
+
+            //// lookup the types
+            //// TODO: done on the second pass?
+            ////if (typeNameDecl.TypeSpecifierRef == null)
+            ////{
+            ////    TypeVisitor tVisitor = new TypeVisitor(TypeEnv);
+            ////    tVisitor.Visit(vld.FieldTypeSpecifier);
+            ////}
+
+            //foreach (Node field in declFields.Children)
+            //{
+            //    //FieldVarDecl fdecl = field as FieldVarDecl;
+            //    //if (fdecl == null) throw new ArgumentNullException(nameof(fdecl));
+
+            //    //string name = fdecl.Name;
+            //    //ProcessModifierTokens(fdecl, modifierTokens, name);
+
+            //    //ITypeDescriptor entry = TypeEnv.Lookup(name);
+            //    //if (entry != null)
+            //    //{
+            //    //    CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, name);
+            //    //    fdecl.NodeTypeCategory = NodeTypeCategory.Error;
+            //    //    fdecl.TypeDescriptorRef = null;
+            //    //}
+            //    //else
+            //    //{
+            //    //    TypeEnv.EnterInfo(name, fdecl);
+            //    //}
+            //}
+
+            //// copy the link to the proper type
+            //// TODO: second pass?
+            ////fieldVarDecl.TypeSpecifierRef = typeNameDecl.TypeSpecifierRef;
+
+        }
+
+
+
+        // ------------------------------------------------------------
+        // HELPER METHODS
+        // ------------------------------------------------------------
+
+
+        /// <summary>
+        /// NOTE: THIS IS DONE ON THE SECOND PASS
+        /// </summary>
+        //private void ProcessClassMethodParams(
+        //    ParameterList parameterList,
+        //    IEnv methodLocalsEnv)
+        //{
+        //    if (parameterList == null) return;
+        //    foreach (AbstractNode node in parameterList)
+        //    {
+        //        Parameter p = node as Parameter;
+        //        if (p == null) throw new ArgumentNullException(nameof(p));
+
+        //        if (p.TypeSpecifier.TypeSpecifierRef == null)
+        //        {
+        //            var tVisitor = new TypeVisitor(TypeEnv);
+        //            tVisitor.Visit(p.TypeSpecifier);
+        //        }
+
+        //        p.Identifier.NodeTypeCategory = p.TypeSpecifier.NodeTypeCategory;
+        //        p.Identifier.TypeSpecifierRef = p.TypeSpecifier;
+        //    }
+        //}
+
+
+
+
     }
 
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
-using Proj3Semantics.ASTNodes;
+using Proj3Semantics.AST;
 
 namespace Proj3Semantics
 {
@@ -64,7 +64,7 @@ namespace Proj3Semantics
 
 
             CompilerErrors.ClearAll();
-            SemanticAnalysis.Run(Parser.Root as CompilationUnit);
+            RunSemanticAnalysis.Run(Parser.Root as CompilationUnit);
             if (CompilerErrors.ErrList.Count > 0)
             {
                 using (OutColor.Red)
@@ -93,14 +93,15 @@ namespace Proj3Semantics
 
             List<string> testFiles = new List<string>()
             {
-                "01hello.txt",
+                //"00test.txt",
+                //"01hello.txt",
                 "02errors1.txt",
-                "03compute.txt",
-                "04twomethods0.txt",
-                "05twomethods1.txt",
-                "06writenums.txt",
-                "07iftest.txt",
-                "08loop.txt",
+                //"03compute.txt",
+                //"04twomethods0.txt",
+                //"05twomethods1.txt",
+                //"06writenums.txt",
+                //"07iftest.txt",
+                //"08loop.txt",
             };
 
             var testNbr = 1;

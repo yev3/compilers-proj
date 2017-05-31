@@ -1,20 +1,20 @@
 ﻿using System;
 
-namespace Proj3Semantics.ASTNodes
+namespace Proj3Semantics.AST
 {
     public class SelectionStatement : Statement { }
 
-    public class Then : AbstractNode
+    public class Then : Node
     {
-        public Then(AbstractNode node)
+        public Then(Node node)
         {
             AddChild(node);
         }
     }
 
-    public class Else : AbstractNode
+    public class Else : Node
     {
-        public Else(AbstractNode node)
+        public Else(Node node)
         {
             AddChild(node);
         }
@@ -22,11 +22,11 @@ namespace Proj3Semantics.ASTNodes
 
     public class IfStatement : SelectionStatement
     {
-        public Expression Predicate { get; set; }
+        public ExprNode Predicate { get; set; }
         public Statement ThenStatement { get; set; }
-        public IfStatement(AbstractNode predicate, AbstractNode thenExpr)
+        public IfStatement(Node predicate, Node thenExpr)
         {
-            Predicate = predicate as Expression;
+            Predicate = predicate as ExprNode;
 
             ThenStatement = thenExpr as Statement;
 
@@ -40,16 +40,16 @@ namespace Proj3Semantics.ASTNodes
 
     public class IfStatementElse : SelectionStatement
     {
-        public Expression Predicate { get; set; }
+        public ExprNode Predicate { get; set; }
         public Statement ThenStatement { get; set; }
         public Statement ElseStatement { get; set; }
 
         public IfStatementElse(
-            AbstractNode predicate,
-            AbstractNode thenExpr,
-            AbstractNode elseExpr)
+            Node predicate,
+            Node thenExpr,
+            Node elseExpr)
         {
-            Predicate = predicate as Expression;
+            Predicate = predicate as ExprNode;
 
             ThenStatement = thenExpr as Statement;
             if (ThenStatement == null) throw new NullReferenceException(nameof(ThenStatement));
@@ -62,14 +62,14 @@ namespace Proj3Semantics.ASTNodes
             AddChild(new Else(elseExpr));
         }
     }
-    public class WhileLoop : AbstractNode
+    public class WhileLoop : Node
     {
-        public Expression Predicate { get; set; }
+        public ExprNode Predicate { get; set; }
         public Statement BodyStatement { get; set; }
 
-        public WhileLoop(AbstractNode predicateNode, AbstractNode bodyStatement)
+        public WhileLoop(Node predicateNode, Node bodyStatement)
         {
-            Predicate = predicateNode as Expression;
+            Predicate = predicateNode as ExprNode;
             BodyStatement = bodyStatement as Statement;
             if (BodyStatement == null) throw new NullReferenceException(nameof(BodyStatement));
 

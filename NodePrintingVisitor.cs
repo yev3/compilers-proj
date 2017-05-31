@@ -5,19 +5,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Proj3Semantics;
-using Proj3Semantics.ASTNodes;
+using Proj3Semantics.AST;
 
 namespace Proj3Semantics
 {
     public class NodePrintingVisitor : IReflectiveVisitor
     {
-        public static string AbstactNodeDebugString(AbstractNode node)
+        public static string AbstactNodeDebugString(Node node)
         {
             TextWriter tw = new StringWriter();
-            
-            bool hasName = node is INamedType;
-            INamedType namedNode = node as INamedType;
-            string nodeName = namedNode?.Name;
+
+            DeclNode decl = node as DeclNode;
+            string nodeName = decl?.Identifier?.Name;
             tw.Write("<" + node.GetType().Name + "> ");
             PrintName(node, tw);
             tw.Write(" ");
@@ -27,11 +26,9 @@ namespace Proj3Semantics
             return tw.ToString();
         }
 
-        public void PreorderTraverseRoot(AbstractNode node, string prefix = "")
+        public void PreorderTraverseRoot(Node node, string prefix = "", bool isLastChild = true)
         {
             if (node == null) return;
-
-            bool isLastChild = (node.NextSibling == null);
 
             using (OutColor.DarkYellow)
             {
@@ -40,9 +37,12 @@ namespace Proj3Semantics
             }
 
             node.Accept(this);
-
-            PreorderTraverseRoot(node.LeftMostChild, prefix + (isLastChild ? "   " : "│  "));
-            if (!isLastChild) PreorderTraverseRoot(node.NextSibling, prefix);
+            if (node.Children.Count == 0) return;
+            Node last = node.Children[node.Children.Count - 1];
+            foreach (Node child in node.Children)
+            {
+                PreorderTraverseRoot(child, prefix + (isLastChild ? "   " : "│  "), child == last);
+            }
         }
 
         // ============================================================
@@ -58,7 +58,8 @@ namespace Proj3Semantics
         // ============================================================
 
 
-        private static void PrintModifiers(AbstractNode node, TextWriter cout = null)
+
+        private static void PrintModifiers(Node node, TextWriter cout = null)
         {
             if (cout == null) cout = Console.Out;
 
@@ -70,38 +71,36 @@ namespace Proj3Semantics
             }
         }
 
-        private static void PrintTypeDescr(AbstractNode node, TextWriter cout = null)
+        private static void PrintTypeDescr(Node node, TextWriter cout = null)
         {
-            if (cout == null) cout = Console.Out;
+            //if (cout == null) cout = Console.Out;
 
-            ITypeDescriptor typeDescriptor = node as ITypeDescriptor;
-            if (typeDescriptor == null) return;
+            //ITypeDescriptor typeDescriptor = node as ITypeDescriptor;
+            //if (typeDescriptor == null) return;
 
-            var typeStrings = new List<string>();
-            typeStrings.Add(typeDescriptor.NodeTypeCategory.ToString());
+            //var typeStrings = new List<string>();
+            //typeStrings.Add(typeDescriptor.NodeTypeCategory.ToString());
 
-            var primitiveDescriptor = node as IPrimitiveTypeDescriptor;
-            if (primitiveDescriptor != null)
-                typeStrings.Add(primitiveDescriptor.VariablePrimitiveType.ToString());
+            //var primitiveDescriptor = node as IPrimitiveTypeDescriptor;
+            //if (primitiveDescriptor != null)
+            //    typeStrings.Add(primitiveDescriptor.VariablePrimitiveType.ToString());
 
-            ITypeDescriptor typeRef = typeDescriptor?.TypeDescriptorRef;
-            typeStrings.Add("tref=" + (typeRef?.ToString() ?? "**NULL**"));
+            //ITypeDescriptor typeRef = typeDescriptor?.TypeDescriptorRef;
+            //typeStrings.Add("tref=" + (typeRef?.ToString() ?? "**NULL**"));
 
-            var typeStr = "{" + string.Join(", ", typeStrings) + "}";
-            using (OutColor.Magenta)
-                cout.Write(typeStr);
+            //var typeStr = "{" + string.Join(", ", typeStrings) + "}";
+            //using (OutColor.Magenta)
+            //    cout.Write(typeStr);
 
         }
 
-        private static void PrintName(AbstractNode node, TextWriter cout = null)
+        private static void PrintName(Node node, TextWriter cout = null)
         {
             if (cout == null) cout = Console.Out;
-
-            bool hasName = node is INamedType;
-            INamedType namedNode = node as INamedType;
-            string nodeName = namedNode?.Name;
-            if (hasName)
+            DeclNode decl = node as DeclNode;
+            if (decl != null)
             {
+                string nodeName = decl?.Identifier?.Name;
                 using (OutColor.Cyan)
                     cout.Write(nodeName);
             }
@@ -113,12 +112,9 @@ namespace Proj3Semantics
         // ============================================================
         //                  VISIT METHODS BELOW
         // ============================================================
-        public void VisitNode(AbstractNode node)
+        public void VisitNode(Node node)
         {
 
-            bool hasName = node is INamedType;
-            INamedType namedNode = node as INamedType;
-            string nodeName = namedNode?.Name;
             Console.Write("<" + node.GetType().Name + "> ");
             PrintName(node);
             Console.Write(" ");
@@ -126,6 +122,41 @@ namespace Proj3Semantics
             Console.Write(" ");
             PrintTypeDescr(node);
             Console.WriteLine();
+        }
+
+        private void VisitNode(DeclNode decl)
+        {
+            Console.Write(decl + ": ");
+            using (OutColor.Cyan)
+            {
+                Console.Write(decl.Name ?? "null_name");
+            }
+            Console.Write(" ");
+            using (OutColor.Magenta)
+            {
+                Console.Write("t:");
+                Console.Write(decl.DeclTypeNode?.ToString() ?? "null_tnode");
+
+
+            }
+            var mods = decl as ITypeHasModifiers;
+            if (mods != null)
+            {
+                using (OutColor.DarkMagenta)
+                {
+                    if (mods.IsStatic) Console.Write(" static");
+                    Console.Write(" " + mods.AccessorType);
+                }
+            }
+            Console.WriteLine();
+
+        }
+
+        private void VisitNode(Identifier id)
+        {
+            Console.Write(id + ": ");
+            using (OutColor.Cyan)
+                Console.WriteLine(id.Name);
         }
 
         private void VisitNode(Modifiers node)
@@ -136,12 +167,14 @@ namespace Proj3Semantics
                 Console.WriteLine(string.Join(", ", stringEnums));
         }
 
-        private void VisitNode(Expression node)
+        private void VisitNode(ExprNode node)
         {
             Console.Write(node + ": ");
             using (OutColor.Magenta)
             {
                 Console.Write(node.ExprType);
+                Console.Write(" t:");
+                Console.Write(node.EvalType?.ToString() ?? "null");
                 Console.Write(" ");
                 PrintTypeDescr(node);
                 Console.WriteLine();
@@ -149,27 +182,26 @@ namespace Proj3Semantics
         }
 
 
-        private void VisitNode(NumberLiteral node)
+        private void VisitNode(IntLiteralExpr node)
         {
             Console.Write(node + ": ");
             using (OutColor.Yellow)
-                Console.WriteLine(node.Value);
+                Console.WriteLine(node.IntegerValue);
         }
-        private void VisitNode(StringLiteral node)
+        private void VisitNode(StringLiteralExpr node)
         {
             Console.Write(node + ": ");
             using (OutColor.Yellow)
-                Console.WriteLine("\"" + node.Name + "\"");
+                Console.WriteLine("\"" + node.StringVal + "\"");
         }
 
-        private void VisitNode(QualifiedName node)
+        private void VisitNode(TypeNode node)
         {
-            Console.Write(node + ": ");
-            var idStr = string.Join(".", node.IdentifierList);
-            using (OutColor.Cyan)
-                Console.Write(idStr);
+            Console.Write("<" + node.GetType().Name + ">: ");
+            using (OutColor.Magenta)
+                Console.Write(node);
 
-            Console.Write(", ");
+            Console.Write(" ");
             PrintTypeDescr(node);
             Console.WriteLine();
         }
