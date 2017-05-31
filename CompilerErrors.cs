@@ -24,7 +24,8 @@ namespace Proj3Semantics
         InvalidFuncArg,
         IncompatibleAssignment,
         IncompatibleOperands,
-        BooleanExpected
+        BooleanExpected,
+        DuplicateFunctionDecl
     }
 
     public static class SemanticErrorTypeMessages
@@ -61,6 +62,8 @@ namespace Proj3Semantics
                     return "Incompatible operands";
                 case BooleanExpected:
                     return "Boolean expected";
+                case DuplicateFunctionDecl:
+                    return "Duplicate function declaration";
                 default:
                     throw new NotImplementedException("TODO: add a text message for the error type");
             }

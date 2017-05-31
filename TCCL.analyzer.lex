@@ -1,5 +1,6 @@
 %namespace Proj3Semantics
-%using Proj3Semantics.ASTNodes;
+%using Proj3Semantics.AST;
+%using QUT.Gppg;
 %scannertype TCCLScanner
 %visibility public
 %tokentype Token 
@@ -88,7 +89,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 <INITIAL> {
 {Identifier}        { yylval = new Identifier(yytext); return (int)Token.IDENTIFIER; }
 
-{DecIntegerLiteral} { yylval = new NumberLiteral(int.Parse(yytext)); return (int)Token.INT_NUMBER; }
+{DecIntegerLiteral} { yylval = new IntLiteralExpr(int.Parse(yytext)); return (int)Token.INT_NUMBER; }
 
 \"                  { stringval.Length = 0; BEGIN(STRING); }
 
@@ -104,7 +105,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 <STRING> {
   \"                { BEGIN(INITIAL); 
                       yystringval = stringval.ToString();
-                      yylval = new StringLiteral(yystringval);
+                      yylval = new StringLiteralExpr(yystringval);
                       return (int)Token.STR_LITERAL; }
   [^\n\r\"\\]+      { stringval.Append(yytext); }
   \\t               { stringval.Append('\t'); }
@@ -117,6 +118,10 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 
 
 
-/* error fallback */
-.|\n                             { Console.WriteLine("Illegal character <"+
-                                                    yytext+">"); }
+.|\n                { Console.WriteLine("Illegal character <" + yytext + ">"); }
+
+%{
+	yylloc = new LexLocation(tokLin, tokCol, tokELin, tokECol, tokPos, tokEPos, buffer);
+	// yylloc = new LexLocation(tokLin, tokCol, tokELin, tokECol);
+%}
+

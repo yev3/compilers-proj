@@ -1,10 +1,10 @@
 %namespace Proj3Semantics
-%using Proj3Semantics.ASTNodes
+%using Proj3Semantics.AST;
 %partial
 %parsertype TCCLParser
 %visibility public
 %tokentype Token
-%YYSTYPE AbstractNode
+%YYSTYPE Node
 
 %{
     // user defined functions go here
@@ -43,8 +43,22 @@
 %%
 
 CompilationUnit     
-    :   NamespaceItems      { $$ = new CompilationUnit($1); }
+    :   DeclarationList     { $$ = new CompilationUnit(@1, $1); }
     ;
+
+DeclarationList
+    :   Declaration         { $$ = new DeclarationList($1); }
+    |   DeclarationList Declaration
+                            { $1.AddChild($2); $$ = $1; }
+    ;
+
+Declaration
+    :   NamespaceDecl       { $$ = $1; }
+    |   ClassDeclaration    { $$ = $1; }
+    |   FunctionDecl        { $$ = $1; }    // done
+    |   LocalVarDecl        { $$ = $1; }
+    ;
+
 
 NamespaceDecl
     :   NAMESPACE Identifier NamespaceBody
@@ -65,12 +79,10 @@ NamespaceItems
                             { $1.AddChild($2); $$ = $1; }
     ;
 
-
 NamespaceDeclStmt
     :   NamespaceDecl       { $$ = $1; }
     |   ClassDeclaration    { $$ = $1; }   
     ;
-
 
 
 
@@ -80,11 +92,14 @@ NamespaceDeclStmt
 //                             { $1.AddChild($2); $$ = $1; }
 //     ;
 
+
+//  CLASS
 ClassDeclaration    
     :   Modifiers CLASS Identifier ClassBody 
-                            { $$ = new ClassDeclaration($1, $3, $4);}
+                            { $$ = new ClassDeclaration($1 as Modifiers, $3 as Identifier, $4 as ClassBody);}
     ;
 
+//  CLASS   MODIFIERS 
 Modifiers           
     :   PUBLIC              { $$ = new Modifiers(ModifierType.PUBLIC);}
     |   PRIVATE             { $$ = new Modifiers(ModifierType.PRIVATE);}
@@ -94,91 +109,106 @@ Modifiers
     |   Modifiers STATIC    { ((Modifiers)$1).AddModType(ModifierType.STATIC); $$ = $1;}
     ;
 
+//  CLASS   BODY    
 ClassBody           
-    :   LBRACE FieldDeclarations RBRACE     { $$ = $2;}
+    :   LBRACE ClassBodyItems RBRACE        { $$ = $2;}
     |   LBRACE RBRACE                       { $$ = new ClassBody();}
     ;
 
-FieldDeclarations   
-    :   FieldDeclaration                    { $$ = new ClassBody($1); }
-    |   FieldDeclarations FieldDeclaration  { $1.AddChild($2); $$ = $1;}
+// CLASS    BODY    DECLS
+ClassBodyItems   
+    :   ClassBodyDecl                       { $$ = new ClassBody($1); }
+    |   ClassBodyItems ClassBodyDecl        { $1.AddChild($2); $$ = $1;}
     ;
 
-FieldDeclaration    
-    :   CLassFieldDecl SEMICOLON  { $$ = $1; }
-    |   MethodDeclaration                   { $$ = $1; }
+// CLASS    BODY    DECL
+ClassBodyDecl    
+    :   ClassFieldDecl SEMICOLON            { $$ = $1; }    
+    |   ClassMethodDecl                     { $$ = $1; }
     |   ConstructorDeclaration              { $$ = $1; }
     |   StaticInitializer                   { $$ = $1; }
     |   StructDeclaration                   { $$ = $1; }
     ;
 
+// CLASS    BODY    DECL    FIELD
+ClassFieldDecl    
+    :   Modifiers TypeNode FieldVarDecls    { $$ = new ClassFieldDeclStatement($1, new LocalVarDecl($2 as TypeNode, $3 as VarDeclList)); }
+    ;
+
+// CLASS    BODY    DECL    METHOD
+ClassMethodDecl           
+    :   Modifiers FunctionDecl              { $$ = new ClassMethodDecl($1 as Modifiers, $2 as FunctionDecl); }
+    |   FunctionDecl                        { $$ = new ClassMethodDecl($1 as FunctionDecl); }       // private non-static by default
+    ;
+
+// CLASS    BODY    DECL    CTOR
+ConstructorDeclaration      
+    :   Modifiers MethodDeclarator Block    { $$ = new NotImplemented("ConstructorDeclaration"); }
+    ;
+
+// CLASS    BODY    DECL    STATICINIT?? .. i dunno what this is
+StaticInitializer           
+    :   STATIC Block                        { $$ = new StaticInitializer($2); }
+    ;
+
+// CLASS    BODY    DECL    STRUCTDECL
 StructDeclaration   
-    :   Modifiers STRUCT Identifier ClassBody   { $$ = new NotImplemented("StructDeclaration"); }
+    :   Modifiers STRUCT Identifier ClassBody   
+                                            { $$ = new NotImplemented("StructDeclaration"); }
     ;
 
-/*
- * This isn't structured so nicely for a bottom up parse.  Recall
- * the example I did in class for Digits, where the "type" of the digits
- * (i.e., the base) is sitting off to the side.  You'll have to do something
- * here to get the information where you want it, so that the declarations can
- * be suitably annotated with their type and modifier information.
- */
-CLassFieldDecl    
-    :   Modifiers TypeSpecifier FieldVariableDeclarators            
-                                            { $$ = new ClassFieldDeclStatement($1, new VariableListDeclaring($2, $3)); }
-    ;
 
-TypeSpecifier               
+TypeNode               
     :   TypeName                            { $$ = $1; }
     |   ArraySpecifier                      { $$ = $1; }
     ;
 
 TypeName                    
     :   PrimitiveType                       { $$ = $1; }
-    |   QualifiedName                       { $$ = $1; }
+    |   QualName                       { $$ = $1; }
     ;
 
 ArraySpecifier              
-    :   TypeName LBRACKET RBRACKET          { $$ = new ArraySpecifier($1); }
+    :   TypeName LBRACKET RBRACKET          { $$ = new NotImplemented("Arrays not supported"); }
     ;
                             
 PrimitiveType               
-    :   BOOLEAN                             { $$ = new BuiltinTypeBoolean(); }
-    |   INT                                 { $$ = new BuiltinTypeInt(); }
-    |   STRING                              { $$ = new BuiltinTypeString(); }
-    |   VOID                                { $$ = new BuiltinTypeVoid(); }
+    :   BOOLEAN                             { $$ = TypeNode.TypeNodeBoolean; }
+    |   INT                                 { $$ = TypeNode.TypeNodeInt; }
+    |   STRING                              { $$ = TypeNode.TypeNodeString; }
+    |   VOID                                { $$ = TypeNode.TypeNodeVoid; }
     ;
 
-FieldVariableDeclarators    
-    :   FieldVariableDeclaratorName         { $$ = new DeclaredVars($1); }
-    |   FieldVariableDeclarators COMMA FieldVariableDeclaratorName  
-                                            { $$.AddChild($3); $$ = $1;}
+FieldVarDecls    
+    :   FieldVarDeclName                        { $$ = new VarDeclList($1 as VarDecl); }
+    |   FieldVarDecls COMMA FieldVarDeclName    { $$.AddChild($3); $$ = $1;}
     ;
 
 
-MethodDeclaration           
-    :   Modifiers TypeSpecifier MethodDeclarator MethodBody         
-                                            { $$ = new MethodDeclaration($1, $2, $3, $4); }
+
+FunctionDecl
+    :   TypeNode MethodDeclarator MethodBody
+                                            { $$ = new FunctionDecl($1 as TypeNode, $2 as MethodDeclarator, $3 as Block); }
     ;
 
 MethodDeclarator            
-    :   MethodDeclaratorName LPAREN ParameterList RPAREN            
-                                            { $$ = new MethodDeclarator($1, $3); }
-    |   MethodDeclaratorName LPAREN RPAREN  { $$ = new MethodDeclarator($1); }
+    :   MethodDeclaratorName LPAREN ParamListNode RPAREN            
+                                            { $$ = new MethodDeclarator($1 as Identifier, $3 as ParamListNode); }
+    |   MethodDeclaratorName LPAREN RPAREN  { $$ = new MethodDeclarator($1 as Identifier); }
     ;
 
-ParameterList               
-    :   Parameter                           { $$ = new ParameterList($1); }
-    |   ParameterList COMMA Parameter       { $1.AddChild($3); $$ = $1;}  
+ParamListNode               
+    :   ParamDecl                           { $$ = new ParamListNode($1); }
+    |   ParamListNode COMMA ParamDecl       { $1.AddChild($3); $$ = $1;}  
     ;
 
-Parameter                   
-    :   TypeSpecifier DeclaratorName        { $$ = new Parameter($1, $2); }
+ParamDecl                   
+    :   TypeNode DeclaratorName             { $$ = new ParamDecl($1 as TypeNode, $2 as Identifier); }
     ;
 
-QualifiedName               
-    :   Identifier                          { $$ = new QualifiedName($1);}
-    |   QualifiedName PERIOD Identifier     { $$.AddChild($3); $$ = $1;}
+QualName               
+    :   Identifier                          { $$ = new QualifiedNode($1 as Identifier);}
+    |   QualName PERIOD Identifier     { ($$ as QualifiedNode).AddChild($3 as Identifier); $$ = $1;}
     ;
 
 DeclaratorName              
@@ -189,25 +219,16 @@ MethodDeclaratorName
     :   Identifier                          { $$ = $1; }
     ;
 
-FieldVariableDeclaratorName 
-    :   Identifier                          { $$ = new FieldVarDecl($1); }
+FieldVarDeclName 
+    :   Identifier                          { $$ = new VarDecl($1 as Identifier); }
     ;
 
-LocalVariableDeclaratorName 
-    :   Identifier                          { $$ = $1; }
-    ;
 
 MethodBody                  
     :   Block                               { $$ = $1; }
     ;
 
-ConstructorDeclaration      
-    :   Modifiers MethodDeclarator Block    { $$ = new NotImplemented("ConstructorDeclaration"); }
-    ;
 
-StaticInitializer           
-    :   STATIC Block                        { $$ = new StaticInitializer($2); }
-    ;
         
 /*
  * These can't be reorganized, because the order matters.
@@ -228,20 +249,22 @@ LocalVariableDeclarationsAndStatements
     ;
 
 LocalVarDeclOrStatement 
-    :   LocalVariableDecl                   { $$ = $1;}
+    :   LocalVarDecl                        { $$ = $1;}
     |   Statement                           { $$ = $1;}
     ;
 
-LocalVariableDecl       
-    :   TypeSpecifier LocalVariableDeclarators SEMICOLON    
-                                            { $$ = new VariableListDeclaring($1, $2);}
+LocalVarDecl       
+    :   TypeNode VarDeclList SEMICOLON      { $$ = new LocalVarDecl($1 as TypeNode, $2 as VarDeclList);}
     |   StructDeclaration                   { $$ = new NotImplemented("struct decl not supported");}
     ;
 
-LocalVariableDeclarators    
-    :   LocalVariableDeclaratorName         { $$ = new DeclaredVars($1); }
-    |   LocalVariableDeclarators COMMA LocalVariableDeclaratorName  
-                                            { $1.AddChild($3); $$ = $1; }
+VarDeclList    
+    :   VarDecl                             { $$ = new VarDeclList($1 as VarDecl); }
+    |   VarDeclList COMMA VarDecl           { $1.AddChild($3); $$ = $1; }
+    ;
+
+VarDecl 
+    :   Identifier                          { $$ = new VarDecl($1 as Identifier); }
     ;
 
 Statement                   
@@ -258,7 +281,7 @@ EmptyStatement
     ;
 
 ExpressionStatement         
-    :   Expression                          { $$ = $1; }
+    :   Expr                          { $$ = $1; }
     ;
 
 /*
@@ -268,47 +291,49 @@ ExpressionStatement
  */
 
 SelectionStatement          
-    :   IF LPAREN Expression RPAREN Statement ELSE Statement    { $$ = new IfStatementElse($3,$5,$7); }
-    |   IF LPAREN Expression RPAREN Statement                   { $$ = new IfStatement($3,$5); }
+    :   IF LPAREN Expr RPAREN Statement ELSE Statement    
+                                            { $$ = new IfStatementElse($3,$5,$7); }
+    |   IF LPAREN Expr RPAREN Statement                   
+                                            { $$ = new IfStatement($3,$5); }
     ;
 
 
 IterationStatement          
-    :   WHILE LPAREN Expression RPAREN Statement
+    :   WHILE LPAREN Expr RPAREN Statement
                                             { $$ = new WhileLoop($3, $5); }
     ;
 
 ReturnStatement         
-    :   RETURN Expression SEMICOLON         { $$ = new ReturnStatement($2); }
+    :   RETURN Expr SEMICOLON         { $$ = new ReturnStatement($2); }
     |   RETURN            SEMICOLON         { $$ = new ReturnStatement(); }
     ;
 
 ArgumentList            
-    :   Expression                          { $$ = new ArgumentList($1); }
-    |   ArgumentList COMMA Expression       { $1.AddChild($3); $$ = $1; }
+    :   Expr                          { $$ = new ArgumentList($1); }
+    |   ArgumentList COMMA Expr       { $1.AddChild($3); $$ = $1; }
     ;
 
-Expression                  
-    :   QualifiedName EQUALS Expression     { $$ = new AssignExpr($1, $3); }
-    |   Expression OP_LOR Expression        { $$ = new BinaryExpr($1, ExprType.LOGICAL_OR, $3); }   /* short-circuit OR  */  
-    |   Expression OP_LAND Expression       { $$ = new BinaryExpr($1, ExprType.LOGICAL_AND, $3); }   /* short-circuit AND */  
-    |   Expression PIPE Expression          { $$ = new BinaryExpr($1, ExprType.PIPE, $3); }                
-    |   Expression HAT Expression           { $$ = new BinaryExpr($1, ExprType.HAT, $3); }                
-    |   Expression AND Expression           { $$ = new BinaryExpr($1, ExprType.AND, $3); }                
-    |   Expression OP_EQ Expression         { $$ = new BinaryExpr($1, ExprType.EQUALS, $3); }                
-    |   Expression OP_NE Expression         { $$ = new BinaryExpr($1, ExprType.NOT_EQUALS, $3); }                
-    |   Expression OP_GT Expression         { $$ = new BinaryExpr($1, ExprType.GREATER_THAN, $3); }                
-    |   Expression OP_LT Expression         { $$ = new BinaryExpr($1, ExprType.LESS_THAN, $3); }                
-    |   Expression OP_LE Expression         { $$ = new BinaryExpr($1, ExprType.LESS_EQUAL, $3); }                
-    |   Expression OP_GE Expression         { $$ = new BinaryExpr($1, ExprType.GREATER_EQUAL, $3); }                
-    |   Expression PLUSOP Expression        { $$ = new BinaryExpr($1, ExprType.PLUSOP, $3); }                
-    |   Expression MINUSOP Expression       { $$ = new BinaryExpr($1, ExprType.MINUSOP, $3); }                
-    |   Expression ASTERISK Expression      { $$ = new BinaryExpr($1, ExprType.ASTERISK, $3); }                
-    |   Expression RSLASH Expression        { $$ = new BinaryExpr($1, ExprType.RSLASH, $3); }                
-    |   Expression PERCENT Expression       { $$ = new BinaryExpr($1, ExprType.PERCENT, $3); }   /* remainder */
-    |   ArithmeticUnaryOperator Expression  %prec UNARY
-                                            { $$ = new NotImplemented("ArithmeticUnaryOperator Expression  %prec UNARY"); }
-    |   EvalExpression                      { $$ = $1; }
+Expr                  
+    :   QualName EQUALS Expr    { $$ = new AssignExpr($1, $3); }
+    |   Expr OP_LOR Expr        { $$ = new CompExpr($1, ExprType.LOGICAL_OR, $3); }   /* short-circuit OR  */  
+    |   Expr OP_LAND Expr       { $$ = new CompExpr($1, ExprType.LOGICAL_AND, $3); }   /* short-circuit AND */  
+    |   Expr PIPE Expr          { $$ = new BinaryExpr($1, ExprType.PIPE, $3); }                
+    |   Expr HAT Expr           { $$ = new BinaryExpr($1, ExprType.HAT, $3); }                
+    |   Expr AND Expr           { $$ = new CompExpr($1, ExprType.AND, $3); }                
+    |   Expr OP_EQ Expr         { $$ = new CompExpr($1, ExprType.EQUALS, $3); }                
+    |   Expr OP_NE Expr         { $$ = new CompExpr($1, ExprType.NOT_EQUALS, $3); }                
+    |   Expr OP_GT Expr         { $$ = new CompExpr($1, ExprType.GREATER_THAN, $3); }                
+    |   Expr OP_LT Expr         { $$ = new CompExpr($1, ExprType.LESS_THAN, $3); }                
+    |   Expr OP_LE Expr         { $$ = new CompExpr($1, ExprType.LESS_EQUAL, $3); }                
+    |   Expr OP_GE Expr         { $$ = new CompExpr($1, ExprType.GREATER_EQUAL, $3); }                
+    |   Expr PLUSOP Expr        { $$ = new BinaryExpr($1, ExprType.PLUSOP, $3); }                
+    |   Expr MINUSOP Expr       { $$ = new BinaryExpr($1, ExprType.MINUSOP, $3); }                
+    |   Expr ASTERISK Expr      { $$ = new BinaryExpr($1, ExprType.ASTERISK, $3); }                
+    |   Expr RSLASH Expr        { $$ = new BinaryExpr($1, ExprType.RSLASH, $3); }                
+    |   Expr PERCENT Expr       { $$ = new BinaryExpr($1, ExprType.PERCENT, $3); }   /* remainder */
+    |   ArithmeticUnaryOperator Expr  %prec UNARY
+                                { $$ = new NotImplemented("ArithmeticUnaryOperator Expr  %prec UNARY"); }
+    |   PriExpr          { $$ = $1; }
     ;
 
 ArithmeticUnaryOperator     
@@ -316,43 +341,56 @@ ArithmeticUnaryOperator
     |   MINUSOP                         { $$ = new NotImplemented("ArithmeticUnaryOperator"); }
     ;
                             
-EvalExpression           
-    :   QualifiedName                   { $$ = new EvalExpr($1);}   
-    |   QualifiedPrimaryExpr            { $$ = new EvalExpr($1);}
+// Expr -> PriExpr
+PriExpr           
+    :   QualName                   { $$ = new EvalExpr($1);}   
+    |   QualPriExpr            { $$ = new EvalExpr($1);}
     ;
 
-QualifiedPrimaryExpr                 
-    :   SpecialBuiltinName              { $$ = $1; }
-    |   ComplexPrimary                  { $$ = $1; }
+// Expr -> PriExpr -> QualPriExpr
+QualPriExpr                 
+    :   SpecialBuiltin              { $$ = $1; }
+    |   CxPriTypes             { $$ = $1; }
     ;
 
-ComplexPrimary              
-    :   LPAREN Expression RPAREN        { $$ = $2; }
-    |   ComplexPrimaryNoParenthesis     { $$ = $1;}
+// Expr -> PriExpr -> QualPriExpr -> SpecialBuiltin
+SpecialBuiltin                 
+    :   THIS                            { $$ = TypeNode.TypeNodeThis;}
+    |   NULL                            { $$ = TypeNode.TypeNodeNull;}
     ;
 
-ComplexPrimaryNoParenthesis 
+// Expr -> PriExpr -> QualPriExpr -> CxPriTypes
+CxPriTypes              
+    :   LPAREN Expr RPAREN        { $$ = $2; }
+    |   CxPriExpr                  { $$ = $1;}
+    ;
+
+// Expr -> PriExpr -> QualPriExpr -> CxPriTypes -> CxPriExpr
+CxPriExpr 
     :   STR_LITERAL                     { $$ = $1; }
     |   Number                          { $$ = $1; }
     |   FieldAccess                     { $$ = $1; }    
     |   MethodCall                      { $$ = $1; }    
     ;
 
+// Expr -> PriExpr -> QualPriExpr -> CxPriTypes -> CxPriExpr -> FieldAccess
 FieldAccess                 
-    :   QualifiedPrimaryExpr PERIOD Identifier   
+    :   QualPriExpr PERIOD Identifier   
                                         { $$ = new NotImplemented("FieldAccess");}   
     ;       
 
+// Expr -> PriExpr -> QualPriExpr -> CxPriTypes -> CxPriExpr -> MethodCall
 MethodCall                  
     :   MethodReference LPAREN ArgumentList RPAREN
-                                        { $$ = new MethodCall($1, $3);}
-    |   MethodReference LPAREN RPAREN   { $$ = new MethodCall($1);}
+                                        { $$ = new MethodCall($1, $3); }
+    |   MethodReference LPAREN RPAREN   { $$ = new MethodCall($1); }
     ;
 
+// Expr -> PriExpr -> QualPriExpr -> CxPriTypes -> CxPriExpr -> MethodCall -> MethodReference
 MethodReference             
-    :   ComplexPrimaryNoParenthesis     { $$ = $1;}
-    |   QualifiedName                   { $$ = $1;}
-    |   SpecialBuiltinName              { $$ = $1;}
+    :   CxPriExpr                  { $$ = $1;}
+    |   QualName                   { $$ = $1;}
+    |   SpecialBuiltin              { $$ = $1;} // Expr -> EvalExpr -> QualPriExpr -> SpecialBuiltin
     |   BuiltinSystemCall               { $$ = $1;}
     ;
 
@@ -361,13 +399,9 @@ BuiltinSystemCall
     |   WRITE_LINE                      { $$ = $1;}
     ;
 
-SpecialBuiltinName                 
-    :   THIS                            { $$ = new BuiltInTypeThis();}
-    |   NULL                            { $$ = new BuiltInTypeNull();}
-    ;
 
 Identifier                  
-    :   IDENTIFIER                      { $$ = $1;}
+    :   IDENTIFIER                      { $$ = $1; }
     ;
 
 Number                      

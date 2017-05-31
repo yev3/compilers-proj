@@ -4,26 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.ModelBinding;
-using Proj3Semantics.ASTNodes;
+using Proj3Semantics.AST;
 
 // found here:
 // http://www.ccs.neu.edu/home/riccardo/courses/csu370-fa07/lect4.pdf
 
 namespace Proj3Semantics
 {
-    using IEnv = ISymbolTable<ITypeDescriptor>;
-
-    public enum NodeTypeCategory
-    {
-        NOT_SET, Primitive, Null, Array, Class, Void, This, ErrorType, ClassFieldDef, ClassMethodDef, NamespaceDecl
-    }
-
-    public enum VariablePrimitiveType
-    {
-        Object, Boolean, String, Int 
-        //Byte, Char, Short, Long, Float, Double 
-    }
-
 	public interface IVisitableNode
 	{
 	   void Accept(IReflectiveVisitor rv);
@@ -35,21 +22,6 @@ namespace Proj3Semantics
         
     }
 
-    public interface IHasOwnScope
-    {
-        IEnv NameEnv { get; set; }
-        IEnv TypeEnv { get; set; }
-    }
-
-    /// <summary>
-    /// Specifies if the node has type information attached to it
-    /// </summary>
-    public interface ITypeDescriptor 
-    {
-        // every type belongs to some kind of a category
-        NodeTypeCategory NodeTypeCategory { get; set; }
-        ITypeDescriptor TypeDescriptorRef { get; set; }
-    }
 
 
     public interface INamedType
@@ -57,24 +29,14 @@ namespace Proj3Semantics
         string Name { get; set; }
     }
 
-    public interface IPrimitiveTypeDescriptor : ITypeDescriptor
-    {
-        VariablePrimitiveType VariablePrimitiveType { get; set; }
-    }
-
-    public interface ITypeHasModifiers
+    public interface ITypeHasModifiers : INamedType
     {
         AccessorType AccessorType { get; set; }
         bool IsStatic { get; set; }
 
     }
 
-    public interface IClassTypeDescriptor : ITypeDescriptor, ITypeHasModifiers, INamedType
-    {
-        IClassTypeDescriptor ParentClass { get; set; }
-    }
-
-    public interface IClassMember : ITypeDescriptor, ITypeHasModifiers, INamedType
+    public interface IClassMember : ITypeHasModifiers
     {
 
     }
@@ -83,10 +45,5 @@ namespace Proj3Semantics
     {
     }
 
-    public interface IClassMethodTypeDesc : IClassMember
-    {
-        List<Parameter> MethodParameters { get; set; }
-        ITypeDescriptor ReturnTypeNode { get; set; }
-    }
 
 }
