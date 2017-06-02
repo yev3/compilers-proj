@@ -63,27 +63,10 @@ namespace Proj3Semantics.AST
     }
 
 
-    public class MethodDeclarator : Node
-    {
-        public Identifier Identifier { get; }
-        public ParamListNode ParamListNode { get; }
-
-        public MethodDeclarator(Identifier id)
-        {
-            this.Identifier = id;
-        }
-        public MethodDeclarator(Identifier id, ParamListNode paramList)
-        {
-            this.Identifier = id;
-            this.ParamListNode = paramList;
-        }
-    }
-
-
-    public class ParamListNode : Node, IEquatable<ParamListNode>
+    public class ParamList : Node, IEquatable<ParamList>
     {
         public List<ParamDecl> ParamDeclList { get; } = new List<ParamDecl>();
-        public ParamListNode(Node parameter)
+        public ParamList(Node parameter)
         {
             AddParameter(parameter);
             base.AddChild(parameter);
@@ -102,7 +85,7 @@ namespace Proj3Semantics.AST
             base.AddChild(child);
         }
 
-        public bool Equals(ParamListNode other)
+        public bool Equals(ParamList other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -114,7 +97,7 @@ namespace Proj3Semantics.AST
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((ParamListNode)obj);
+            return Equals((ParamList)obj);
         }
 
         public override int GetHashCode()
@@ -130,12 +113,12 @@ namespace Proj3Semantics.AST
             }
         }
 
-        public static bool operator ==(ParamListNode left, ParamListNode right)
+        public static bool operator ==(ParamList left, ParamList right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(ParamListNode left, ParamListNode right)
+        public static bool operator !=(ParamList left, ParamList right)
         {
             return !Equals(left, right);
         }

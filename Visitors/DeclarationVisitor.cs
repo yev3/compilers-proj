@@ -58,20 +58,20 @@ namespace Proj3Semantics
             newScopeDeclVisitor.Visit(cdecl.ClassBody);
         }
 
-        private void VisitNode(FunctionDecl fdecl)
+        private void VisitNode(FuncDecl fdecl)
         {
             Log.Trace("Visiting function declaration");
             string fname = fdecl.Identifier.Name;
 
             var localFunctions = from s in Env.LookupLocalTypes(fname, SymbolType.Function)
-                                 let f = s.DeclNode as FunctionDecl
+                                 let f = s.DeclNode as FuncDecl
                                  where f != null
                                  select f;
 
             // check if any other functions have the same signature as me
-            foreach (FunctionDecl declared in localFunctions)
+            foreach (FuncDecl declared in localFunctions)
             {
-                if (declared.ParamListNode == fdecl.ParamListNode)
+                if (declared.ParamList == fdecl.ParamList)
                 {
                     CompilerErrors.Add(SemanticErrorTypes.DuplicateFunctionDecl, fname);
                     return;
@@ -83,14 +83,14 @@ namespace Proj3Semantics
             Env.EnterInfo(fname, new Symbol(SymbolType.Function, fdecl, newScope));
 
             var newScopeDeclVisitor = new DeclarationVisitor(newScope);
-            newScopeDeclVisitor.Visit(fdecl.ParamListNode);
+            newScopeDeclVisitor.Visit(fdecl.ParamList);
             newScopeDeclVisitor.Visit(fdecl.MethodBody);
         }
 
-        private void VisitNode(ParamListNode paramsNode)
+        private void VisitNode(ParamList @params)
         {
             Log.Trace("Visiting parameters");
-            foreach (ParamDecl decl in paramsNode.ParamDeclList)
+            foreach (ParamDecl decl in @params.ParamDeclList)
                 Visit(decl);
         }
 
