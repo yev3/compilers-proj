@@ -93,6 +93,7 @@
     <Compile Include="CompilerErrors.cs" />
     <Compile Include="CustomExtensions.cs" />
     <Compile Include="GplexBuffers.cs" />
+    <Compile Include="Visitors\CodeGenVisitor.cs" />
     <Compile Include="Visitors\SemanticsVisitor.cs" />
     <Compile Include="NodePrintingVisitor.cs" />
     <Compile Include="Visitors\RunSemanticAnalysis.cs" />
