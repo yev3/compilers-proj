@@ -72,7 +72,7 @@ namespace Proj3Semantics
             Log.Trace("Type checking builtin, no action.");
         }
 
-        private void VisitNode(QualifiedNameNode qnode)
+        private void VisitNode(QualifiedNode qnode)
         {
             Log.Trace("Type checking qualified type " + qnode.ToString());
             var curEnv = Env;
@@ -113,8 +113,8 @@ namespace Proj3Semantics
         {
             Log.Trace("Type checking " + nameof(AssignExpr));
 
-            Visit(assn.LhsQualName);
-            QualifiedNameNode lval = assn.LhsQualName;
+            Visit(assn.LhsQual);
+            QualifiedNode lval = assn.LhsQual;
             Debug.Assert(lval != null);
             if (lval.NodeTypeCategory == NodeTypeCategory.ErrorType)
             {
@@ -221,7 +221,7 @@ namespace Proj3Semantics
             Visit(child);
 
             // TODO TODO
-            QualifiedNameNode qnode = child as QualifiedNameNode;
+            QualifiedNode qnode = child as QualifiedNode;
             if (qnode != null)
             {
                 expr.EvalType = qnode;
@@ -248,6 +248,12 @@ namespace Proj3Semantics
             //       |   QualifiedName                   { $$ = $1;}
             //       |   SpecialBuiltinName              { $$ = $1;}
             //       |   BuiltinSystemCall               { $$ = $1;}
+
+            // just checking the qualifiednamenode and SystemCall for now
+
+            QualifiedNode qualNode = call.MethodReference as QualifiedNode;
+            
+
 
 
 

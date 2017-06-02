@@ -28,16 +28,16 @@ namespace Proj3Semantics.AST
             set { throw new AccessViolationException(); }
         }
 
-        public QualifiedNameNode LhsQualName { get; set; }
+        public QualifiedNode LhsQual { get; set; }
         public ExprNode RhsExprNode { get; set; }
 
         public AssignExpr(Node lhs, Node rhs)
         {
-            LhsQualName = lhs as QualifiedNameNode;
+            LhsQual = lhs as QualifiedNode;
             RhsExprNode = rhs as ExprNode;
-            Debug.Assert(LhsQualName != null);
+            Debug.Assert(LhsQual != null);
             Debug.Assert(RhsExprNode != null);
-            AddChild(LhsQualName);
+            AddChild(LhsQual);
             AddChild(RhsExprNode);
         }
     }

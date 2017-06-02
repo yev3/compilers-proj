@@ -85,11 +85,11 @@ namespace Proj3Semantics.AST
         }
     }
 
-    public class QualifiedNameNode : TypeNode
+    public class QualifiedNode : TypeNode
     {
         public List<string> IdentifierList { get; set; } = new List<string>();
         public Symbol SymbolRef { get; set; } = null;
-        public QualifiedNameNode(Identifier id)
+        public QualifiedNode(Identifier id)
         {
             NodeTypeCategory = NodeTypeCategory.Unknown;
             AddChild(id);
@@ -106,7 +106,7 @@ namespace Proj3Semantics.AST
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            QualifiedNameNode otherQ = other as QualifiedNameNode;
+            QualifiedNode otherQ = other as QualifiedNode;
             if (otherQ == null) return false;
             return IdentifierList.SequenceEqual(otherQ.IdentifierList);
         }
