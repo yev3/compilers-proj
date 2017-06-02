@@ -72,7 +72,7 @@ namespace Proj3Semantics
             Log.Trace("Type checking builtin, no action.");
         }
 
-        private void VisitNode(QualifiedNode qnode)
+        private void VisitNode(QualifiedType qnode)
         {
             Log.Trace("Type checking qualified type " + qnode.ToString());
             var curEnv = Env;
@@ -103,6 +103,31 @@ namespace Proj3Semantics
             }
         }
 
+        private void VisitNode(LValueNode lval)
+        {
+            // for lvalue, we want to recursively figure out the types
+            var lft = lval.LeftOfPeriodExpr;
+            if (lft != null)
+            {
+                CompilerErrors.Add(SemanticErrorTypes.FeatureNotImplemented, "do not support field access.. yet.");
+                lval.EvalType = TypeRefNode.TypeNodeError;
+                return;
+            }
+
+            var symbols = Env.Lookup(lval.Identifier.Name);
+            if (symbols.Count != 1)
+            {
+                CompilerErrors.Add(SemanticErrorTypes.UndeclaredIdentifier, "Invalid variable reference");
+                lval.EvalType = TypeRefNode.TypeNodeError;
+                return;
+            }
+
+            lval.SymbolRef = symbols.First();
+            lval.EvalType = lval.SymbolRef.DeclNode.DeclTypeNode;
+        }
+
+
+
         private void VisitNode(LocalVarDecl decl)
         {
             Log.Trace("Type checking " + nameof(LocalVarDecl) + ": TypeSpecifier");
@@ -113,29 +138,30 @@ namespace Proj3Semantics
         {
             Log.Trace("Type checking " + nameof(AssignExpr));
 
-            Visit(assn.LhsQual);
-            QualifiedNode lval = assn.LhsQual;
+            Visit(assn.LValueNode);
+            LValueNode lval = assn.LValueNode;
             Debug.Assert(lval != null);
-            if (lval.NodeTypeCategory == NodeTypeCategory.ErrorType)
+            if (lval.EvalType == TypeRefNode.TypeNodeError)
             {
-                assn.EvalType = TypeNode.TypeNodeError;
+                assn.EvalType = TypeRefNode.TypeNodeError;
                 return;
             }
-            TypeNode ltype = lval.SymbolRef.DeclNode.DeclTypeNode;
+
+            TypeRefNode ltype = lval.EvalType;
 
             Visit(assn.RhsExprNode);
-            TypeNode rtype = assn.RhsExprNode.EvalType;
+            TypeRefNode rtype = assn.RhsExprNode.EvalType;
             Debug.Assert(rtype != null);
             if (rtype.NodeTypeCategory == NodeTypeCategory.ErrorType)
             {
-                assn.EvalType = TypeNode.TypeNodeError;
+                assn.EvalType = TypeRefNode.TypeNodeError;
                 return;
             }
 
 
             if (!rtype.CanConvertTo(ltype))
             {
-                assn.EvalType = TypeNode.TypeNodeError;
+                assn.EvalType = TypeRefNode.TypeNodeError;
                 CompilerErrors.Add(SemanticErrorTypes.IncompatibleAssignment, rtype + " to " + ltype);
                 return;
             }
@@ -157,7 +183,7 @@ namespace Proj3Semantics
             Visit(lft);
             if (lft.EvalType.NodeTypeCategory == NodeTypeCategory.ErrorType)
             {
-                compExpr.EvalType = TypeNode.TypeNodeError;
+                compExpr.EvalType = TypeRefNode.TypeNodeError;
                 return;
             }
 
@@ -165,18 +191,18 @@ namespace Proj3Semantics
             Visit(rgt);
             if (rgt.EvalType.NodeTypeCategory == NodeTypeCategory.ErrorType)
             {
-                compExpr.EvalType = TypeNode.TypeNodeError;
+                compExpr.EvalType = TypeRefNode.TypeNodeError;
                 return;
             }
 
             if (IsArithmeticCompatible(lft.EvalType, rgt.EvalType))
             {
-                compExpr.EvalType = TypeNode.TypeNodeBoolean;
+                compExpr.EvalType = TypeRefNode.TypeNodeBoolean;
             }
             else
             {
                 CompilerErrors.Add(SemanticErrorTypes.IncompatibleOperands, compExpr.ExprType.ToString());
-                compExpr.EvalType = TypeNode.TypeNodeError;
+                compExpr.EvalType = TypeRefNode.TypeNodeError;
             }
         }
 
@@ -188,7 +214,7 @@ namespace Proj3Semantics
 
             if (lft.EvalType.NodeTypeCategory == NodeTypeCategory.ErrorType)
             {
-                binaryExpr.EvalType = TypeNode.TypeNodeError;
+                binaryExpr.EvalType = TypeRefNode.TypeNodeError;
                 return;
             }
 
@@ -197,7 +223,7 @@ namespace Proj3Semantics
 
             if (rgt.EvalType.NodeTypeCategory == NodeTypeCategory.ErrorType)
             {
-                binaryExpr.EvalType = TypeNode.TypeNodeError;
+                binaryExpr.EvalType = TypeRefNode.TypeNodeError;
                 return;
             }
 
@@ -209,7 +235,7 @@ namespace Proj3Semantics
             else
             {
                 CompilerErrors.Add(SemanticErrorTypes.IncompatibleOperands, binaryExpr.ExprType.ToString());
-                binaryExpr.EvalType = TypeNode.TypeNodeError;
+                binaryExpr.EvalType = TypeRefNode.TypeNodeError;
             }
         }
 
@@ -217,39 +243,44 @@ namespace Proj3Semantics
         private void VisitNode(EvalExpr expr)
         {
             Log.Trace("Checking Evaluation of " + expr.ToDebugString());
-            var child = expr.Child;
-            Visit(child);
-
-            // TODO TODO
-            QualifiedNode qnode = child as QualifiedNode;
-            if (qnode != null)
-            {
-                expr.EvalType = qnode;
-                return;
-            }
-
-            ExprNode e = child as ExprNode;
-            if (e != null)
-            {
-                expr.EvalType = e.EvalType;
-                return;
-            }
-
-            CompilerErrors.Add(SemanticErrorTypes.FeatureNotImplemented, "Eval expression of " + child);
-            expr.EvalType = TypeNode.TypeNodeError;
+            Visit(expr.ChildExpr);
+            expr.EvalType = expr.ChildExpr.EvalType;
+            Debug.Assert(expr.EvalType != null);
         }
 
-        private List<AbstractFuncDecl> GetMethodOverloads(QualifiedNode qnode)
+        private List<AbstractFuncDecl> GetMethodOverloads(QualifiedType qnode)
         {
-            if (qnode.IdentifierList.Count != 1)
+            Log.Trace("Looking up method overloads for " + qnode.ToString());
+            var curEnv = Env;
+            string curScopeName = "";
+            Symbol curSymbol = null;
+
+            var identifiers = qnode.IdentifierList;
+            int num_levels = identifiers.Count;
+            if (num_levels > 1)
             {
-                throw new NotImplementedException("TODO: only simple function calls supported");
+                for (int i = 0; i < num_levels - 1; i++)
+                {
+                    string curIdStr = identifiers[i];
+                    var results = curEnv.Lookup(curIdStr);
+                    if (results == null || results.Count != 1)
+                    {
+                        string errMsg = curIdStr;
+                        if (curScopeName != "")
+                            errMsg += " in " + curScopeName;
+                        CompilerErrors.Add(SemanticErrorTypes.UndeclaredIdentifier, errMsg);
+                        qnode.NodeTypeCategory = NodeTypeCategory.ErrorType;
+                        return new List<AbstractFuncDecl>();
+                    }
+                    curSymbol = results.First();
+                    curEnv = curSymbol.Env;
+                    curScopeName = curIdStr;
+                }
             }
-            string fname = qnode.IdentifierList.First();
 
-            Log.Trace("Looking up method overload set for " + fname);
-
-            return Env
+            string fname = identifiers[num_levels - 1];
+            Log.Trace("Looking up method overload set for " + fname + " in " + qnode);
+            return curEnv
                 .Lookup(fname)
                 .Where(sym => sym.SymbolType == SymbolType.Function)
                 .Select(sym => sym.DeclNode)
@@ -286,8 +317,8 @@ namespace Proj3Semantics
         {
             Log.Trace("Start checking MethodCall " + call.ToDebugString());
 
-            QualifiedNode qualNode = call.MethodReference as QualifiedNode;
-            if (qualNode == null)
+            QualifiedType qualType = call.MethodReference as QualifiedType;
+            if (qualType == null)
                 CompilerErrors.Add(SemanticErrorTypes.FeatureNotImplemented, "Only support calling user-defined functions.");
 
 
@@ -297,15 +328,15 @@ namespace Proj3Semantics
             foreach (ExprNode exprNode in argExpressions)
             {
                 Visit(exprNode);
-                if (exprNode.EvalType == TypeNode.TypeNodeError)
+                if (exprNode.EvalType == TypeRefNode.TypeNodeError)
                 {
-                    call.EvalType = TypeNode.TypeNodeError;
+                    call.EvalType = TypeRefNode.TypeNodeError;
                     return;
                 }
             }
 
 
-            var candidateSet = GetMethodOverloads(qualNode);
+            var candidateSet = GetMethodOverloads(qualType);
             var matchedSet = candidateSet.Where(f => ArgumentsCompatible(f.ParamList, argExpressions)).ToList();
             var numMatched = matchedSet.Count;
 
@@ -313,7 +344,7 @@ namespace Proj3Semantics
             {
                 // TODO: better error message text
                 CompilerErrors.Add(SemanticErrorTypes.InvalidFuncArg, "Unable to match a function call signature.");
-                call.EvalType = TypeNode.TypeNodeError;
+                call.EvalType = TypeRefNode.TypeNodeError;
                 return;
             }
 
@@ -321,7 +352,7 @@ namespace Proj3Semantics
             {
                 // TODO: better error message text
                 CompilerErrors.Add(SemanticErrorTypes.InvalidFuncArg, "Ambiguous function call");
-                call.EvalType = TypeNode.TypeNodeError;
+                call.EvalType = TypeRefNode.TypeNodeError;
                 return;
             }
 
@@ -436,7 +467,7 @@ namespace Proj3Semantics
             return false;
         }
 
-        private bool IsArithmeticCompatible(TypeNode arg1, TypeNode arg2)
+        private bool IsArithmeticCompatible(TypeRefNode arg1, TypeRefNode arg2)
         {
             if (arg1 == null || arg2 == null) return false;
             return arg1.NodeTypeCategory == arg2.NodeTypeCategory;

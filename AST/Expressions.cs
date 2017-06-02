@@ -17,7 +17,7 @@ namespace Proj3Semantics.AST
     public abstract class ExprNode : ExpressionStatement
     {
         public abstract ExprType ExprType { get; set; }
-        public TypeNode EvalType { get; set; }
+        public TypeRefNode EvalType { get; set; }
     }
 
     public class AssignExpr : ExprNode
@@ -28,16 +28,16 @@ namespace Proj3Semantics.AST
             set { throw new AccessViolationException(); }
         }
 
-        public QualifiedNode LhsQual { get; set; }
+        public LValueNode LValueNode { get; set; }
         public ExprNode RhsExprNode { get; set; }
 
         public AssignExpr(Node lhs, Node rhs)
         {
-            LhsQual = lhs as QualifiedNode;
+            LValueNode = lhs as LValueNode;
             RhsExprNode = rhs as ExprNode;
-            Debug.Assert(LhsQual != null);
+            Debug.Assert(LValueNode != null);
             Debug.Assert(RhsExprNode != null);
-            AddChild(LhsQual);
+            AddChild(LValueNode);
             AddChild(RhsExprNode);
         }
     }
@@ -57,7 +57,7 @@ namespace Proj3Semantics.AST
         public StringLiteralExpr(string stringVal)
         {
             StringVal = stringVal;
-            EvalType = TypeNode.TypeNodeString;
+            EvalType = TypeRefNode.TypeNodeString;
         }
 
 
@@ -70,7 +70,7 @@ namespace Proj3Semantics.AST
         public IntLiteralExpr(int integerValue)
         {
             IntegerValue = integerValue;
-            EvalType = TypeNode.TypeNodeInt;
+            EvalType = TypeRefNode.TypeNodeInt;
         }
     }
 
@@ -82,17 +82,48 @@ namespace Proj3Semantics.AST
             set { throw new AccessViolationException(); }
         }
 
-        public Node Child { get; set; }
+        public ExprNode ChildExpr { get; set; }
 
-        public EvalExpr(Node node)
+        public EvalExpr(ExprNode node)
         {
-            Child = node;
-            Debug.Assert(Child != null);
+            ChildExpr = node;
+            Debug.Assert(ChildExpr != null);
             AddChild(node);
 
         }
-
         protected EvalExpr() { }
+    }
+
+    public class TypeExpr : ExprNode
+    {
+        public override ExprType ExprType { get; set; }
+        public TypeRefNode TypeRefNode { get; set; }
+        public TypeExpr(TypeRefNode typeRef)
+        {
+            TypeRefNode = typeRef;
+        }
+    }
+    public class LValueNode : EvalExpr
+    {
+        //public Symbol SymbolRef { get; set; } = null;
+        public ExprNode LeftOfPeriodExpr { get; set; }
+        public Identifier Identifier { get; set; }
+        public Symbol SymbolRef { get; set; }
+
+        public LValueNode(Identifier id)
+        {
+            Identifier = id;
+            AddChild(id);
+        }
+
+        public LValueNode(ExprNode lhs, Identifier id)
+        {
+            LeftOfPeriodExpr = lhs;
+            Identifier = id;
+            AddChild(lhs);
+            AddChild(id);
+        }
 
     }
+
 }

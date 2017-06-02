@@ -15,51 +15,51 @@ namespace Proj3Semantics.AST
         Declaration, Unknown
     }
 
-    public abstract class TypeNode : Node, IEquatable<TypeNode>
+    public abstract class TypeRefNode : Node, IEquatable<TypeRefNode>
     {
-        public static TypeNode TypeNodeInt { get; } = new BuiltinType(NodeTypeCategory.Int);
-        public static TypeNode TypeNodeString { get; } = new BuiltinType(NodeTypeCategory.String);
-        public static TypeNode TypeNodeObject { get; } = new BuiltinType(NodeTypeCategory.Object);
-        public static TypeNode TypeNodeNull { get; } = new BuiltinType(NodeTypeCategory.Null);
-        public static TypeNode TypeNodeBoolean { get; } = new BuiltinType(NodeTypeCategory.Boolean);
-        public static TypeNode TypeNodeVoid { get; } = new BuiltinType(NodeTypeCategory.Void);
-        public static TypeNode TypeNodeThis { get; } = new BuiltinType(NodeTypeCategory.This);
+        public static TypeRefNode TypeNodeInt { get; } = new BuiltinType(NodeTypeCategory.Int);
+        public static TypeRefNode TypeNodeString { get; } = new BuiltinType(NodeTypeCategory.String);
+        public static TypeRefNode TypeNodeObject { get; } = new BuiltinType(NodeTypeCategory.Object);
+        public static TypeRefNode TypeNodeNull { get; } = new BuiltinType(NodeTypeCategory.Null);
+        public static TypeRefNode TypeNodeBoolean { get; } = new BuiltinType(NodeTypeCategory.Boolean);
+        public static TypeRefNode TypeNodeVoid { get; } = new BuiltinType(NodeTypeCategory.Void);
+        public static TypeRefNode TypeNodeThis { get; } = new BuiltinType(NodeTypeCategory.This);
         // Generic declaration node
-        public static TypeNode TypeNodeDeclaration { get; } = new BuiltinType(NodeTypeCategory.Declaration);
-        public static TypeNode TypeNodeError { get; } = new BuiltinType(NodeTypeCategory.ErrorType);
-        public NodeTypeCategory NodeTypeCategory { get; set; }
+        public static TypeRefNode TypeNodeDeclaration { get; } = new BuiltinType(NodeTypeCategory.Declaration);
+        public static TypeRefNode TypeNodeError { get; } = new BuiltinType(NodeTypeCategory.ErrorType);
+        public NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.Unknown;
 
-        public abstract bool Equals(TypeNode other);
+        public abstract bool Equals(TypeRefNode other);
 
 
         public abstract override bool Equals(object obj);
 
         public abstract override int GetHashCode();
 
-        public static bool operator ==(TypeNode left, TypeNode right)
+        public static bool operator ==(TypeRefNode left, TypeRefNode right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(TypeNode left, TypeNode right)
+        public static bool operator !=(TypeRefNode left, TypeRefNode right)
         {
             return !Equals(left, right);
         }
 
-        public bool CanConvertTo(TypeNode other)
+        public bool CanConvertTo(TypeRefNode other)
         {
             return other.Equals(this);
         }
     }
 
-    public class BuiltinType : TypeNode
+    public class BuiltinType : TypeRefNode
     {
         public BuiltinType(NodeTypeCategory type)
         {
             NodeTypeCategory = type;
         }
 
-        public override bool Equals(TypeNode other)
+        public override bool Equals(TypeRefNode other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -71,7 +71,7 @@ namespace Proj3Semantics.AST
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((TypeNode)obj);
+            return Equals((TypeRefNode)obj);
         }
 
         public override int GetHashCode()
@@ -85,11 +85,11 @@ namespace Proj3Semantics.AST
         }
     }
 
-    public class QualifiedNode : TypeNode
+    public class QualifiedType : TypeRefNode
     {
         public List<string> IdentifierList { get; set; } = new List<string>();
         public Symbol SymbolRef { get; set; } = null;
-        public QualifiedNode(Identifier id)
+        public QualifiedType(Identifier id)
         {
             NodeTypeCategory = NodeTypeCategory.Unknown;
             AddChild(id);
@@ -102,13 +102,13 @@ namespace Proj3Semantics.AST
             IdentifierList.Add(id.Name);
         }
 
-        public override bool Equals(TypeNode other)
+        public override bool Equals(TypeRefNode other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            QualifiedNode otherQ = other as QualifiedNode;
+            QualifiedType otherQ = other as QualifiedType;
             if (otherQ == null) return false;
-            return IdentifierList.SequenceEqual(otherQ.IdentifierList);
+            return SymbolRef == otherQ.SymbolRef;
         }
 
         public override bool Equals(object obj)
@@ -116,7 +116,7 @@ namespace Proj3Semantics.AST
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((TypeNode)obj);
+            return Equals((QualifiedType)obj);
         }
 
         public override int GetHashCode()

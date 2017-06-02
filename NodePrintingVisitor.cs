@@ -195,7 +195,7 @@ namespace Proj3Semantics
                 Console.WriteLine("\"" + node.StringVal + "\"");
         }
 
-        private void VisitNode(TypeNode node)
+        private void VisitNode(TypeRefNode node)
         {
             Console.Write("<" + node.GetType().Name + ">: ");
             using (OutColor.Magenta)
