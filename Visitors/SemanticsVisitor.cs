@@ -471,16 +471,15 @@ namespace Proj3Semantics
 
         private void CheckBoolean(ExprNode expr)
         {
-            //Visit(expr);
-            //if (expr.NodeTypeCategory == NodeTypeCategory.Primitive)
-            //{
-            //    var tref = expr.TypeDescriptorRef as IPrimitiveTypeDescriptor;
-            //    if (tref == null || tref.VariablePrimitiveType != VariablePrimitiveType.Boolean)
-            //    {
-            //        CompilerErrors.Add(SemanticErrorTypes.BooleanExpected);
-            //    }
-            //}
-
+            Visit(expr);
+            if (expr.EvalType.NodeTypeCategory == NodeTypeCategory.Boolean)
+            {
+                var tref = expr.EvalType.NodeTypeCategory;
+                if (tref == null || tref != NodeTypeCategory.Boolean)
+                {
+                    CompilerErrors.Add(SemanticErrorTypes.BooleanExpected);
+                }
+            }
         }
 
         private bool IsPrimitiveAssignable(Object dst, Object src)
