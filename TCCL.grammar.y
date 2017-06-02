@@ -208,9 +208,6 @@ ArraySpecifier
 // FUNCTION DECLARATION
 // ------------------------------------------------------------
 
-
-// TODO: Delete MethodDecl
-
 FuncDecl
     :   TypeNode FuncDeclName LPAREN ParamList RPAREN FuncBody
                                     { $$ = new FuncDecl($1 as TypeNode, $2 as Identifier, $4 as ParamList, $6 as Block); } 
@@ -222,7 +219,7 @@ ParamList
     :   ParamDecl                   { $$ = new ParamList($1); }
     |   ParamList COMMA ParamDecl   { $1.AddChild($3); $$ = $1;}  
     ;
-
+	 
 ParamDecl                   
     :   TypeNode ParamName          { $$ = new ParamDecl($1 as TypeNode, $2 as Identifier); }
     ;
@@ -270,6 +267,7 @@ VarDecl         :   Identifier      { $$ = new VarDecl($1 as Identifier); } ;
 // LocalDeclOrStmt -> LocalDecl -> Stmt
 Stmt                   
     :   EmptyStmt                   { $$ = $1; }
+    |   BuiltinStmt                 { $$ = $1; } 
     |   ExpressionStmt SEMICOLON    { $$ = $1; }
     |   IfStmt                      { $$ = $1; }
     |   WhileStmt                   { $$ = $1; }
@@ -301,6 +299,16 @@ WhileStmt
 ReturnStmt         
     :   RETURN Expr SEMICOLON           { $$ = new ReturnStatement($2); }
     |   RETURN SEMICOLON                { $$ = new ReturnStatement(); }
+    ;
+
+BuiltinStmt
+    :   WRITE BuiltinStmtArgs SEMICOLON         { $$ = new WriteStatement($2 as ArgumentList);}
+    |   WRITE_LINE BuiltinStmtArgs SEMICOLON    { $$ = new WriteLineStatement($2 as ArgumentList);}
+    ;
+
+BuiltinStmtArgs
+    :   LPAREN CallArgList RPAREN       { $$ = $2; }
+    |   LPAREN RPAREN                   { $$ = null; }
     ;
 
 
@@ -381,13 +389,8 @@ MethodRef
     :   CxEvalExpr              { $$ = $1;}
     |   QualifiedNode           { $$ = $1;}
     |   SpecialBuiltin          { $$ = $1;} 
-    |   SystemCall              { $$ = $1;}
     ;
 
-SystemCall                 
-    :   WRITE                   { $$ = $1;}
-    |   WRITE_LINE              { $$ = $1;}
-    ;
 
 Identifier  :   IDENTIFIER      { $$ = $1; } ;
 Number      :   INT_NUMBER      { $$ = $1;} ;
