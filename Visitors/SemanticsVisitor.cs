@@ -72,7 +72,7 @@ namespace Proj3Semantics
             Log.Trace("Type checking builtin, no action.");
         }
 
-        private void VisitNode(QualifiedNode qnode)
+        private void VisitNode(QualifiedNameNode qnode)
         {
             Log.Trace("Type checking qualified type " + qnode.ToString());
             var curEnv = Env;
@@ -114,7 +114,7 @@ namespace Proj3Semantics
             Log.Trace("Type checking " + nameof(AssignExpr));
 
             Visit(assn.LhsQualName);
-            QualifiedNode lval = assn.LhsQualName;
+            QualifiedNameNode lval = assn.LhsQualName;
             Debug.Assert(lval != null);
             if (lval.NodeTypeCategory == NodeTypeCategory.ErrorType)
             {
@@ -145,6 +145,8 @@ namespace Proj3Semantics
 
         private void VisitNode(ExprNode expr)
         {
+            // If this function is run, that means that 
+            // we need to impolement a proper VisitNode for its subclass 
             throw new NotImplementedException();
         }
 
@@ -219,7 +221,7 @@ namespace Proj3Semantics
             Visit(child);
 
             // TODO TODO
-            QualifiedNode qnode = child as QualifiedNode;
+            QualifiedNameNode qnode = child as QualifiedNameNode;
             if (qnode != null)
             {
                 expr.EvalType = qnode;
@@ -246,6 +248,9 @@ namespace Proj3Semantics
             //       |   QualifiedName                   { $$ = $1;}
             //       |   SpecialBuiltinName              { $$ = $1;}
             //       |   BuiltinSystemCall               { $$ = $1;}
+
+
+
 
             //ITypeDescriptor methodRefDescriptor = call.MethodReference as ITypeDescriptor;
             //if (methodRefDescriptor == null) throw new ArgumentNullException(nameof(methodRefDescriptor) + " is not a valid type descriptor");

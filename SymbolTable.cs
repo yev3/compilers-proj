@@ -97,7 +97,7 @@ namespace Proj3Semantics
         /// </summary>
         List<TEntry> Lookup(string s);
         List<TEntry> LookupLocal(string s);
-        List<TEntry> LookupLocalTypes(string s, SymbolType type);
+        List<TEntry> LookupLocalEntriesByType(string s, SymbolType type);
     }
 
     [DebuggerDisplay("{ToString()}")]
@@ -157,7 +157,7 @@ namespace Proj3Semantics
             return MultiMap[s];
         }
 
-        public List<Symbol> LookupLocalTypes(string s, SymbolType type)
+        public List<Symbol> LookupLocalEntriesByType(string s, SymbolType type)
         {
             return LookupLocal(s).Where(sym => sym.SymbolType == type).ToList();
         }
