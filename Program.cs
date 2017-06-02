@@ -90,17 +90,16 @@ namespace Proj3Semantics
 
         private static void TestAll()
         {
-
             List<string> testFiles = new List<string>()
             {
                 //"00test.txt",
                 //"01hello.txt",
-                "02errors1.txt",
+                //"02errors1.txt",
                 //"03compute.txt",
                 //"04twomethods0.txt",
                 //"05twomethods1.txt",
                 //"06writenums.txt",
-                //"07iftest.txt",
+                "07iftest.txt",
                 //"08loop.txt",
             };
 
