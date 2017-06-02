@@ -43,7 +43,7 @@ namespace Proj3Semantics
             Log.Trace("Checking Class declaration in env: " + Env);
             string cname = cdecl.Name;
 
-            var localClassDecls = Env.LookupLocalTypes(cname, SymbolType.Class);
+            var localClassDecls = Env.LookupLocalEntriesByType(cname, SymbolType.Class);
             if (localClassDecls.Count > 0)
             {
                 CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, cname);
@@ -63,7 +63,7 @@ namespace Proj3Semantics
             Log.Trace("Visiting function declaration");
             string fname = fdecl.Identifier.Name;
 
-            var localFunctions = from s in Env.LookupLocalTypes(fname, SymbolType.Function)
+            var localFunctions = from s in Env.LookupLocalEntriesByType(fname, SymbolType.Function)
                                  let f = s.DeclNode as FuncDecl
                                  where f != null
                                  select f;
@@ -98,7 +98,7 @@ namespace Proj3Semantics
         {
             Log.Trace("Visiting parameter declaration");
             var name = decl.Identifier.Name;
-            var locals = Env.LookupLocalTypes(name, SymbolType.Variable);
+            var locals = Env.LookupLocalEntriesByType(name, SymbolType.Variable);
 
             if (locals.Count > 0)
             {
@@ -233,38 +233,6 @@ namespace Proj3Semantics
             ////fieldVarDecl.TypeSpecifierRef = typeNameDecl.TypeSpecifierRef;
 
         }
-
-
-
-        // ------------------------------------------------------------
-        // HELPER METHODS
-        // ------------------------------------------------------------
-
-
-        /// <summary>
-        /// NOTE: THIS IS DONE ON THE SECOND PASS
-        /// </summary>
-        //private void ProcessClassMethodParams(
-        //    ParameterList parameterList,
-        //    IEnv methodLocalsEnv)
-        //{
-        //    if (parameterList == null) return;
-        //    foreach (AbstractNode node in parameterList)
-        //    {
-        //        Parameter p = node as Parameter;
-        //        if (p == null) throw new ArgumentNullException(nameof(p));
-
-        //        if (p.TypeSpecifier.TypeSpecifierRef == null)
-        //        {
-        //            var tVisitor = new TypeVisitor(TypeEnv);
-        //            tVisitor.Visit(p.TypeSpecifier);
-        //        }
-
-        //        p.Identifier.NodeTypeCategory = p.TypeSpecifier.NodeTypeCategory;
-        //        p.Identifier.TypeSpecifierRef = p.TypeSpecifier;
-        //    }
-        //}
-
 
 
 

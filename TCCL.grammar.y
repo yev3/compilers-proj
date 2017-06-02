@@ -195,8 +195,8 @@ PrimitiveType
 
 // TypeNode -> TypeName -> QualName
 QualName               
-    :   Identifier                  { $$ = new QualifiedNode($1 as Identifier);}
-    |   QualName PERIOD Identifier  { ($$ as QualifiedNode).AddChild($3 as Identifier); $$ = $1;}
+    :   Identifier                  { $$ = new QualifiedNameNode($1 as Identifier);}
+    |   QualName PERIOD Identifier  { ($$ as QualifiedNameNode).AddChild($3 as Identifier); $$ = $1;}
     ;
 
 // TypeNode -> ArraySpecifier
@@ -309,7 +309,7 @@ ReturnStmt
 // ------------------------------------------------------------
 
 Expr                  
-    :   LValue EQUALS Expr      { $$ = new AssignExpr($1, $3); }
+    :   QualName EQUALS Expr    { $$ = new AssignExpr($1, $3); }
     |   Expr OP_LOR Expr        { $$ = new CompExpr($1, ExprType.LOGICAL_OR, $3); }   /* short-circuit OR  */  
     |   Expr OP_LAND Expr       { $$ = new CompExpr($1, ExprType.LOGICAL_AND, $3); }   /* short-circuit AND */  
     |   Expr PIPE Expr          { $$ = new BinaryExpr($1, ExprType.PIPE, $3); }                
@@ -327,41 +327,31 @@ Expr
     |   Expr RSLASH Expr        { $$ = new BinaryExpr($1, ExprType.RSLASH, $3); }                
     |   Expr PERCENT Expr       { $$ = new BinaryExpr($1, ExprType.PERCENT, $3); }   /* remainder */
     |   ArithmeticUnaryOperator Expr  %prec UNARY { $$ = new NotImplemented("ArithmeticUnaryOperator Expr  %prec UNARY"); }
-    |   PriExpr                 { $$ = $1; }
+    |   LPAREN Expr RPAREN      { $$ = new EvalExpr($2);}
+    |   QualName                { $$ = new EvalExpr($1);}   
+    |   SpecialBuiltin          { $$ = new EvalExpr($1);}
+    |   CxPriExpr               { $$ = new EvalExpr($1);}
     ;
-
-LValue  :   QualName            { $$ = $1; } ;
 
 ArithmeticUnaryOperator     
     :   PLUSOP                  { $$ = new NotImplemented("ArithmeticUnaryOperator"); }
     |   MINUSOP                 { $$ = new NotImplemented("ArithmeticUnaryOperator"); }
     ;
                             
-// Expr -> PriExpr
-PriExpr           
-    :   QualName                { $$ = new EvalExpr($1);}   
-    |   QualPriExpr             { $$ = new EvalExpr($1);}
-    ;
-
-// Expr -> PriExpr -> QualPriExpr
+// Expr -> QualPriExpr
 QualPriExpr                 
     :   SpecialBuiltin          { $$ = $1; }
-    |   CxPriTypes              { $$ = $1; }
+    |   LPAREN Expr RPAREN      { $$ = $2; }
+    |   CxPriExpr               { $$ = $1;}
     ;
 
-// Expr -> PriExpr -> QualPriExpr -> SpecialBuiltin
+// Expr -> QualPriExpr -> SpecialBuiltin
 SpecialBuiltin                 
     :   THIS                    { $$ = TypeNode.TypeNodeThis;}
     |   NULL                    { $$ = TypeNode.TypeNodeNull;}
     ;
 
-// Expr -> PriExpr -> QualPriExpr -> CxPriTypes
-CxPriTypes              
-    :   LPAREN Expr RPAREN      { $$ = $2; }
-    |   CxPriExpr               { $$ = $1;}
-    ;
-
-// Expr -> PriExpr -> QualPriExpr -> CxPriTypes -> CxPriExpr
+// Expr -> QualPriExpr -> CxPriExpr
 CxPriExpr 
     :   STR_LITERAL             { $$ = $1; }
     |   Number                  { $$ = $1; }
@@ -369,13 +359,13 @@ CxPriExpr
     |   MethodCall              { $$ = $1; }    
     ;
 
-// Expr -> PriExpr -> QualPriExpr -> CxPriTypes -> CxPriExpr -> FieldAccess
+// Expr -> QualPriExpr -> CxPriExpr -> FieldAccess
 FieldAccess                 
     :   QualPriExpr PERIOD Identifier   
                                 { $$ = new NotImplemented("FieldAccess");}   
     ;       
 
-// Expr -> PriExpr -> QualPriExpr -> CxPriTypes -> CxPriExpr -> MethodCall
+// Expr -> QualPriExpr -> CxPriExpr -> MethodCall
 MethodCall                  
     :   MethodRef LPAREN CallArgList RPAREN     { $$ = new MethodCall($1, $3); }
     |   MethodRef LPAREN RPAREN                 { $$ = new MethodCall($1); }
@@ -386,11 +376,11 @@ CallArgList
     |   CallArgList COMMA Expr  { $1.AddChild($3); $$ = $1; }
     ;
 
-// Expr -> PriExpr -> QualPriExpr -> CxPriTypes -> CxPriExpr -> MethodCall -> MethodRef
+// Expr -> QualPriExpr -> CxPriExpr -> MethodCall -> MethodRef
 MethodRef             
     :   CxPriExpr               { $$ = $1;}
     |   QualName                { $$ = $1;}
-    |   SpecialBuiltin          { $$ = $1;} // Expr -> EvalExpr -> QualPriExpr -> SpecialBuiltin
+    |   SpecialBuiltin          { $$ = $1;} 
     |   SystemCall              { $$ = $1;}
     ;
 

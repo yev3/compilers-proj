@@ -3,6 +3,12 @@
 
 public class Compute {
     public void Main () {
+        "hello"();
+        5();
+        foo()();
+        this();
+        null();
+
         int w, x;
         x = 3 + 4;  
         w = x * x;  
