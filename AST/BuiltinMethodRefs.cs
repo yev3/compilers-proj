@@ -36,13 +36,13 @@ namespace Proj3Semantics.AST
     public class SysWriteRef : AbstractFuncDecl
     {
         public override ISymbolTable<Symbol> Env { get; set; } = null;
-        public override TypeNode ReturnTypeSpecifier { get; } = TypeNode.TypeNodeVoid;
+        public override TypeRefNode ReturnTypeSpecifier { get; } = TypeRefNode.TypeNodeVoid;
 
         public override ParamList ParamList { get; set; }
-            = new ParamList(new[]{ new ParamDecl(TypeNode.TypeNodeObject, new Identifier("obj"))});
+            = new ParamList(new[]{ new ParamDecl(TypeRefNode.TypeNodeObject, new Identifier("obj"))});
         public override Block MethodBody { get; set; } = null;
         public List<ParamDecl> MethodParameters { get; set; }
-        public TypeNode ReturnTypeNode { get; set; } = TypeNode.TypeNodeVoid;
+        public TypeRefNode ReturnTypeNode { get; set; } = TypeRefNode.TypeNodeVoid;
 
         public SysWriteRef() : base(new Identifier("BuiltinCallWrite")) { }
 

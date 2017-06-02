@@ -38,7 +38,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 "-"             { return (int)Token.MINUSOP; }
 "null"          { return (int)Token.NULL; }
 "int"           { return (int)Token.INT; }
-"string"        { return (int)Token.STRING; }
+[Ss]"tring"     { return (int)Token.STRING; }
 "=="            { return (int)Token.OP_EQ; }
 "<"             { return (int)Token.OP_LT; }
 ":"             { return (int)Token.COLON; }

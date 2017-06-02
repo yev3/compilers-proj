@@ -129,8 +129,8 @@ ClassBodyDecl
 
 // ClassDecl -> ClassBody -> ClassBodyDecl -> ClassFieldDecl
 ClassFieldDecl    
-    :   Modifiers TypeNode FieldVarDecls    
-                                    { $$ = new ClassFieldDeclStatement($1, new LocalVarDecl($2 as TypeNode, $3 as VarDeclList)); }
+    :   Modifiers TypeRef FieldVarDecls    
+                                    { $$ = new ClassFieldDeclStatement($1, new LocalVarDecl($2 as TypeRefNode, $3 as VarDeclList)); }
     ;
 
 // ClassDecl -> ClassBody -> ClassBodyDecl -> ClassFieldDecl -> FieldVarDecls
@@ -173,33 +173,33 @@ StructDecl
 // TYPE STUFF HERE
 // ==========================
 
-// TypeNode
-TypeNode               
+// TypeRef
+TypeRef               
     :   TypeName                    { $$ = $1; }
     |   ArraySpecifier              { $$ = $1; }
     ;
 
-// TypeNode -> TypeName
+// TypeRef -> TypeName
 TypeName                    
     :   PrimitiveType               { $$ = $1; }
-    |   QualifiedNode                    { $$ = $1; }
+    |   QualifiedType               { $$ = $1; }
     ;
 
-// TypeNode -> TypeName -> PrimitiveType
+// TypeRef -> TypeName -> PrimitiveType
 PrimitiveType               
-    :   BOOLEAN                     { $$ = TypeNode.TypeNodeBoolean; }
-    |   INT                         { $$ = TypeNode.TypeNodeInt; }
-    |   STRING                      { $$ = TypeNode.TypeNodeString; }
-    |   VOID                        { $$ = TypeNode.TypeNodeVoid; }
+    :   BOOLEAN                     { $$ = TypeRefNode.TypeNodeBoolean; }
+    |   INT                         { $$ = TypeRefNode.TypeNodeInt; }
+    |   STRING                      { $$ = TypeRefNode.TypeNodeString; }
+    |   VOID                        { $$ = TypeRefNode.TypeNodeVoid; }
     ;
 
-// TypeNode -> TypeName -> QualifiedNode
-QualifiedNode               
-    :   Identifier                  { $$ = new QualifiedNode($1 as Identifier);}
-    |   QualifiedNode PERIOD Identifier  { ($$ as QualifiedNode).AddChild($3 as Identifier); $$ = $1;}
+// TypeRef -> TypeName -> QualifiedType
+QualifiedType               
+    :   Identifier                      { $$ = new QualifiedType($1 as Identifier);}
+    |   QualifiedType PERIOD Identifier { ($$ as QualifiedType).AddChild($3 as Identifier); $$ = $1; }
     ;
 
-// TypeNode -> ArraySpecifier
+// TypeRef -> ArraySpecifier
 ArraySpecifier              
     :   TypeName LBRACKET RBRACKET  { $$ = new NotImplemented("Arrays not supported"); }
     ;
@@ -209,10 +209,10 @@ ArraySpecifier
 // ------------------------------------------------------------
 
 FuncDecl
-    :   TypeNode FuncDeclName LPAREN ParamList RPAREN FuncBody
-                                    { $$ = new FuncDecl($1 as TypeNode, $2 as Identifier, $4 as ParamList, $6 as Block); } 
-    |   TypeNode FuncDeclName LPAREN RPAREN FuncBody
-                                    { $$ = new FuncDecl($1 as TypeNode, $2 as Identifier, null , $5 as Block); } 
+    :   TypeRef FuncDeclName LPAREN ParamList RPAREN FuncBody
+                                    { $$ = new FuncDecl($1 as TypeRefNode, $2 as Identifier, $4 as ParamList, $6 as Block); } 
+    |   TypeRef FuncDeclName LPAREN RPAREN FuncBody
+                                    { $$ = new FuncDecl($1 as TypeRefNode, $2 as Identifier, null , $5 as Block); } 
     ;
 
 ParamList               
@@ -221,7 +221,7 @@ ParamList
     ;
 	 
 ParamDecl                   
-    :   TypeNode ParamName          { $$ = new ParamDecl($1 as TypeNode, $2 as Identifier); }
+    :   TypeRef ParamName          { $$ = new ParamDecl($1 as TypeRefNode, $2 as Identifier); }
     ;
 
 
@@ -252,7 +252,7 @@ LocalDeclOrStmt
 
 // LocalDeclOrStmt -> LocalDecl
 LocalDecl       
-    :   TypeNode VarDeclList SEMICOLON  { $$ = new LocalVarDecl($1 as TypeNode, $2 as VarDeclList);}
+    :   TypeRef VarDeclList SEMICOLON  { $$ = new LocalVarDecl($1 as TypeRefNode, $2 as VarDeclList);}
     |   StructDecl                      { $$ = new NotImplemented("struct decl not supported");}
     ;
 
@@ -317,7 +317,7 @@ BuiltinStmtArgs
 // ------------------------------------------------------------
 
 Expr                  
-    :   QualifiedNode EQUALS Expr    { $$ = new AssignExpr($1, $3); }
+    :   LValue EQUALS Expr      { $$ = new AssignExpr($1, $3); }
     |   Expr OP_LOR Expr        { $$ = new CompExpr($1, ExprType.LOGICAL_OR, $3); }   /* short-circuit OR  */  
     |   Expr OP_LAND Expr       { $$ = new CompExpr($1, ExprType.LOGICAL_AND, $3); }   /* short-circuit AND */  
     |   Expr PIPE Expr          { $$ = new BinaryExpr($1, ExprType.PIPE, $3); }                
@@ -335,12 +335,16 @@ Expr
     |   Expr RSLASH Expr        { $$ = new BinaryExpr($1, ExprType.RSLASH, $3); }                
     |   Expr PERCENT Expr       { $$ = new BinaryExpr($1, ExprType.PERCENT, $3); }   /* remainder */
     |   ArithmeticUnaryOperator Expr  %prec UNARY { $$ = new NotImplemented("ArithmeticUnaryOperator Expr  %prec UNARY"); }
-    |   QualifiedNode           { $$ = new EvalExpr($1);}   
-    |   SpecialBuiltin          { $$ = new EvalExpr($1);}
-    |   LPAREN Expr RPAREN      { $$ = new EvalExpr($2);}
-    |   CxEvalExpr              { $$ = new EvalExpr($1);}
+    |   LValue                  { $$ = new EvalExpr($1 as ExprNode);}   
+    |   SpecialBuiltin          { $$ = new TypeExpr($1 as TypeRefNode);}
+    |   LPAREN Expr RPAREN      { $$ = new EvalExpr($2 as ExprNode);}
+    |   CxEvalExpr              { $$ = new EvalExpr($1 as ExprNode);}
     ;
 
+LValue               
+    :   Identifier                  { $$ = new LValueNode($1 as Identifier);}
+    |   Expr PERIOD Identifier      { $$ = new LValueNode($1 as ExprNode, $3 as Identifier); }
+    ;
 ArithmeticUnaryOperator     
     :   PLUSOP                  { $$ = new NotImplemented("ArithmeticUnaryOperator"); }
     |   MINUSOP                 { $$ = new NotImplemented("ArithmeticUnaryOperator"); }
@@ -355,8 +359,8 @@ QualPriExpr
 
 // Expr -> QualPriExpr -> SpecialBuiltin
 SpecialBuiltin                 
-    :   THIS                    { $$ = TypeNode.TypeNodeThis;}
-    |   NULL                    { $$ = TypeNode.TypeNodeNull;}
+    :   THIS                    { $$ = TypeRefNode.TypeNodeThis;}
+    |   NULL                    { $$ = TypeRefNode.TypeNodeNull;}
     ;
 
 // Expr -> QualPriExpr -> CxEvalExpr
@@ -387,7 +391,7 @@ CallArgList
 // Expr -> QualPriExpr -> CxEvalExpr -> MethodCall -> MethodRef
 MethodRef             
     :   CxEvalExpr              { $$ = $1;}
-    |   QualifiedNode           { $$ = $1;}
+    |   QualifiedType           { $$ = $1;} // This can only be a type!
     |   SpecialBuiltin          { $$ = $1;} 
     ;
 

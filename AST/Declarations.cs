@@ -16,9 +16,9 @@ namespace Proj3Semantics.AST
         /// <summary>
         /// Each declaration should have a type associated with it
         /// </summary>
-        public virtual TypeNode DeclTypeNode
+        public virtual TypeRefNode DeclTypeNode
         {
-            get { return TypeNode.TypeNodeDeclaration; }
+            get { return TypeRefNode.TypeNodeDeclaration; }
             set { throw new InvalidOperationException(); }
         }
 
@@ -43,7 +43,7 @@ namespace Proj3Semantics.AST
     public abstract class AbstractFuncDecl : DeclNode
     {
         public abstract IEnv Env { get; set; }
-        public abstract TypeNode ReturnTypeSpecifier { get; }
+        public abstract TypeRefNode ReturnTypeSpecifier { get; }
         public abstract ParamList ParamList { get; set; }
         public abstract Block MethodBody { get; set; }
         protected AbstractFuncDecl(Identifier identifier) : base(identifier) { }
@@ -52,7 +52,7 @@ namespace Proj3Semantics.AST
     public class FuncDecl : AbstractFuncDecl
     {
         public override IEnv Env { get; set; }
-        public override TypeNode ReturnTypeSpecifier { get; }
+        public override TypeRefNode ReturnTypeSpecifier { get; }
         public override ParamList ParamList { get; set; }
         public override Block MethodBody { get; set; }
 
@@ -64,7 +64,7 @@ namespace Proj3Semantics.AST
             PopulateChildren();
         }
         public FuncDecl(
-            TypeNode returnTypeSpecifier, 
+            TypeRefNode returnTypeSpecifier, 
             Identifier name, 
             ParamList paramList, 
             Block methodBody) 
@@ -191,8 +191,8 @@ namespace Proj3Semantics.AST
 
     public class ParamDecl : DeclNode, IEquatable<ParamDecl>
     {
-        public override TypeNode DeclTypeNode { get; set; }
-        public ParamDecl(TypeNode boundType, Identifier name) : base(name)
+        public override TypeRefNode DeclTypeNode { get; set; }
+        public ParamDecl(TypeRefNode boundType, Identifier name) : base(name)
         {
             DeclTypeNode = boundType;
             AddChild(boundType);
@@ -233,11 +233,11 @@ namespace Proj3Semantics.AST
 
     public class LocalVarDecl : Node
     {
-        public TypeNode TypeSpecifier { get; set; }
+        public TypeRefNode TypeSpecifier { get; set; }
         public VarDeclList VarDeclList { get; set; }
         public ExprNode Initialization { get; set; }
         public LocalVarDecl(
-            TypeNode typeSpecifier,
+            TypeRefNode typeSpecifier,
             VarDeclList varDeclList,
             Node init = null)
         {
@@ -268,7 +268,7 @@ namespace Proj3Semantics.AST
     public class VarDecl : DeclNode
     {
         public VarDecl(Identifier id) : base(id) { }
-        public override TypeNode DeclTypeNode { get; set; } = null;
+        public override TypeRefNode DeclTypeNode { get; set; } = null;
         public override string ToString()
         {
             return this.DeclTypeNode.ToString();

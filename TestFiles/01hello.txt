@@ -1,8 +1,0 @@
-/*Tests calls to Writeline with a string */
-
-public class Hello {
-    public void Main () {
-        WriteLine("Hello, World");
-    }
-}
-
