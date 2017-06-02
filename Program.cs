@@ -93,18 +93,18 @@ namespace Proj3Semantics
             List<string> testFiles = new List<string>()
             {
                 //"00scratch.cs",
-                //"01errors1.cs",
+                //"00writenums.cs",
+                "01hello.cs",
                 //"02compute.cs",
-                //"03fact2.cs",
-                //"04iftest.cs",
-                "05logictest.cs",
-                //"06loop.cs",
-                //"07struct1.cs",
-                //"08twomethods0.cs",
-                //"09twomethods1.cs",
+                //"03iftest.cs",
+                //"04loop.cs",
+                //"05twomethods0.cs",
+                //"06twomethods1.cs",
+                //"07fact2.cs",
+                //"08logictest.cs",
+                //"09struct1.cs",
                 //"10twoparams.cs",
-                //"11writenums.cs",
-                //"12hello.cs",
+                //"11errors1.cs",
             };
 
             var testNbr = 1;
