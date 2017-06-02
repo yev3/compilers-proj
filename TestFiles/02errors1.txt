@@ -1,13 +1,17 @@
 /* Tests for handling undeclared variables and erroneous use of */
 /* strings and booleans */
 
+void foo(int x){}
+void foo(string x){}
+void foo(string x, int y){}
+void foo(string x, string y){}
+
 public class Compute {
+
     public void Main () {
-        "hello"();
-        5();
-        foo()();
-        this();
-        null();
+
+        foo("hi", 2);
+        foo(2, "hi");
 
         int w, x;
         x = 3 + 4;  

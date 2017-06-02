@@ -66,6 +66,10 @@ namespace Proj3Semantics.AST
     public class ParamList : Node, IEquatable<ParamList>
     {
         public List<ParamDecl> ParamDeclList { get; } = new List<ParamDecl>();
+        public ParamList(IEnumerable<ParamDecl> declList)
+        {
+            ParamDeclList.AddRange(declList);
+        }
         public ParamList(Node parameter)
         {
             AddParameter(parameter);

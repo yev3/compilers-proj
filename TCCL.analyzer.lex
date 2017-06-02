@@ -79,8 +79,8 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 ">"             { return (int)Token.OP_GT; }
 "!="            { return (int)Token.OP_NE; }
 "&&"            { return (int)Token.OP_LAND; }
-"Write"         { yylval = new BuiltinCallWrite(); return (int)Token.WRITE; }
-"WriteLine"     { yylval = new BuiltinCallWriteLine(); return (int)Token.WRITE_LINE; } 
+"Write"         { yylval = BuiltinCalls.BuiltinCallWrite; return (int)Token.WRITE; }
+"WriteLine"     { yylval = BuiltinCalls.BuiltinCallWriteLine; return (int)Token.WRITE_LINE; } 
 
 
 }

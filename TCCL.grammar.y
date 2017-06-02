@@ -327,10 +327,10 @@ Expr
     |   Expr RSLASH Expr        { $$ = new BinaryExpr($1, ExprType.RSLASH, $3); }                
     |   Expr PERCENT Expr       { $$ = new BinaryExpr($1, ExprType.PERCENT, $3); }   /* remainder */
     |   ArithmeticUnaryOperator Expr  %prec UNARY { $$ = new NotImplemented("ArithmeticUnaryOperator Expr  %prec UNARY"); }
-    |   LPAREN Expr RPAREN      { $$ = new EvalExpr($2);}
-    |   QualifiedNode                { $$ = new EvalExpr($1);}   
+    |   QualifiedNode           { $$ = new EvalExpr($1);}   
     |   SpecialBuiltin          { $$ = new EvalExpr($1);}
-    |   CxPriExpr               { $$ = new EvalExpr($1);}
+    |   LPAREN Expr RPAREN      { $$ = new EvalExpr($2);}
+    |   CxEvalExpr              { $$ = new EvalExpr($1);}
     ;
 
 ArithmeticUnaryOperator     
@@ -342,7 +342,7 @@ ArithmeticUnaryOperator
 QualPriExpr                 
     :   SpecialBuiltin          { $$ = $1; }
     |   LPAREN Expr RPAREN      { $$ = $2; }
-    |   CxPriExpr               { $$ = $1;}
+    |   CxEvalExpr               { $$ = $1;}
     ;
 
 // Expr -> QualPriExpr -> SpecialBuiltin
@@ -351,35 +351,35 @@ SpecialBuiltin
     |   NULL                    { $$ = TypeNode.TypeNodeNull;}
     ;
 
-// Expr -> QualPriExpr -> CxPriExpr
-CxPriExpr 
+// Expr -> QualPriExpr -> CxEvalExpr
+CxEvalExpr 
     :   STR_LITERAL             { $$ = $1; }
     |   Number                  { $$ = $1; }
     |   FieldAccess             { $$ = $1; }    
     |   MethodCall              { $$ = $1; }    
     ;
 
-// Expr -> QualPriExpr -> CxPriExpr -> FieldAccess
+// Expr -> QualPriExpr -> CxEvalExpr -> FieldAccess
 FieldAccess                 
     :   QualPriExpr PERIOD Identifier   
                                 { $$ = new NotImplemented("FieldAccess");}   
     ;       
 
-// Expr -> QualPriExpr -> CxPriExpr -> MethodCall
+// Expr -> QualPriExpr -> CxEvalExpr -> MethodCall
 MethodCall                  
     :   MethodRef LPAREN CallArgList RPAREN     { $$ = new MethodCall($1, $3); }
     |   MethodRef LPAREN RPAREN                 { $$ = new MethodCall($1); }
     ;
 
 CallArgList            
-    :   Expr                    { $$ = new ArgumentList($1); }
+    :   Expr                    { $$ = new ArgumentList($1 as ExprNode); }
     |   CallArgList COMMA Expr  { $1.AddChild($3); $$ = $1; }
     ;
 
-// Expr -> QualPriExpr -> CxPriExpr -> MethodCall -> MethodRef
+// Expr -> QualPriExpr -> CxEvalExpr -> MethodCall -> MethodRef
 MethodRef             
-    :   CxPriExpr               { $$ = $1;}
-    |   QualifiedNode                { $$ = $1;}
+    :   CxEvalExpr              { $$ = $1;}
+    |   QualifiedNode           { $$ = $1;}
     |   SpecialBuiltin          { $$ = $1;} 
     |   SystemCall              { $$ = $1;}
     ;

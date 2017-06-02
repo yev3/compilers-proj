@@ -40,12 +40,21 @@ namespace Proj3Semantics.AST
         }
     }
 
-    public class FuncDecl : DeclNode
+    public abstract class AbstractFuncDecl : DeclNode
     {
-        public IEnv Env { get; set; } = null;
-        public TypeNode ReturnTypeSpecifier { get; }
-        public ParamList ParamList { get; set; }
-        public Block MethodBody { get; set; }
+        public abstract IEnv Env { get; set; }
+        public abstract TypeNode ReturnTypeSpecifier { get; }
+        public abstract ParamList ParamList { get; set; }
+        public abstract Block MethodBody { get; set; }
+        protected AbstractFuncDecl(Identifier identifier) : base(identifier) { }
+    }
+
+    public class FuncDecl : AbstractFuncDecl
+    {
+        public override IEnv Env { get; set; }
+        public override TypeNode ReturnTypeSpecifier { get; }
+        public override ParamList ParamList { get; set; }
+        public override Block MethodBody { get; set; }
 
         public FuncDecl(FuncDecl fdecl) : base(fdecl.Identifier)
         {
@@ -73,8 +82,8 @@ namespace Proj3Semantics.AST
             if (ParamList != null) AddChild(ParamList);
             AddChild(MethodBody);
         }
-
     }
+
 
     #region ClassDecl
     public enum ModifierType { PUBLIC, STATIC, PRIVATE }
