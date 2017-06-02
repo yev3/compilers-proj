@@ -90,7 +90,6 @@ namespace Proj3Semantics
 
         private static void TestAll()
         {
-
             List<string> testFiles = new List<string>()
             {
                 //"00scratch.cs",
