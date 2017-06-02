@@ -45,7 +45,7 @@ namespace Proj3Semantics
                 visitor.Visit(n);
         }
 
-        private void VisitNode(FunctionDecl fdecl)
+        private void VisitNode(FuncDecl fdecl)
         {
             Log.Trace("Type checking method decl " + fdecl.ToDebugString());
             string name = fdecl.Identifier.Name;
@@ -57,7 +57,7 @@ namespace Proj3Semantics
 
             // TODO
             Log.Trace("  -- Visit ParamListNode");
-            visitor.Visit(fdecl.ParamListNode);
+            visitor.Visit(fdecl.ParamList);
 
             Log.Trace("  -- Visit Body");
             visitor.Visit(fdecl.MethodBody);

@@ -40,36 +40,38 @@ namespace Proj3Semantics.AST
         }
     }
 
-    public class FunctionDecl : DeclNode
+    public class FuncDecl : DeclNode
     {
         public IEnv Env { get; set; } = null;
         public TypeNode ReturnTypeSpecifier { get; }
-        public ParamListNode ParamListNode { get; set; }
+        public ParamList ParamList { get; set; }
         public Block MethodBody { get; set; }
 
-        public FunctionDecl(FunctionDecl fdecl) : base(fdecl.Identifier)
+        public FuncDecl(FuncDecl fdecl) : base(fdecl.Identifier)
         {
             this.ReturnTypeSpecifier = fdecl.ReturnTypeSpecifier;
-            this.ParamListNode = fdecl.ParamListNode;
+            this.ParamList = fdecl.ParamList;
             this.MethodBody = fdecl.MethodBody;
             PopulateChildren();
         }
-        public FunctionDecl(TypeNode returnTypeSpecifier, MethodDeclarator methodDeclarator, Block methodBody) :
-            base(methodDeclarator.Identifier)
+        public FuncDecl(
+            TypeNode returnTypeSpecifier, 
+            Identifier name, 
+            ParamList paramList, 
+            Block methodBody) 
+            : base(name)
         {
-            this.ReturnTypeSpecifier = returnTypeSpecifier;
-            if (methodDeclarator == null) throw new ArgumentNullException(nameof(methodDeclarator));
-            ParamListNode = methodDeclarator.ParamListNode;
-            this.MethodBody = methodBody;
+            ReturnTypeSpecifier = returnTypeSpecifier;
+            ParamList = paramList;
+            MethodBody = methodBody;
             PopulateChildren();
         }
 
         public void PopulateChildren()
         {
             AddChild(ReturnTypeSpecifier);
-            if (ParamListNode != null) AddChild(ParamListNode);
+            if (ParamList != null) AddChild(ParamList);
             AddChild(MethodBody);
-            
         }
 
     }
@@ -153,18 +155,18 @@ namespace Proj3Semantics.AST
 
     }
 
-    public class ClassMethodDecl : FunctionDecl, ITypeHasModifiers
+    public class ClassMethodDecl : FuncDecl, ITypeHasModifiers
     {
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
 
-        public ClassMethodDecl(Modifiers modifiers, FunctionDecl functionDecl) : base(functionDecl)
+        public ClassMethodDecl(Modifiers modifiers, FuncDecl funcDecl) : base(funcDecl)
         {
             modifiers.ProcessModifierTokensFor(this);
         }
         
         // Method decl is private non-static by default
-        public ClassMethodDecl(FunctionDecl functionDecl) : base(functionDecl)
+        public ClassMethodDecl(FuncDecl funcDecl) : base(funcDecl)
         {
             AccessorType = AccessorType.Private;
             IsStatic = false;
