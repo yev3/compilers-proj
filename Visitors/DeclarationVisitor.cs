@@ -58,18 +58,18 @@ namespace Proj3Semantics
             newScopeDeclVisitor.Visit(cdecl.ClassBody);
         }
 
-        private void VisitNode(FuncDecl fdecl)
+        private void VisitNode(AbstractFuncDecl fdecl)
         {
             Log.Trace("Visiting function declaration");
             string fname = fdecl.Identifier.Name;
 
             var localFunctions = from s in Env.LookupLocalEntriesByType(fname, SymbolType.Function)
-                                 let f = s.DeclNode as FuncDecl
+                                 let f = s.DeclNode as AbstractFuncDecl
                                  where f != null
                                  select f;
 
             // check if any other functions have the same signature as me
-            foreach (FuncDecl declared in localFunctions)
+            foreach (AbstractFuncDecl declared in localFunctions)
             {
                 if (declared.ParamList == fdecl.ParamList)
                 {
@@ -145,6 +145,10 @@ namespace Proj3Semantics
 
         }
 
+        private void VisitNode(MethodCall call)
+        {
+            // do nothing
+        }
 
 
 

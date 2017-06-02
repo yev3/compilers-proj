@@ -45,7 +45,7 @@ namespace Proj3Semantics
                 visitor.Visit(n);
         }
 
-        private void VisitNode(FuncDecl fdecl)
+        private void VisitNode(AbstractFuncDecl fdecl)
         {
             Log.Trace("Type checking method decl " + fdecl.ToDebugString());
             string name = fdecl.Identifier.Name;
@@ -239,6 +239,42 @@ namespace Proj3Semantics
             expr.EvalType = TypeNode.TypeNodeError;
         }
 
+        private List<AbstractFuncDecl> GetMethodOverloads(QualifiedNode qnode)
+        {
+            if (qnode.IdentifierList.Count != 1)
+            {
+                throw new NotImplementedException("TODO: only simple function calls supported");
+            }
+            string fname = qnode.IdentifierList.First();
+
+            Log.Trace("Looking up method overload set for " + fname);
+
+            return Env
+                .Lookup(fname)
+                .Where(sym => sym.SymbolType == SymbolType.Function)
+                .Select(sym => sym.DeclNode)
+                .Cast<AbstractFuncDecl>()
+                .ToList();
+        }
+
+        private bool ArgumentsCompatible(ParamList parameters, List<ExprNode> arguments)
+        {
+            int num_params = parameters?.ParamDeclList?.Count ?? 0;
+            int num_args = arguments.Count;
+            if (num_args != num_params) return false;
+            if (num_args == 0) return true;
+
+            // case when both are same count and more than 0
+            var tuples = Enumerable.Zip(parameters.ParamDeclList, arguments, Tuple.Create);
+            foreach (Tuple<ParamDecl, ExprNode> t in tuples)
+            {
+                if (t.Item1.DeclTypeNode != t.Item2.EvalType)
+                    return false;
+            }
+            return true;
+        }
+
+
         private void VisitNode(MethodCall call)
         {
             Log.Trace("Start checking MethodCall " + call.ToDebugString());
@@ -251,29 +287,67 @@ namespace Proj3Semantics
 
             // just checking the qualifiednamenode and SystemCall for now
 
+            AbstractFuncDecl fdecl;
             QualifiedNode qualNode = call.MethodReference as QualifiedNode;
-            
+            if (qualNode != null)
+            {
+                List<AbstractFuncDecl> overloadFuncs = GetMethodOverloads(qualNode);
 
+                // evaluate the arguments
+                List<ExprNode> argExpressions 
+                    = call.ArgumentList?.Children?.Cast<ExprNode>()?.ToList() ?? new List<ExprNode>();
+                foreach (ExprNode exprNode in argExpressions)
+                {
+                    Visit(exprNode);
+                    if (exprNode.EvalType == TypeNode.TypeNodeError)
+                    {
+                        call.EvalType = TypeNode.TypeNodeError;
+                        return;
+                    }
+                }
 
+                List<AbstractFuncDecl> compatibleFuncs = overloadFuncs
+                    .Where(f => ArgumentsCompatible(f.ParamList, argExpressions))
+                    .ToList();
+                if (compatibleFuncs.Count == 0)
+                {
+                    // TODO: better error message text
+                    CompilerErrors.Add(SemanticErrorTypes.InvalidFuncArg, "Unable to match a function call signature.");
+                    call.EvalType = TypeNode.TypeNodeError;
+                    return;
+                }
+                else if (compatibleFuncs.Count > 1)
+                {
+                    // TODO: better error message text
+                    CompilerErrors.Add(SemanticErrorTypes.InvalidFuncArg, "Ambiguous function call");
+                    call.EvalType = TypeNode.TypeNodeError;
+                    return;
+                }
+            }
 
+            Log.Info("Successfully matched a function.");
 
-
-            //ITypeDescriptor methodRefDescriptor = call.MethodReference as ITypeDescriptor;
-            //if (methodRefDescriptor == null) throw new ArgumentNullException(nameof(methodRefDescriptor) + " is not a valid type descriptor");
-            //_log.Trace("    checking MethodReference " + call.MethodReference.ToDebugString());
-            //var typeVisitor = new TypeVisitor(this);
-            //typeVisitor.Visit(call.MethodReference);
-            //if (methodRefDescriptor.NodeTypeCategory == NodeTypeCategory.NOT_SET ||
-            //    methodRefDescriptor.NodeTypeCategory == NodeTypeCategory.Error ||
-            //    methodRefDescriptor.TypeDescriptorRef == null)
+            // otherwise check that it is a valid function reference
+            //AbstractFuncDecl fdecl = call.MethodReference as AbstractFuncDecl;
+            //if (fdecl == null)
             //{
-            //    _log.Trace("    Quitting method call type checking, should have emitted an error..");
-            //    Debug.Assert(methodRefDescriptor.NodeTypeCategory == NodeTypeCategory.Error);
-            //    goto ErrorOccured;
+            //    CompilerErrors.Add(SemanticErrorTypes.UndeclaredIdentifier, "no valid function " + qualNode + " found.");
+            //    call.EvalType = TypeNode.TypeNodeError;
+            //    return;
             //}
 
-            //IClassMethodTypeDesc methodDescriptor = methodRefDescriptor.TypeDescriptorRef as IClassMethodTypeDesc;
-            //if (methodDescriptor == null) throw new ArgumentNullException(nameof(methodDescriptor));
+            //call.EvalType = fdecl.ReturnTypeSpecifier;
+
+            //int num_params = fdecl.ParamList?.Children?.Count ?? 0;
+            //int num_args = call.ArgumentList?.Children?.Count ?? 0;
+
+            //if (num_args != num_params)
+            //{
+            //    CompilerErrors.Add(SemanticErrorTypes.NoMethodWithNumArgs, "");
+
+            //}
+
+
 
             //List<Parameter> definedParams = methodDescriptor.MethodParameters;
             //ArgumentList calledArgs = call.ArgumentList;

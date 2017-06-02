@@ -92,5 +92,7 @@ namespace Proj3Semantics.AST
 
         }
 
+        protected EvalExpr() { }
+
     }
 }

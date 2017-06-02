@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using QUT.Gppg;
 
@@ -67,17 +68,13 @@ namespace Proj3Semantics.AST
 
 
 
-    public abstract class QualifiedPrimaryExpr : Node { }
-
-    public abstract class ComplexPrimary : QualifiedPrimaryExpr { }
-
-    public class MethodCall : ComplexPrimary
+    public class MethodCall : EvalExpr
     {
         public Node MethodReference { get; set; }
         public ArgumentList ArgumentList { get; set; } = null;
         public bool HasArguments => ArgumentList == null;
 
-        public MethodCall(Node methodReference)
+        public MethodCall(Node methodReference)  
         {
             MethodReference = methodReference;
             AddChild(MethodReference);
@@ -115,10 +112,11 @@ namespace Proj3Semantics.AST
 
     public class ArgumentList : Node
     {
-        public ArgumentList(Node node)
+        public ArgumentList(ExprNode node)
         {
             AddChild(node);
         }
+
     }
 
     public class NamespaceBody : Node
