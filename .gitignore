@@ -3,6 +3,8 @@
 *.Parser.Generated.cs
 *.grammar.lst
 *.analyzer.lst
+TCCL.grammar.conflicts
+TCCL.grammar.report.html
 
 
 ## Ignore Visual Studio temporary files, build results, and

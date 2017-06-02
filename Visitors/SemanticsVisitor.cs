@@ -274,129 +274,59 @@ namespace Proj3Semantics
             return true;
         }
 
+        // MethodReference             
+        //       :   ComplexPrimaryNoParenthesis     { $$ = $1;}
+        //       |   QualifiedName                   { $$ = $1;}
+        //       |   SpecialBuiltinName              { $$ = $1;}
+        //       |   BuiltinSystemCall               { $$ = $1;}
+
+        // just checking the qualifiednamenode and SystemCall for now
 
         private void VisitNode(MethodCall call)
         {
             Log.Trace("Start checking MethodCall " + call.ToDebugString());
 
-            // MethodReference             
-            //       :   ComplexPrimaryNoParenthesis     { $$ = $1;}
-            //       |   QualifiedName                   { $$ = $1;}
-            //       |   SpecialBuiltinName              { $$ = $1;}
-            //       |   BuiltinSystemCall               { $$ = $1;}
-
-            // just checking the qualifiednamenode and SystemCall for now
-
-            AbstractFuncDecl fdecl;
             QualifiedNode qualNode = call.MethodReference as QualifiedNode;
-            if (qualNode != null)
+            if (qualNode == null)
+                CompilerErrors.Add(SemanticErrorTypes.FeatureNotImplemented, "Only support calling user-defined functions.");
+
+
+            // evaluate the arguments
+            List<ExprNode> argExpressions
+                = call.ArgumentList?.Children?.Cast<ExprNode>()?.ToList() ?? new List<ExprNode>();
+            foreach (ExprNode exprNode in argExpressions)
             {
-                List<AbstractFuncDecl> overloadFuncs = GetMethodOverloads(qualNode);
-
-                // evaluate the arguments
-                List<ExprNode> argExpressions 
-                    = call.ArgumentList?.Children?.Cast<ExprNode>()?.ToList() ?? new List<ExprNode>();
-                foreach (ExprNode exprNode in argExpressions)
+                Visit(exprNode);
+                if (exprNode.EvalType == TypeNode.TypeNodeError)
                 {
-                    Visit(exprNode);
-                    if (exprNode.EvalType == TypeNode.TypeNodeError)
-                    {
-                        call.EvalType = TypeNode.TypeNodeError;
-                        return;
-                    }
-                }
-
-                List<AbstractFuncDecl> compatibleFuncs = overloadFuncs
-                    .Where(f => ArgumentsCompatible(f.ParamList, argExpressions))
-                    .ToList();
-                if (compatibleFuncs.Count == 0)
-                {
-                    // TODO: better error message text
-                    CompilerErrors.Add(SemanticErrorTypes.InvalidFuncArg, "Unable to match a function call signature.");
-                    call.EvalType = TypeNode.TypeNodeError;
-                    return;
-                }
-                else if (compatibleFuncs.Count > 1)
-                {
-                    // TODO: better error message text
-                    CompilerErrors.Add(SemanticErrorTypes.InvalidFuncArg, "Ambiguous function call");
                     call.EvalType = TypeNode.TypeNodeError;
                     return;
                 }
             }
 
-            Log.Info("Successfully matched a function.");
 
-            // otherwise check that it is a valid function reference
-            //AbstractFuncDecl fdecl = call.MethodReference as AbstractFuncDecl;
-            //if (fdecl == null)
-            //{
-            //    CompilerErrors.Add(SemanticErrorTypes.UndeclaredIdentifier, "no valid function " + qualNode + " found.");
-            //    call.EvalType = TypeNode.TypeNodeError;
-            //    return;
-            //}
+            var candidateSet = GetMethodOverloads(qualNode);
+            var matchedSet = candidateSet.Where(f => ArgumentsCompatible(f.ParamList, argExpressions)).ToList();
+            var numMatched = matchedSet.Count;
 
-            //call.EvalType = fdecl.ReturnTypeSpecifier;
+            if (numMatched == 0)
+            {
+                // TODO: better error message text
+                CompilerErrors.Add(SemanticErrorTypes.InvalidFuncArg, "Unable to match a function call signature.");
+                call.EvalType = TypeNode.TypeNodeError;
+                return;
+            }
 
-            //int num_params = fdecl.ParamList?.Children?.Count ?? 0;
-            //int num_args = call.ArgumentList?.Children?.Count ?? 0;
+            if (numMatched > 1)
+            {
+                // TODO: better error message text
+                CompilerErrors.Add(SemanticErrorTypes.InvalidFuncArg, "Ambiguous function call");
+                call.EvalType = TypeNode.TypeNodeError;
+                return;
+            }
 
-            //if (num_args != num_params)
-            //{
-            //    CompilerErrors.Add(SemanticErrorTypes.NoMethodWithNumArgs, "");
-
-            //}
-
-
-
-            //List<Parameter> definedParams = methodDescriptor.MethodParameters;
-            //ArgumentList calledArgs = call.ArgumentList;
-
-            //// CHECKING # of args matches
-            //int numParams = definedParams.Count;
-            //int numArgs = calledArgs?.Children?.Count ?? 0;
-
-            //if (numParams != numArgs)
-            //{
-            //    CompilerErrors.Add(SemanticErrorTypes.NoMethodWithNumArgs, methodDescriptor.Name);
-            //    goto ErrorOccured;
-            //}
-
-            //if (numParams > 0)
-            //{
-            //    _log.Trace("    checking ArgumentList " + calledArgs?.ToDebugString());
-            //    Debug.Assert(calledArgs != null);
-
-            //    IEnumerable<Tuple<Parameter, Expression>> pairs =
-            //        Enumerable.Zip(definedParams, calledArgs.Children.Cast<Expression>(), Tuple.Create);
-
-            //    foreach (Tuple<Parameter, Expression> pair in pairs)
-            //    {
-            //        // type check the type of this argument expression
-            //        VisitNode(pair.Item2);
-
-            //        if (!IsAssignable(pair.Item1.TypeDescriptor, pair.Item2))
-            //        {
-            //            CompilerErrors.Add(SemanticErrorTypes.InvalidFuncArg, pair.Item1.Name);
-            //            goto ErrorOccured;
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    _log.Trace("    No arguments");
-            //}
-
-            //call.NodeTypeCategory = methodDescriptor.ReturnTypeNode.NodeTypeCategory;
-            //call.TypeDescriptorRef = methodDescriptor.ReturnTypeNode.TypeDescriptorRef;
-            //_log.Trace("Finish checking MethodCall " + call.ToDebugString());
-
-            //return;
-
-            //// set the return to error type
-            //ErrorOccured:
-            //call.NodeTypeCategory = NodeTypeCategory.Error;
-            //call.TypeDescriptorRef = null;
+            var fdecl = matchedSet.First();
+            call.EvalType = fdecl.ReturnTypeSpecifier;
         }
 
 

@@ -84,7 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AST\AllNodes.cs" />
-    <Compile Include="AST\BuiltinCalls.cs" />
+    <Compile Include="AST\BuiltinMethodRefs.cs" />
     <Compile Include="AST\ClassAndMethodNodes.cs" />
     <Compile Include="AST\ControlStatementNodes.cs" />
     <Compile Include="AST\Declarations.cs" />
@@ -171,11 +171,11 @@
   <Target Name="YltBuildGen" DependsOnTargets="GenerateTCCL" />
   <Target Name="GenerateTCCL" Inputs="TCCL.analyzer.lex;$(TCCLGrammarPath).grammar.y" Outputs="TCCL.Scanner.Generated.cs;$(TCCLParser).Parser.Generated.cs">
     <Message Text="Generating scanner for TCCL ..." />
-    <Exec Command="$(GplexTool) &quot;/out:TCCL.Scanner.Generated.cs&quot; &quot;TCCL.analyzer.lex&quot;" WorkingDirectory="$(ProjectDir)" Outputs="TCCL.Scanner.cs">
+    <Exec Command="$(GplexTool)  &quot;/verbose&quot; /out:TCCL.Scanner.Generated.cs &quot;TCCL.analyzer.lex&quot;" WorkingDirectory="$(ProjectDir)" Outputs="TCCL.Scanner.cs">
       <Output TaskParameter="Outputs" ItemName="TCCLScanner" />
     </Exec>
     <Message Text="Generating parser for TCCLParser ..." />
-    <Exec Command="$(GppgTool) /no-lines /gplex /verbose &quot;$(TCCLGrammarPath).grammar.y&quot; &gt; &quot;$(TCCLParser).Parser.Generated.cs&quot;" WorkingDirectory="$(ProjectDir)" Outputs="$(TCCLParser).Parser.Generated.cs">
+    <Exec Command="$(GppgTool) /no-lines /gplex /verbose /conflicts /report &quot;$(TCCLGrammarPath).grammar.y&quot; &gt; &quot;$(TCCLParser).Parser.Generated.cs&quot;" WorkingDirectory="$(ProjectDir)" Outputs="$(TCCLParser).Parser.Generated.cs">
       <Output TaskParameter="Outputs" ItemName="TCCL" />
     </Exec>
   </Target>
