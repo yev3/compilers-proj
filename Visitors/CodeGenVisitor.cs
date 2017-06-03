@@ -13,15 +13,13 @@ namespace Proj3Semantics.Visitors
     public class CodeGenVisitor
     {
         private static Logger Log = LogManager.GetCurrentClassLogger();
-        private IEnv Env { get; set; }
         private StreamWriter IL { get; set; }
         private string AssemblyName { get; set; }
 
         private const string EntryPointFunc = "main";
 
-        public CodeGenVisitor(IEnv env, StreamWriter il, String assemblyName)
+        public CodeGenVisitor(StreamWriter il, String assemblyName)
         {
-            Env = env;
             IL = il;
             AssemblyName = assemblyName;
         }
@@ -29,7 +27,7 @@ namespace Proj3Semantics.Visitors
         public void Generate(Node root)
         {
             GeneratePrelude();
-            Visit(root);
+            //Visit(root);
 
 
 
@@ -50,7 +48,10 @@ namespace Proj3Semantics.Visitors
                 @"  } ",
                 @"} ",
             };
-
+            foreach (string line in list)
+            {
+                IL.WriteLine(line);
+            }
 
         }
         private void GeneratePrelude()

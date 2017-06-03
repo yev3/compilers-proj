@@ -68,6 +68,7 @@
     <StartupObject>Proj3Semantics.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Build.Utilities.v12.0, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>packages\NLog.4.4.9\lib\net45\NLog.dll</HintPath>
@@ -93,6 +94,7 @@
     <Compile Include="CompilerErrors.cs" />
     <Compile Include="CustomExtensions.cs" />
     <Compile Include="GplexBuffers.cs" />
+    <Compile Include="ILCodeGeneration.cs" />
     <Compile Include="Visitors\CodeGenVisitor.cs" />
     <Compile Include="Visitors\SemanticsVisitor.cs" />
     <Compile Include="NodePrintingVisitor.cs" />

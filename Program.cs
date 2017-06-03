@@ -25,17 +25,21 @@ namespace Proj3Semantics
             while (true)
             {
                 Console.Write("Enter a file name: ");
-
                 string input = Console.ReadLine();
-                if (input == null) continue;
+                if (string.IsNullOrEmpty(input)) continue;
+
+                Console.Write("Enter an assembly name: ");
+                string ass = Console.ReadLine();
+                if (string.IsNullOrEmpty(ass)) continue;
+
                 string cmd = input.ToLower().Trim();
                 if (cmd == "exit" || cmd == "quit") return;
                 string fname = input + ".txt";
 
                 if (System.IO.File.Exists(fname))
                 {
-                    RunFile(fname);
-                    Console.WriteLine("Parsing complete");
+                    RunFile(ass, fname);
+                    Console.WriteLine("Finished with " + ass);
                 }
                 else
                 {
@@ -45,13 +49,14 @@ namespace Proj3Semantics
                         Console.WriteLine("Current directory: {0}", Directory.GetCurrentDirectory());
                     }
                 }
+
             }
 
             //Console.WriteLine("Press any key to continue..");
             //Console.ReadKey();
         }
 
-        static void RunFile(string fname)
+        static void RunFile(string ass, string fname)
         {
             using (OutColor.Cyan)
                 Console.WriteLine(File.ReadAllText(fname));
@@ -86,33 +91,37 @@ namespace Proj3Semantics
             var nodeVisitor = new NodePrintingVisitor();
             nodeVisitor.PreorderTraverseRoot(Parser.Root);
 
+            Console.WriteLine("\nStart Code Generation Phase:");
+            Console.WriteLine("==============================\n");
+            ILCodeGeneration codeGen = new ILCodeGeneration(Parser.Root, ass);
+            codeGen.GenerateCompileAndRun();
+
         }
 
         private static void TestAll()
         {
-            List<string> testFiles = new List<string>()
-            {
-                //"00scratch.cs",
-                //"00writenums.cs",
-                "01hello.cs",
-                //"02compute.cs",
-                //"03iftest.cs",
-                //"04loop.cs",
-                //"05twomethods0.cs",
-                //"06twomethods1.cs",
-                //"07fact2.cs",
-                //"08logictest.cs",
-                //"09struct1.cs",
-                //"10twoparams.cs",
-                //"11errors1.cs",
+
+            var testCases = new[] {
+                //new {assembly = "scratch", file = "00scratch.cs"},
+                //new {assembly = "writenums", file = "00writenums.cs"},
+                new {assembly = "hello", file = "01hello.cs"},
+                //new {assembly = "compute", file = "02compute.cs"},
+                //new {assembly = "iftest", file = "03iftest.cs"},
+                //new {assembly = "loop", file = "04loop.cs"},
+                //new {assembly = "twomethods0", file = "05twomethods0.cs"},
+                //new {assembly = "twomethods1", file = "06twomethods1.cs"},
+                //new {assembly = "fact2", file = "07fact2.cs"},
+                //new {assembly = "logictest", file = "08logictest.cs"},
+                //new {assembly = "struct1", file = "09struct1.cs"},
+                //new {assembly = "twoparams", file = "10twoparams.cs"},
+                //new {assembly = "errors1", file = "11errors1.cs"},
             };
 
-            var testNbr = 1;
-            foreach (var file in testFiles)
+            foreach (var entry in testCases)
             {
-                Console.WriteLine("Test case {0}: {1}", testNbr++, file);
+                Console.WriteLine("Test assembly {0}: {1}", entry.assembly, entry.file);
                 Console.WriteLine("========================================\n");
-                RunFile(file);
+                RunFile(entry.assembly, entry.file);
             }
 
         }
