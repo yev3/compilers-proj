@@ -46,6 +46,15 @@ namespace Proj3Semantics
             }
             Log.Trace("Finished generating IL code.");
 
+            Console.WriteLine();
+            Console.WriteLine("SOURCE:\n");
+            using (OutColor.Cyan)
+            {
+                Console.WriteLine(File.ReadAllText(_ilFullPath));
+
+            }
+
+
         }
 
         public int CompileExe()
