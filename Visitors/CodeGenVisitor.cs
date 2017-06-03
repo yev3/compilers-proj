@@ -10,6 +10,7 @@ using Proj3Semantics.AST;
 namespace Proj3Semantics.Visitors
 {
     using IEnv = ISymbolTable<Symbol>;
+
     public class CodeGenVisitor
     {
         private static Logger Log = LogManager.GetCurrentClassLogger();
@@ -54,6 +55,7 @@ namespace Proj3Semantics.Visitors
             }
 
         }
+
         private void GeneratePrelude()
         {
             IL.WriteLine(@".assembly extern mscorlib {}");
@@ -125,9 +127,57 @@ namespace Proj3Semantics.Visitors
                 @"    ret          ",
                 @"  } ",
             };
-            
+            IL.Write(".method ");
+
+            if (mdecl.IsStatic)
+            {
+                IL.Write("static ");
+            }
+
+            var returnType = mdecl.ReturnTypeSpecifier;
+
+            IL.Write(returnType + " ");
+
+            IL.Write(mdecl.Name + "(");
+            foreach (ParamDecl paramListChild in mdecl.ParamList.ParamDeclList)
+            {
+                Visit(paramListChild);
+            }
+            IL.WriteLine(")");
+            IL.WriteLine("{");
+            IL.WriteLine(".entrypoint");
+            IL.WriteLine(".maxstack 15");
+
+            foreach (Node bodyChild in mdecl.MethodBody.Children)
+            {
+                Visit(bodyChild);
+            }
+            IL.WriteLine("ret");
+            IL.WriteLine("}");
         }
 
+        private void VisitNode(ParamDecl paramDecl)
+        {
+            // TODO
+        }
+
+        private void VisitNode(Block block)
+        {
+            // TODO
+            foreach (Node bodyChild in block.Children)
+            {
+                Visit(bodyChild);
+            }
+        }
+
+        private void VisitNode(Statement statement)
+        {
+            // TODO
+            foreach (Node bodyChild in statement.Children)
+            {
+                Visit(bodyChild);
+            }
+        }
 
     }
 }
