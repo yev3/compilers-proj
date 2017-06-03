@@ -86,6 +86,7 @@ namespace Proj3Semantics
     public interface ISymbolTable<TEntry>
     {
         int CurrentNestLevel { get; }
+        List<TEntry> GetLocalDeclarations();
         ISymbolTable<TEntry> GetNewLevel(string envName = "");
         ISymbolTable<TEntry> GetPrevLevel();
         void EnterInfo(string s, TEntry info);
@@ -101,13 +102,22 @@ namespace Proj3Semantics
     }
 
     [DebuggerDisplay("{ToString()}")]
-    public class SymbolTable: ISymbolTable<Symbol>
+    public class SymbolTable : ISymbolTable<Symbol>
     {
         private static Logger Log = LogManager.GetCurrentClassLogger();
         private string EnvName { get; }
         private SymbolTable Parent { get; set; }
         private MultiMap<Symbol> MultiMap { get; } = new MultiMap<Symbol>();
         public int CurrentNestLevel { get; }
+        public List<Symbol> GetLocalDeclarations()
+        {
+            var result = new List<Symbol>();
+            foreach (string key in MultiMap.Keys)
+            {
+                result.AddRange(MultiMap[key].Where(s => s.SymbolType == SymbolType.Variable));
+            }
+            return result;
+        }
 
         public SymbolTable(IEnv parent = null, string envName = "")
         {
@@ -156,6 +166,7 @@ namespace Proj3Semantics
         {
             return MultiMap[s];
         }
+
 
         public List<Symbol> LookupLocalEntriesByType(string s, SymbolType type)
         {
