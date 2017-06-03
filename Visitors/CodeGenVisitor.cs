@@ -172,7 +172,7 @@ namespace Proj3Semantics.Visitors
         private void VisitNode(Statement statement)
         {
             // TODO
-            foreach (Node bodyChild in block.Children)
+            foreach (Node bodyChild in statement.Children)
             {
                 Visit(bodyChild);
             }
