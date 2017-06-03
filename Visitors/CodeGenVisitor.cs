@@ -28,8 +28,7 @@ namespace Proj3Semantics.Visitors
         public void Generate(Node root)
         {
             GeneratePrelude();
-            //Visit(root);
-
+            Visit(root);
 
 
 
@@ -49,10 +48,6 @@ namespace Proj3Semantics.Visitors
                 @"  } ",
                 @"} ",
             };
-            foreach (string line in list)
-            {
-                IL.WriteLine(line);
-            }
 
         }
 
@@ -114,38 +109,26 @@ namespace Proj3Semantics.Visitors
 
         private void VisitNode(ClassMethodDecl mdecl)
         {
-            List<string> list = new List<string>()
-            {
-                @"  .method static void main() ",
-                @"  {",
-                @"    .entrypoint",
-                @"    .maxstack 1",
-                @"",
-                @"    ldstr     ""Hello, World""",
-                @"    call      void [mscorlib]System.Console::WriteLine(string)",
-                @"",
-                @"    ret          ",
-                @"  } ",
-            };
+            bool isEntryPoint = mdecl.Name.ToLower() == "main";
+
+
             IL.Write(".method ");
 
-            if (mdecl.IsStatic)
+            if (mdecl.IsStatic || isEntryPoint)
             {
                 IL.Write("static ");
             }
 
-            var returnType = mdecl.ReturnTypeSpecifier;
-
-            IL.Write(returnType + " ");
+            Visit(mdecl.ReturnTypeSpecifier);
 
             IL.Write(mdecl.Name + "(");
-            foreach (ParamDecl paramListChild in mdecl.ParamList.ParamDeclList)
-            {
-                Visit(paramListChild);
-            }
+
+            Visit(mdecl.ParamList);
+
             IL.WriteLine(")");
             IL.WriteLine("{");
-            IL.WriteLine(".entrypoint");
+            if (isEntryPoint)
+                IL.WriteLine(".entrypoint");
             IL.WriteLine(".maxstack 15");
 
             foreach (Node bodyChild in mdecl.MethodBody.Children)
@@ -156,10 +139,7 @@ namespace Proj3Semantics.Visitors
             IL.WriteLine("}");
         }
 
-        private void VisitNode(ParamDecl paramDecl)
-        {
-            // TODO
-        }
+
 
         private void VisitNode(Block block)
         {
@@ -169,6 +149,82 @@ namespace Proj3Semantics.Visitors
                 Visit(bodyChild);
             }
         }
+
+        private string GetTypeName(TypeRefNode type)
+        {
+            string t;
+            switch (type.NodeTypeCategory)
+            {
+                case NodeTypeCategory.Int:
+                    t = "int";
+                    break;
+                case NodeTypeCategory.String:
+                    t = "string";
+                    break;
+                case NodeTypeCategory.Object:
+                    t = "object";
+                    break;
+                case NodeTypeCategory.Boolean:
+                    t = "bool";
+                    break;
+                case NodeTypeCategory.Void:
+                    t = "void";
+                    break;
+                case NodeTypeCategory.This:
+                    t = "this";
+                    break;
+                default:
+                    throw new NotImplementedException("unsupported generation of " + type.NodeTypeCategory);
+            }
+            return t;
+        }
+
+        private void VisitNode(TypeRefNode type)
+        {
+            IL.Write(GetTypeName(type));
+            IL.Write(" ");
+        }
+
+        // this will print types like so.. string, int, bool...
+        private void VisitNode(ParamList plist)
+        {
+            var paramList = plist?.ParamDeclList;
+            if (paramList != null)
+            {
+                string insideParen = string.Join(", ", paramList.Select(p => GetTypeName(p.DeclTypeNode)));
+                IL.Write(insideParen);
+            }
+
+        }
+
+        private void VisitNode(WriteLineStatement stmt)
+        {
+            foreach (Node child in stmt.Children)
+                Visit(child);
+
+            IL.Write("\t\tcall\t\t void [mscorlib]System.Console::WriteLine(");
+            Visit(stmt.AbstractFuncDecl.ParamList);
+            IL.WriteLine(")");
+        }
+
+        private void VisitNode(EvalExpr evalExpr)
+        {
+            Visit(evalExpr.ChildExpr);
+        }
+
+        private void VisitNode(ExprNode expr)
+        {
+            throw new AccessViolationException("YOU ARE MISSING AN OVERLOAD!!");
+        }
+
+        private void VisitNode(StringLiteralExpr str)
+        {
+            IL.Write("\t\tldstr\t\t \"");
+            IL.Write(str.StringVal);
+            IL.WriteLine("\"");
+        }
+
+
 
         private void VisitNode(Statement statement)
         {
