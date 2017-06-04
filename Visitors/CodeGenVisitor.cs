@@ -98,7 +98,7 @@ namespace Proj3Semantics.Visitors
 
             var stuff = from l in locals
                         let d = l.DeclNode
-                        select new { varName = d.Name, typeName = GetTypeName(d.DeclTypeNode) };
+                        select new { varName = d.Name, typeName = d.DeclTypeNode.NodeTypeCategory.GetIlName() };
 
             int idxCount = 0;
             var declStrings = new List<string>();
@@ -163,38 +163,10 @@ namespace Proj3Semantics.Visitors
             }
         }
 
-        private string GetTypeName(TypeRefNode type)
-        {
-            string t;
-            switch (type.NodeTypeCategory)
-            {
-                case NodeTypeCategory.Int:
-                    t = "int32";
-                    break;
-                case NodeTypeCategory.String:
-                    t = "string";
-                    break;
-                case NodeTypeCategory.Object:
-                    t = "object";
-                    break;
-                case NodeTypeCategory.Boolean:
-                    t = "bool";
-                    break;
-                case NodeTypeCategory.Void:
-                    t = "void";
-                    break;
-                case NodeTypeCategory.This:
-                    t = "this";
-                    break;
-                default:
-                    throw new NotImplementedException("unsupported generation of " + type.NodeTypeCategory);
-            }
-            return t;
-        }
 
         private void VisitNode(TypeRefNode type)
         {
-            IL.Write(GetTypeName(type));
+            IL.Write(type.NodeTypeCategory.GetIlName());
             IL.Write(" ");
         }
 
@@ -204,7 +176,7 @@ namespace Proj3Semantics.Visitors
             var paramList = plist?.ParamDeclList;
             if (paramList != null)
             {
-                string insideParen = string.Join(", ", paramList.Select(p => GetTypeName(p.DeclTypeNode)));
+                string insideParen = string.Join(", ", paramList.Select(p => (p.DeclTypeNode.NodeTypeCategory.GetIlName())));
                 IL.Write(insideParen);
             }
 
@@ -212,7 +184,7 @@ namespace Proj3Semantics.Visitors
 
         string GetExprTypes(IEnumerable<ExprNode> exprs)
         {
-            return string.Join(", ", exprs.Select(e => GetTypeName(e.EvalType)));
+            return string.Join(", ", exprs.Select(e => e.EvalType.NodeTypeCategory.GetIlName()));
         }
 
         private void VisitNode(WriteStatement stmt)

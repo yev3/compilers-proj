@@ -104,8 +104,8 @@ namespace Proj3Semantics
             var testCases = new[] {
                 //new {assembly = "scratch", file = "00scratch.cs"},
                 //new {assembly = "writenums", file = "00writenums.cs"},
-                //new {assembly = "hello", file = "01hello.cs"},
-                new {assembly = "compute", file = "02compute.cs"},
+                new {assembly = "hello", file = "01hello.cs"},
+                //new {assembly = "compute", file = "02compute.cs"},
                 //new {assembly = "iftest", file = "03iftest.cs"},
                 //new {assembly = "loop", file = "04loop.cs"},
                 //new {assembly = "twomethods0", file = "05twomethods0.cs"},
