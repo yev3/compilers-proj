@@ -4,12 +4,35 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Proj3Semantics.AST;
 
 namespace Proj3Semantics
 {
     using static ConsoleColor;
     public static class Extensions
     {
+
+        public static string GetIlName(this NodeTypeCategory cat)
+        {
+            switch (cat)
+            {
+                case NodeTypeCategory.Int:
+                    return "int32";
+                case NodeTypeCategory.String:
+                    return "string";
+                case NodeTypeCategory.Object:
+                    return "object";
+                case NodeTypeCategory.Boolean:
+                    return "bool";
+                case NodeTypeCategory.Void:
+                    return "void";
+                case NodeTypeCategory.This:
+                    return "this";
+                default:
+                    throw new NotImplementedException("Unsupported ToString of NodeTypeCategory: " + cat.GetType().Name.ToString());
+            }
+        }
+
 
         private const string EVAL_METHOD_NAME = "visit";
         public static IEnumerable<MethodInfo> GetVisitMethodsOneArg(this Type type)
@@ -47,6 +70,7 @@ namespace Proj3Semantics
                 yield return current;
         }
     }
+
 
     public class OutColor : IDisposable
     {

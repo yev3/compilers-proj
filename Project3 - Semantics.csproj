@@ -92,7 +92,7 @@
     <Compile Include="AST\Expressions.cs" />
     <Compile Include="AST\TypeNodes.cs" />
     <Compile Include="CompilerErrors.cs" />
-    <Compile Include="CustomExtensions.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="GplexBuffers.cs" />
     <Compile Include="ILCodeGeneration.cs" />
     <Compile Include="Visitors\CodeGenVisitor.cs" />
