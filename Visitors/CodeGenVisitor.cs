@@ -19,8 +19,10 @@ namespace Proj3Semantics.Visitors
 
         private const string EntryPointFunc = "main";
 
-        private Dictionary<string, int> LocalsPosnMap { get; set; }
-        private Dictionary<string, string> LocalsTypeMap { get; set; }
+        private int LocalsCount { get; set; }
+
+        //private Dictionary<string, int> LocalsPosnMap { get; set; }
+        //private Dictionary<string, string> LocalsTypeMap { get; set; }
 
         public CodeGenVisitor(StreamWriter il, String assemblyName)
         {
@@ -90,32 +92,6 @@ namespace Proj3Semantics.Visitors
             IL.WriteLine(cname);
         }
 
-        void GenerateLocalsMaps(IEnv env)
-        {
-            var idPosnDict = new Dictionary<string, int>();
-            var typesDict = new Dictionary<string, string>();
-            var locals = env.GetLocalDeclarations();
-
-            var stuff = from l in locals
-                        let d = l.DeclNode
-                        select new { varName = d.Name, typeName = d.DeclTypeNode.NodeTypeCategory.GetIlName() };
-
-            int idxCount = 0;
-            var declStrings = new List<string>();
-
-            foreach (var s in stuff)
-            {
-                int curIdx = idxCount++;
-                idPosnDict.Add(s.varName, curIdx);
-                typesDict.Add(s.varName, s.typeName);
-                declStrings.Add(string.Format("\t[{0}] {1} {2}", curIdx, s.typeName, s.varName));
-            }
-
-            IL.Write(string.Join(" , \n", declStrings));
-
-            LocalsPosnMap = idPosnDict;
-            LocalsTypeMap = typesDict;
-        }
 
         private void VisitNode(ClassMethodDecl mdecl)
         {
@@ -140,27 +116,33 @@ namespace Proj3Semantics.Visitors
                 IL.WriteLine(".entrypoint");
             IL.WriteLine(".maxstack 15");
 
-            IL.WriteLine(".locals init(");
-            GenerateLocalsMaps(mdecl.Env);
-            IL.WriteLine("\n)");
+            LocalsCount = 0;
+            Visit(mdecl.MethodBody);
 
-            foreach (Node bodyChild in mdecl.MethodBody.Children)
-            {
-                Visit(bodyChild);
-            }
             IL.WriteLine("ret");
             IL.WriteLine("}");
         }
 
 
 
-        private void VisitNode(Block block)
+        private void VisitNode(LocalVarDecl vdecls)
         {
-            // TODO
-            foreach (Node bodyChild in block.Children)
+            var entryStrings = new List<string>();
+            foreach (VarDecl d in vdecls.VarDeclList.Children.Cast<VarDecl>())
             {
-                Visit(bodyChild);
+                int posn = LocalsCount++;
+                entryStrings.Add(string.Format(
+                        "\t[{0}] {1} {2}", posn,
+                        d.DeclTypeNode.NodeTypeCategory.GetIlName(),
+                        d.Name));
+                d.IlLocalsPosn = posn;
             }
+
+
+            IL.WriteLine("\n// LocalVarDecl");
+            IL.WriteLine(".locals init(");
+            IL.WriteLine(string.Join(",\n", entryStrings));
+            IL.WriteLine("\n)");
         }
 
 
@@ -179,7 +161,6 @@ namespace Proj3Semantics.Visitors
                 string insideParen = string.Join(", ", paramList.Select(p => (p.DeclTypeNode.NodeTypeCategory.GetIlName())));
                 IL.Write(insideParen);
             }
-
         }
 
         string GetExprTypes(IEnumerable<ExprNode> exprs)
@@ -219,10 +200,10 @@ namespace Proj3Semantics.Visitors
 
         private void VisitNode(LValueNode lval)
         {
-            var localPosn = LocalsPosnMap[lval.Identifier.Name];
+            var locPosn = lval.SymbolRef.DeclNode.IlLocalsPosn;
             // load a local on the stack
             IL.Write("ldloc.");
-            IL.WriteLine(localPosn);
+            IL.WriteLine(locPosn);
         }
 
         private void VisitNode(ExprNode expr)
@@ -241,8 +222,7 @@ namespace Proj3Semantics.Visitors
         {
             Visit(expr.RhsExprNode);
 
-            var varName = expr.LValueNode.Identifier.Name;
-            int localsPosn = LocalsPosnMap[varName];
+            int localsPosn = expr.LValueNode.SymbolRef.DeclNode.IlLocalsPosn;
             // store into locals
             IL.Write("stloc.");
             IL.WriteLine(localsPosn);
@@ -274,19 +254,10 @@ namespace Proj3Semantics.Visitors
         }
         private void VisitNode(IntLiteralExpr intExpr)
         {
-           IL.WriteLine("ldc.i4.s\t" + intExpr.IntegerValue);
+            IL.WriteLine("ldc.i4.s\t" + intExpr.IntegerValue);
         }
 
-        private void VisitNode(LocalVarDecl x) { }  // do nothing
 
-        private void VisitNode(Statement statement)
-        {
-            // TODO
-            foreach (Node bodyChild in statement.Children)
-            {
-                Visit(bodyChild);
-            }
-        }
 
     }
 }
