@@ -12,6 +12,7 @@ namespace Proj3Semantics.AST
     {
         public string Name { get; set; }
         public Identifier Identifier { get; set; }
+        public int IlLocalsPosn { get; set; }
 
         /// <summary>
         /// Each declaration should have a type associated with it
