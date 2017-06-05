@@ -48,10 +48,10 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 "this"          { return (int)Token.THIS; }
 "class"         { return (int)Token.CLASS; }
 "namespace"     { return (int)Token.NAMESPACE; }
-"|"             { return (int)Token.PIPE; }
+"|"             { return (int)Token.B_OR; }
 "public"        { return (int)Token.PUBLIC; }
 [\.]            { return (int)Token.PERIOD; }
-"\^"            { return (int)Token.HAT; }
+"\^"            { return (int)Token.B_XOR; }
 ","             { return (int)Token.COMMA; }
 "void"          { return (int)Token.VOID; }
 "~"             { return (int)Token.TILDE; }
@@ -65,7 +65,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 "private"       { return (int)Token.PRIVATE; }
 "!"             { return (int)Token.BANG; }
 "<="            { return (int)Token.OP_LE; }
-"&"             { return (int)Token.AND; }
+"&"             { return (int)Token.B_AND; }
 [\{]            { return (int)Token.LBRACE; }
 [\}]            { return (int)Token.RBRACE; }
 [\[]            { return (int)Token.LBRACKET; }

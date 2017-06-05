@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.Remoting;
 using NLog.LayoutRenderers;
 
@@ -65,10 +66,10 @@ namespace Proj3Semantics.AST
             PopulateChildren();
         }
         public FuncDecl(
-            TypeRefNode returnTypeSpecifier, 
-            Identifier name, 
-            ParamList paramList, 
-            Block methodBody) 
+            TypeRefNode returnTypeSpecifier,
+            Identifier name,
+            ParamList paramList,
+            Block methodBody)
             : base(name)
         {
             ReturnTypeSpecifier = returnTypeSpecifier;
@@ -105,7 +106,7 @@ namespace Proj3Semantics.AST
             AddModType(type);
         }
 
-        public void ProcessModifierTokensFor(ITypeHasModifiers node)
+        public void ProcessModifierTokensFor(IClassMember node)
         {
             bool accessorWasSet = false;
             node.IsStatic = false;
@@ -144,11 +145,12 @@ namespace Proj3Semantics.AST
         }
     }
 
-    public class ClassDeclaration : DeclNode, ITypeHasModifiers
+    public class ClassDeclaration : DeclNode, IClassMember
     {
         public IEnv Env { get; set; } = null;
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
+        public ClassDeclaration ParentClass { get; set; }
         public ClassBody ClassBody { get; set; }
         public ClassDeclaration(
             Modifiers modifiers,
@@ -158,6 +160,11 @@ namespace Proj3Semantics.AST
             // fill in modifier fields for the interface ITypeHasModifiers
             modifiers.ProcessModifierTokensFor(this);
             ClassBody = classBody;
+            foreach (Node n in classBody.Children)
+            {
+                IClassMember cm = n as IClassMember;
+                if (cm != null) cm.ParentClass = this;
+            }
 
             AddChild(modifiers);
             AddChild(ClassBody);
@@ -165,16 +172,17 @@ namespace Proj3Semantics.AST
 
     }
 
-    public class ClassMethodDecl : FuncDecl, ITypeHasModifiers
+    public class ClassMethodDecl : FuncDecl, IClassMember
     {
         public AccessorType AccessorType { get; set; }
         public bool IsStatic { get; set; }
+        public ClassDeclaration ParentClass { get; set; }
 
         public ClassMethodDecl(Modifiers modifiers, FuncDecl funcDecl) : base(funcDecl)
         {
             modifiers.ProcessModifierTokensFor(this);
         }
-        
+
         // Method decl is private non-static by default
         public ClassMethodDecl(FuncDecl funcDecl) : base(funcDecl)
         {
@@ -183,10 +191,131 @@ namespace Proj3Semantics.AST
         }
     }
 
+
+
+
+    public class FieldVarDecl : Node, IClassMember
+    {
+        public FieldVarDecl(Node identifier)
+        {
+            Name = (identifier as Identifier)?.Name;
+            if (Name == null) throw new ArgumentException("Field variable decl without an identifier.");
+        }
+
+        public NodeTypeCategory NodeTypeCategory
+        {
+            get { return NodeTypeCategory.ClassFieldDef; }
+            set
+            {
+                throw new AccessViolationException(
+                    "unable to set class field type");
+            }
+        }
+
+        public AccessorType AccessorType { get; set; }
+        public bool IsStatic { get; set; }
+        public ClassDeclaration ParentClass { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class ClassFieldDeclStatement : Node
+    {
+        public Modifiers Modifiers { get; set; }
+        public LocalVarDecl VarDeclList { get; set; }
+
+        public ClassFieldDeclStatement(
+            Node modifiers,
+            LocalVarDecl varDeclList)
+        {
+            Modifiers = modifiers as Modifiers;
+            VarDeclList = varDeclList;
+
+            AddChild(modifiers);
+            AddChild(VarDeclList);
+        }
+
+        public AccessorType AccessorType { get; set; }
+        public bool IsStatic { get; set; }
+    }
+
+    public class ClassBody : Node
+    {
+        public ClassBody()
+        {
+            //Console.WriteLine("Class body is empty!");
+        }
+        public ClassBody(Node c)
+        {
+            AddChild(c);
+        }
+    }
+
     #endregion
 
+    public class ParamList : Node, IEquatable<ParamList>
+    {
+        public List<ParamDecl> ParamDeclList { get; } = new List<ParamDecl>();
+        public ParamList(IEnumerable<ParamDecl> declList)
+        {
+            ParamDeclList.AddRange(declList);
+        }
+        public ParamList(Node parameter)
+        {
+            AddParameter(parameter);
+            base.AddChild(parameter);
+        }
 
+        private void AddParameter(Node node)
+        {
+            ParamDecl p = node as ParamDecl;
+            if (p == null) throw new ArgumentNullException(nameof(p));
+            ParamDeclList.Add(p);
+        }
 
+        public override void AddChild(Node child)
+        {
+            AddParameter(child);
+            base.AddChild(child);
+        }
+
+        public bool Equals(ParamList other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return ParamDeclList.SequenceEqual(other.ParamDeclList);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((ParamList)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 19;
+                foreach (var item in ParamDeclList)
+                {
+                    hash = hash * 31 + item.GetHashCode();
+                }
+                return hash;
+            }
+        }
+
+        public static bool operator ==(ParamList left, ParamList right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(ParamList left, ParamList right)
+        {
+            return !Equals(left, right);
+        }
+    }
 
 
 

@@ -248,7 +248,7 @@ namespace Proj3Semantics
             Debug.Assert(expr.EvalType != null);
         }
 
-        private List<AbstractFuncDecl> GetMethodOverloads(QualifiedType qnode)
+        private List<Symbol> GetMethodOverloads(QualifiedType qnode)
         {
             Log.Trace("Looking up method overloads for " + qnode.ToString());
             var curEnv = Env;
@@ -270,7 +270,7 @@ namespace Proj3Semantics
                             errMsg += " in " + curScopeName;
                         CompilerErrors.Add(SemanticErrorTypes.UndeclaredIdentifier, errMsg);
                         qnode.NodeTypeCategory = NodeTypeCategory.ErrorType;
-                        return new List<AbstractFuncDecl>();
+                        return new List<Symbol>();
                     }
                     curSymbol = results.First();
                     curEnv = curSymbol.Env;
@@ -283,8 +283,6 @@ namespace Proj3Semantics
             return curEnv
                 .Lookup(fname)
                 .Where(sym => sym.SymbolType == SymbolType.Function)
-                .Select(sym => sym.DeclNode)
-                .Cast<AbstractFuncDecl>()
                 .ToList();
         }
 
@@ -337,7 +335,7 @@ namespace Proj3Semantics
 
 
             var candidateSet = GetMethodOverloads(qualType);
-            var matchedSet = candidateSet.Where(f => ArgumentsCompatible(f.ParamList, argExpressions)).ToList();
+            var matchedSet = candidateSet.Where(f => ArgumentsCompatible((f.DeclNode as AbstractFuncDecl)?.ParamList, argExpressions)).ToList();
             var numMatched = matchedSet.Count;
 
             if (numMatched == 0)
@@ -356,8 +354,9 @@ namespace Proj3Semantics
                 return;
             }
 
-            var fdecl = matchedSet.First();
-            call.EvalType = fdecl.ReturnTypeSpecifier;
+            var funcSymbol = matchedSet.First();
+            call.MethodReference.SymbolRef = funcSymbol;
+            call.EvalType = funcSymbol.DeclNode.DeclTypeNode;
         }
 
 

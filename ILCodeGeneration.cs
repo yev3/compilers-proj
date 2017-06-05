@@ -60,7 +60,7 @@ namespace Proj3Semantics
         public int CompileExe()
         {
             string ilasmExePath = Microsoft.Build.Utilities.ToolLocationHelper.GetPathToDotNetFrameworkFile("ilasm.exe", TargetDotNetFrameworkVersion.VersionLatest);
-            string ilasmArgs = "\"" + _ilFullPath + "\" /out=\"" + _exeFullPath + "\"";
+            string ilasmArgs = "\"" + _ilFullPath + "\" /debug /out=\"" + _exeFullPath + "\"";
 
             Log.Trace("Compiling IL to EXE: ");
             Log.Trace(ilasmExePath);

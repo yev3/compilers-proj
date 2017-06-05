@@ -14,13 +14,13 @@
 
 /* Terminals */
 %token WRITE WRITE_LINE  // builtin calls
-%token AND ASTERISK BANG BOOLEAN CLASS NAMESPACE
-%token COLON COMMA ELSE EQUALS HAT
+%token B_AND ASTERISK BANG BOOLEAN CLASS NAMESPACE
+%token COLON COMMA ELSE EQUALS B_XOR
 %token IF INSTANCEOF INT STRING IDENTIFIER STR_LITERAL INT_NUMBER
 %token LBRACE LBRACKET LPAREN MINUSOP
 %token NEW NULL OP_EQ OP_GE OP_GT
 %token OP_LAND OP_LE OP_LOR OP_LT OP_NE
-%token PERCENT PERIOD PIPE PLUSOP PRIVATE
+%token PERCENT PERIOD B_OR PLUSOP PRIVATE
 %token PUBLIC QUESTION RBRACE RBRACKET RETURN
 %token RPAREN RSLASH SEMICOLON STATIC STRUCT
 %token SUPER THIS TILDE VOID WHILE
@@ -31,9 +31,9 @@
 %right EQUALS
 %left  OP_LOR
 %left  OP_LAND
-%left  PIPE
-%left  HAT
-%left  AND
+%left  B_OR
+%left  B_XOR
+%left  B_AND
 %left  OP_EQ, OP_NE
 %left  OP_GT, OP_LT, OP_LE, OP_GE
 %left  PLUSOP, MINUSOP
@@ -320,9 +320,9 @@ Expr
     :   LValue EQUALS Expr      { $$ = new AssignExpr($1, $3); }
     |   Expr OP_LOR Expr        { $$ = new CompExpr($1, ExprType.LOGICAL_OR, $3); }   /* short-circuit OR  */  
     |   Expr OP_LAND Expr       { $$ = new CompExpr($1, ExprType.LOGICAL_AND, $3); }   /* short-circuit AND */  
-    |   Expr PIPE Expr          { $$ = new BinaryExpr($1, ExprType.PIPE, $3); }                
-    |   Expr HAT Expr           { $$ = new BinaryExpr($1, ExprType.HAT, $3); }                
-    |   Expr AND Expr           { $$ = new CompExpr($1, ExprType.AND, $3); }                
+    |   Expr B_OR Expr          { $$ = new BinaryExpr($1, ExprType.B_OR, $3); }                
+    |   Expr B_XOR Expr         { $$ = new BinaryExpr($1, ExprType.B_XOR, $3); }                
+    |   Expr B_AND Expr         { $$ = new BinaryExpr($1, ExprType.B_AND, $3); }                
     |   Expr OP_EQ Expr         { $$ = new CompExpr($1, ExprType.EQUALS, $3); }                
     |   Expr OP_NE Expr         { $$ = new CompExpr($1, ExprType.NOT_EQUALS, $3); }                
     |   Expr OP_GT Expr         { $$ = new CompExpr($1, ExprType.GREATER_THAN, $3); }                
@@ -380,8 +380,8 @@ FieldAccess
 
 // Expr -> QualPriExpr -> CxEvalExpr -> MethodCall
 MethodCall                  
-    :   MethodRef LPAREN CallArgList RPAREN     { $$ = new MethodCall($1, $3); }
-    |   MethodRef LPAREN RPAREN                 { $$ = new MethodCall($1); }
+    :   MethodRef LPAREN CallArgList RPAREN     { $$ = new MethodCall($1 as QualifiedType, $3 as ArgumentList); }
+    |   MethodRef LPAREN RPAREN                 { $$ = new MethodCall($1 as QualifiedType); }
     ;
 
 CallArgList            
