@@ -63,7 +63,7 @@ namespace Proj3Semantics
         {
             if (cout == null) cout = Console.Out;
 
-            var modifiers = node as ITypeHasModifiers;
+            var modifiers = node as IClassMember;
             if (modifiers == null) return;
             using (OutColor.Magenta)
             {
@@ -139,7 +139,7 @@ namespace Proj3Semantics
 
 
             }
-            var mods = decl as ITypeHasModifiers;
+            var mods = decl as IClassMember;
             if (mods != null)
             {
                 using (OutColor.DarkMagenta)

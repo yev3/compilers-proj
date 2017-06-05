@@ -29,21 +29,12 @@ namespace Proj3Semantics
         string Name { get; set; }
     }
 
-    public interface ITypeHasModifiers : INamedType
+    public interface IClassMember : INamedType
     {
         AccessorType AccessorType { get; set; }
         bool IsStatic { get; set; }
+        ClassDeclaration ParentClass { get; set; }
 
     }
-
-    public interface IClassMember : ITypeHasModifiers
-    {
-
-    }
-
-    public interface IClassFieldTypeDesc : IClassMember
-    {
-    }
-
 
 }

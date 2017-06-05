@@ -70,22 +70,20 @@ namespace Proj3Semantics.AST
 
     public class MethodCall : EvalExpr
     {
-        public Node MethodReference { get; set; }
+        public QualifiedType MethodReference { get; set; }
         public ArgumentList ArgumentList { get; set; } = null;
-        public bool HasArguments => ArgumentList == null;
 
-        public MethodCall(Node methodReference)  
+        public MethodCall(QualifiedType methodReference)  
         {
             MethodReference = methodReference;
+            if (MethodReference == null) throw new NullReferenceException(typeof(QualifiedType).ToString());
             AddChild(MethodReference);
         }
 
-        public MethodCall(Node methodRef, Node argList)
+        public MethodCall(QualifiedType methodRef, ArgumentList argList) : this(methodRef)
         {
-            MethodReference = methodRef;
-            ArgumentList = argList as ArgumentList;
+            ArgumentList = argList;
             if (ArgumentList == null) throw new NullReferenceException(typeof(ArgumentList).ToString());
-            AddChild(MethodReference);
             AddChild(ArgumentList);
         }
 

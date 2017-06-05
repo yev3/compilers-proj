@@ -58,6 +58,11 @@ namespace Proj3Semantics
             newScopeDeclVisitor.Visit(cdecl.ClassBody);
         }
 
+        private void VisitNode(ClassMethodDecl cmdecl)
+        {
+            VisitNode(cmdecl as AbstractFuncDecl);
+        }
+
         private void VisitNode(AbstractFuncDecl fdecl)
         {
             Log.Trace("Visiting function declaration");

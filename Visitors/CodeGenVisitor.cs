@@ -20,6 +20,7 @@ namespace Proj3Semantics.Visitors
         private const string EntryPointFunc = "main";
 
         private int LocalsCount { get; set; }
+        private int LabelCount { get; set; }
 
         //private Dictionary<string, int> LocalsPosnMap { get; set; }
         //private Dictionary<string, string> LocalsTypeMap { get; set; }
@@ -99,7 +100,7 @@ namespace Proj3Semantics.Visitors
 
             IL.Write(".method ");
 
-            if (mdecl.IsStatic || isEntryPoint)
+            //if (mdecl.IsStatic || isEntryPoint)
             {
                 IL.Write("static ");
             }
@@ -158,6 +159,10 @@ namespace Proj3Semantics.Visitors
             var paramList = plist?.ParamDeclList;
             if (paramList != null)
             {
+                int paramPosn = 0;
+                foreach (ParamDecl pdecl in paramList)
+                    pdecl.IlLocalsPosn = paramPosn++;
+
                 string insideParen = string.Join(", ", paramList.Select(p => (p.DeclTypeNode.NodeTypeCategory.GetIlName())));
                 IL.Write(insideParen);
             }
@@ -166,6 +171,41 @@ namespace Proj3Semantics.Visitors
         string GetExprTypes(IEnumerable<ExprNode> exprs)
         {
             return string.Join(", ", exprs.Select(e => e.EvalType.NodeTypeCategory.GetIlName()));
+        }
+        private void VisitNode(MethodCall call)
+        {
+            Console.WriteLine();
+            // push the arguments
+            var args = call?.ArgumentList?.Children;
+            if (args != null)
+            {
+                foreach (Node n in args)
+                    Visit(n);
+            }
+
+            var funcDecl = call.MethodReference.SymbolRef.DeclNode as AbstractFuncDecl;
+            if (funcDecl == null) throw new ArgumentNullException(nameof(funcDecl));
+
+            IL.Write("call\t ");
+            IL.Write(funcDecl.ReturnTypeSpecifier.NodeTypeCategory.GetIlName());
+            IL.Write(" ");
+
+            var parentClass = (funcDecl as IClassMember)?.ParentClass;
+            if (parentClass != null)
+            {
+                IL.Write(parentClass.Name);
+                IL.Write("::");
+            }
+
+            IL.Write(funcDecl.Name);
+            IL.Write("(");
+            var paramList = funcDecl.ParamList?.ParamDeclList;
+            if (paramList != null)
+            {
+                var ilNames = paramList.Select(p => p.DeclTypeNode.NodeTypeCategory.GetIlName());
+                IL.Write(string.Join(", ", ilNames));
+            }
+            IL.WriteLine(")");
         }
 
         private void VisitNode(WriteStatement stmt)
@@ -200,10 +240,16 @@ namespace Proj3Semantics.Visitors
 
         private void VisitNode(LValueNode lval)
         {
-            var locPosn = lval.SymbolRef.DeclNode.IlLocalsPosn;
+            var declNode = lval.SymbolRef.DeclNode;
             // load a local on the stack
-            IL.Write("ldloc.");
-            IL.WriteLine(locPosn);
+
+            if (declNode is ParamDecl)
+                IL.Write("ldarg.");
+            else
+                IL.Write("ldloc.");
+
+
+            IL.WriteLine(declNode.IlLocalsPosn);
         }
 
         private void VisitNode(ExprNode expr)
@@ -246,15 +292,104 @@ namespace Proj3Semantics.Visitors
                 case ExprType.RSLASH:
                     IL.WriteLine("div");
                     break;
-                case ExprType.PERCENT:
+                case ExprType.B_OR:
+                    IL.WriteLine("or");
+                    break;
+                case ExprType.B_XOR:
+                    IL.WriteLine("xor");
+                    break;
+                case ExprType.B_AND:
+                    IL.WriteLine("and");
+                    break;
                 default:
                     throw new NotImplementedException("unsupported binary operator ");
             }
+        }
+
+        private void VisitNode(CompExpr cexpr)
+        {
+            Visit(cexpr.LhsExprNode);
+            Visit(cexpr.RhsExprNode);
+            switch (cexpr.ExprType)
+            {
+                case ExprType.EQUALS:
+                    IL.WriteLine("ceq");    // done
+                    break;
+                case ExprType.NOT_EQUALS:   //
+                    IL.WriteLine("ceq");
+                    IL.WriteLine("ldc.i4.0");
+                    IL.WriteLine("ceq");
+                    break;
+                case ExprType.GREATER_THAN:
+                    IL.WriteLine("cgt");    // done
+                    break;
+                case ExprType.LESS_THAN:
+                    IL.WriteLine("clt");    //
+                    break;
+                case ExprType.LESS_EQUAL:
+                    IL.WriteLine("cgt");    // first >, then !
+                    IL.WriteLine("ldc.i4.0");
+                    IL.WriteLine("ceq");
+                    break;
+                case ExprType.GREATER_EQUAL:
+                    IL.WriteLine("clt");    // first <, then !
+                    IL.WriteLine("ldc.i4.0");
+                    IL.WriteLine("ceq");
+                    break;
+                default:
+                    throw new NotImplementedException("unsupported compare operator");
+            }
 
         }
+
+        private void VisitNode(IfStatementElse condStmt)
+        {
+            int num = LabelCount++;
+            string lblElse = "lbl_else_" + num;
+            string lblEnd = "lbl_endif_" + num;
+
+            // todo for elseif: declare a new local temp bool
+
+            // eval predicate
+            Visit(condStmt.Predicate);
+
+            // todo for elseif: store in the local temp
+
+            // if the pred is false, then jump to LBL_FALSE
+            IL.WriteLine("brfalse\t" + lblElse);
+
+            Visit(condStmt.ThenStatement);
+            IL.WriteLine("br\t" + lblEnd);
+
+            IL.WriteLine("\n" + lblElse + ":");
+            Visit(condStmt.ElseStatement);
+
+            IL.WriteLine("\n" + lblEnd + ":");
+
+            // todo for elseif: else if support
+        }
+
+        private void VisitNode(WhileLoop lp)
+        {
+            int num = LabelCount++;
+            string lblBefore = "before_while_" + num;
+            string lblAfter = "after_while_" + num;
+
+            IL.WriteLine("\n" + lblBefore + ":");
+            Visit(lp.Predicate);
+            IL.WriteLine("brfalse\t" + lblAfter);
+
+            Visit(lp.BodyStatement);
+            IL.WriteLine("br\t" + lblBefore);
+
+            IL.WriteLine("\n" + lblAfter + ":");
+        }
+
+
+
         private void VisitNode(IntLiteralExpr intExpr)
         {
-            IL.WriteLine("ldc.i4.s\t" + intExpr.IntegerValue);
+            IL.WriteLine("ldc.i4\t" + intExpr.IntegerValue);
         }
 
 
