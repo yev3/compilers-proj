@@ -59,11 +59,9 @@ namespace Proj3Semantics.Visitors
             }
         }
 
-        private void VisitNode(ClassDeclaration cdecl)
+        private void VisitNode(AccessorType accessorType)
         {
-            IL.Write(@".class ");
-
-            switch (cdecl.AccessorType)
+            switch (accessorType)
             {
                 case AccessorType.Public:
                     IL.Write(@"public ");
@@ -74,6 +72,12 @@ namespace Proj3Semantics.Visitors
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private void VisitNode(ClassDeclaration cdecl)
+        {
+            IL.Write(@".class ");
+            Visit(cdecl.AccessorType);
 
             if (cdecl.IsStatic)
             {
@@ -100,7 +104,8 @@ namespace Proj3Semantics.Visitors
 
             IL.Write(".method ");
 
-            //if (mdecl.IsStatic || isEntryPoint)
+            Visit(mdecl.AccessorType);
+            if (mdecl.IsStatic || isEntryPoint)
             {
                 IL.Write("static ");
             }
@@ -124,6 +129,26 @@ namespace Proj3Semantics.Visitors
             IL.WriteLine("}");
         }
 
+        private void VisitNode(ClassFieldDeclStatement fdecl)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(".field ");
+            Visit(fdecl.AccessorType);
+
+            if (fdecl.IsStatic)
+                sb.Append("static ");
+
+            var varDecl = fdecl.LocalVarDecl;
+            sb.Append(varDecl.TypeSpecifier.NodeTypeCategory.GetIlName());
+            sb.Append(' ');
+
+            var dcls = varDecl.VarDeclList.Children.Cast<VarDecl>();
+            foreach (VarDecl dcl in dcls)
+            {
+                IL.Write(sb);
+                IL.WriteLine(dcl.Name);
+            }
+        }
 
 
         private void VisitNode(LocalVarDecl vdecls)
@@ -183,7 +208,7 @@ namespace Proj3Semantics.Visitors
                     Visit(n);
             }
 
-            var funcDecl = call.MethodReference.SymbolRef.DeclNode as AbstractFuncDecl;
+            var funcDecl = call.MethodRef.AbstractFuncDecl;
             if (funcDecl == null) throw new ArgumentNullException(nameof(funcDecl));
 
             IL.Write("call\t ");

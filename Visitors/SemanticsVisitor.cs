@@ -55,7 +55,6 @@ namespace Proj3Semantics
 
             var visitor = new SemanticsVisitor(fdecl.Env);
 
-            // TODO
             Log.Trace("  -- Visit ParamListNode");
             visitor.Visit(fdecl.ParamList);
 
@@ -105,19 +104,38 @@ namespace Proj3Semantics
 
         private void VisitNode(LValueNode lval)
         {
-            // for lvalue, we want to recursively figure out the types
-            var lft = lval.LeftOfPeriodExpr;
-            if (lft != null)
+            IEnv env;
+
+            if (lval.LeftOfPeriodExpr != null)
             {
-                CompilerErrors.Add(SemanticErrorTypes.FeatureNotImplemented, "do not support field access.. yet.");
-                lval.EvalType = TypeRefNode.TypeNodeError;
-                return;
+                LValueNode lft = lval.LeftOfPeriodExpr as LValueNode;
+                if (lft == null)
+                {
+                    CompilerErrors.Add(SemanticErrorTypes.FeatureNotImplemented, "only support field access on named expressions");
+                    lval.EvalType = TypeRefNode.TypeNodeError;
+                    return;
+                }
+
+                Visit(lft);
+                var declNode = lft.SymbolRef?.DeclNode;
+                var declSymbol = declNode?.DeclTypeNode as QualifiedType;
+                env = declSymbol?.SymbolRef?.Env;
+                if (env == null)
+                {
+                    throw new NullReferenceException();
+                }
+            }
+            else
+            {
+                env = Env;
             }
 
-            var symbols = Env.Lookup(lval.Identifier.Name);
-            if (symbols.Count != 1)
+
+            string name = lval.Identifier.Name;
+            var symbols = env.Lookup(name);
+            if (symbols == null || symbols.Count != 1)
             {
-                CompilerErrors.Add(SemanticErrorTypes.UndeclaredIdentifier, "Invalid variable reference");
+                CompilerErrors.Add(SemanticErrorTypes.UndeclaredIdentifier, "Invalid variable reference " + name);
                 lval.EvalType = TypeRefNode.TypeNodeError;
                 return;
             }
@@ -125,7 +143,6 @@ namespace Proj3Semantics
             lval.SymbolRef = symbols.First();
             lval.EvalType = lval.SymbolRef.DeclNode.DeclTypeNode;
         }
-
 
 
         private void VisitNode(LocalVarDecl decl)
@@ -248,38 +265,43 @@ namespace Proj3Semantics
             Debug.Assert(expr.EvalType != null);
         }
 
-        private List<Symbol> GetMethodOverloads(QualifiedType qnode)
+        private List<Symbol> GetMethodOverloads(MethodRef mref)
         {
-            Log.Trace("Looking up method overloads for " + qnode.ToString());
-            var curEnv = Env;
-            string curScopeName = "";
-            Symbol curSymbol = null;
+            Log.Trace("Looking up method overloads for " + mref.ToString());
+            IEnv curEnv;
 
-            var identifiers = qnode.IdentifierList;
-            int num_levels = identifiers.Count;
-            if (num_levels > 1)
+            if (mref.ExprNode != null)
             {
-                for (int i = 0; i < num_levels - 1; i++)
+                // figure out the env we are looking up the functions in
+                Visit(mref.ExprNode);
+
+                var symRef = (mref.ExprNode as LValueNode)?.SymbolRef;
+                curEnv = symRef?.Env;
+
+                if (curEnv == null)
                 {
-                    string curIdStr = identifiers[i];
-                    var results = curEnv.Lookup(curIdStr);
-                    if (results == null || results.Count != 1)
+                    // looking up an instance of an object
+                    var varDecl = symRef?.DeclNode as VarDecl;
+                    if (varDecl != null)
                     {
-                        string errMsg = curIdStr;
-                        if (curScopeName != "")
-                            errMsg += " in " + curScopeName;
-                        CompilerErrors.Add(SemanticErrorTypes.UndeclaredIdentifier, errMsg);
-                        qnode.NodeTypeCategory = NodeTypeCategory.ErrorType;
-                        return new List<Symbol>();
+                        var qType = varDecl.DeclTypeNode as QualifiedType;
+                        curEnv = qType?.SymbolRef?.Env;
                     }
-                    curSymbol = results.First();
-                    curEnv = curSymbol.Env;
-                    curScopeName = curIdStr;
+                }
+
+                if (curEnv == null)
+                {
+                    CompilerErrors.Add(SemanticErrorTypes.IdentifierNotTypeName, mref.ExprNode.ToString());
+                    return new List<Symbol>();
                 }
             }
+            else
+            {
+                curEnv = Env;
+            }
 
-            string fname = identifiers[num_levels - 1];
-            Log.Trace("Looking up method overload set for " + fname + " in " + qnode);
+            string fname = mref.Identifier.Name;
+            Log.Trace("Looking up method overload set for " + fname + " in " + mref);
             return curEnv
                 .Lookup(fname)
                 .Where(sym => sym.SymbolType == SymbolType.Function)
@@ -303,22 +325,10 @@ namespace Proj3Semantics
             return true;
         }
 
-        // MethodReference             
-        //       :   ComplexPrimaryNoParenthesis     { $$ = $1;}
-        //       |   QualifiedName                   { $$ = $1;}
-        //       |   SpecialBuiltinName              { $$ = $1;}
-        //       |   BuiltinSystemCall               { $$ = $1;}
-
-        // just checking the qualifiednamenode and SystemCall for now
 
         private void VisitNode(MethodCall call)
         {
             Log.Trace("Start checking MethodCall " + call.ToDebugString());
-
-            QualifiedType qualType = call.MethodReference as QualifiedType;
-            if (qualType == null)
-                CompilerErrors.Add(SemanticErrorTypes.FeatureNotImplemented, "Only support calling user-defined functions.");
-
 
             // evaluate the arguments
             List<ExprNode> argExpressions
@@ -334,7 +344,7 @@ namespace Proj3Semantics
             }
 
 
-            var candidateSet = GetMethodOverloads(qualType);
+            var candidateSet = GetMethodOverloads(call.MethodRef);
             var matchedSet = candidateSet.Where(f => ArgumentsCompatible((f.DeclNode as AbstractFuncDecl)?.ParamList, argExpressions)).ToList();
             var numMatched = matchedSet.Count;
 
@@ -354,9 +364,12 @@ namespace Proj3Semantics
                 return;
             }
 
-            var funcSymbol = matchedSet.First();
-            call.MethodReference.SymbolRef = funcSymbol;
-            call.EvalType = funcSymbol.DeclNode.DeclTypeNode;
+            var symRef = matchedSet.First();
+            var funcDecl = symRef.DeclNode as AbstractFuncDecl;
+            if (funcDecl == null) throw new ArgumentNullException(nameof(funcDecl));
+
+            call.MethodRef.AbstractFuncDecl = funcDecl;
+            call.EvalType = funcDecl.ReturnTypeSpecifier;
         }
 
 

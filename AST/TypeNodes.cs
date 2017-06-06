@@ -9,7 +9,7 @@ namespace Proj3Semantics.AST
     public enum NodeTypeCategory
     {
         Int, String, Object, Null,
-        Boolean, Class, Void,
+        Boolean, Void,
         This, ErrorType, ClassFieldDef,
         ClassMethodDef, NamespaceDecl,
         Declaration, Unknown

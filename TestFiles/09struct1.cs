@@ -2,34 +2,39 @@
 /* Includes references to fields of an instance of the struct */
 
 
-public class structTest {
+public class structTest
+{
 
-/* Declarations in a struct  */
+    /* Declarations in a struct  */
 
-    public struct test {
+    public struct test
+    {
         public int control;
 
-        public void init (int i) {
+        public void init(int i)
+        {
             control = i;
         }
 
-        public int factorial(int x) {
-            if (x==0) return 1;
-            else return x * factorial (x-1);
+        public static int factorial(int x)
+        {
+            if (x == 0) return 1;
+            else return x * factorial(x - 1);
         }
+    }
 
-     }
+    private static test t;
 
-     private static test t;
- 
-     public static void main() {
-     int gobble;
-     WriteLine ("TCCL test of factorial in a struct");
-     t.init (0);
-     while ( test.control < 15) {
-        gobble = factorial (t.control);
-        WriteLine (gobble);
-        t.control = t.control + 1;
-     }   
-   }
+    public static void Main()
+    {
+        int gobble;
+        WriteLine("TCCL test of factorial in a struct");
+        t.init(0);
+        while (t.control < 15)
+        {
+            gobble = test.factorial(t.control);
+            WriteLine(gobble);
+            t.control = t.control + 1;
+        }
+    }
 }

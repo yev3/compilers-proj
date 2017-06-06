@@ -127,12 +127,7 @@ namespace Proj3Semantics
         {
             Log.Trace("Visiting VarDeclList");
 
-            // TODO: process later
-            //var typeVisitor = new TypeVisitor(TypeEnv);
-            //decls.FieldTypeSpecifier.Accept(typeVisitor);
-
             var typeNode = declVars.TypeSpecifier;
-
             foreach (VarDecl decl in declVars.VarDeclList.Children.Cast<VarDecl>())
             {
                 decl.DeclTypeNode = typeNode;
@@ -147,7 +142,11 @@ namespace Proj3Semantics
                     CompilerErrors.Add(SemanticErrorTypes.VariableAlreadyDeclared, name);
                 }
             }
-
+        }
+        private void VisitNode(ClassFieldDeclStatement fieldDecl)
+        {
+            Log.Trace("Checking fields declaration in env: " + Env);
+            Visit(fieldDecl.LocalVarDecl);
         }
 
         private void VisitNode(MethodCall call)
@@ -159,9 +158,6 @@ namespace Proj3Semantics
 
         // TODO BELOW
         // ------------------------------------------------------------
-
-
-
 
         private void VisitNode(NamespaceDecl nsdecl)
         {
@@ -191,59 +187,6 @@ namespace Proj3Semantics
             foreach (Node node in namespaceBody.Children)
                 Visit(node);
         }
-
-
-
-
-
-        private void VisitNode(ClassFieldDeclStatement fieldDecl)
-        {
-            //_log.Trace("Checking fields declaration in env: " + TypeEnv);
-            //VariableListDeclaring vld = fieldDecl.VariableListDeclaring;
-            //DeclaredVars declFields = vld.ItemIdList;
-
-            //ITypeDescriptor typeNameDecl = vld.TypeSpecifier;
-            //if (typeNameDecl == null) throw new NullReferenceException("Declared class field is not ITypeInfo.");
-
-            //var modifierTokens = fieldDecl.Modifiers.ModifierTokens;
-            //fieldDecl.Children?.Remove(fieldDecl.Modifiers);
-
-            //// lookup the types
-            //// TODO: done on the second pass?
-            ////if (typeNameDecl.TypeSpecifierRef == null)
-            ////{
-            ////    TypeVisitor tVisitor = new TypeVisitor(TypeEnv);
-            ////    tVisitor.Visit(vld.FieldTypeSpecifier);
-            ////}
-
-            //foreach (Node field in declFields.Children)
-            //{
-            //    //FieldVarDecl fdecl = field as FieldVarDecl;
-            //    //if (fdecl == null) throw new ArgumentNullException(nameof(fdecl));
-
-            //    //string name = fdecl.Name;
-            //    //ProcessModifierTokens(fdecl, modifierTokens, name);
-
-            //    //ITypeDescriptor entry = TypeEnv.Lookup(name);
-            //    //if (entry != null)
-            //    //{
-            //    //    CompilerErrors.Add(SemanticErrorTypes.DuplicateClassDecl, name);
-            //    //    fdecl.NodeTypeCategory = NodeTypeCategory.Error;
-            //    //    fdecl.TypeDescriptorRef = null;
-            //    //}
-            //    //else
-            //    //{
-            //    //    TypeEnv.EnterInfo(name, fdecl);
-            //    //}
-            //}
-
-            //// copy the link to the proper type
-            //// TODO: second pass?
-            ////fieldVarDecl.TypeSpecifierRef = typeNameDecl.TypeSpecifierRef;
-
-        }
-
-
 
     }
 

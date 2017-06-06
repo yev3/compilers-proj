@@ -65,22 +65,42 @@ namespace Proj3Semantics.AST
         }
     }
 
+    public class MethodRef : Node
+    {
+        public ExprNode ExprNode { get; set; }
+        public Identifier Identifier { get; set; }
 
+        public AbstractFuncDecl AbstractFuncDecl { get; set; }
 
+        //public Symbol SymbolRef { get; set; }
+
+        public MethodRef(ExprNode exprNode, Identifier identifier)
+        {
+            ExprNode = exprNode;
+            Identifier = identifier;
+            AddChild(exprNode);
+            AddChild(identifier);
+        }
+        public MethodRef(Identifier identifier)
+        {
+            Identifier = identifier;
+            AddChild(identifier);
+        }
+    }
 
     public class MethodCall : EvalExpr
     {
-        public QualifiedType MethodReference { get; set; }
+        public MethodRef MethodRef { get; set; }
         public ArgumentList ArgumentList { get; set; } = null;
 
-        public MethodCall(QualifiedType methodReference)  
+        public MethodCall(MethodRef methodRef)  
         {
-            MethodReference = methodReference;
-            if (MethodReference == null) throw new NullReferenceException(typeof(QualifiedType).ToString());
-            AddChild(MethodReference);
+            MethodRef = methodRef;
+            if (MethodRef == null) throw new NullReferenceException(typeof(MethodRef).ToString());
+            AddChild(MethodRef);
         }
 
-        public MethodCall(QualifiedType methodRef, ArgumentList argList) : this(methodRef)
+        public MethodCall(MethodRef methodRef, ArgumentList argList) : this(methodRef)
         {
             ArgumentList = argList;
             if (ArgumentList == null) throw new NullReferenceException(typeof(ArgumentList).ToString());
