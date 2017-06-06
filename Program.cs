@@ -110,8 +110,8 @@ namespace Proj3Semantics
                 //new {assembly = "twomethods0", file = "05twomethods0.cs"},
                 //new {assembly = "twomethods1", file = "06twomethods1.cs"},
                 //new {assembly = "fact2", file = "07fact2.cs"},
-                new {assembly = "logictest", file = "08logictest.cs"},
-                //new {assembly = "struct1", file = "09struct1.cs"},
+                //new {assembly = "logictest", file = "08logictest.cs"},
+                new {assembly = "struct1", file = "09struct1.cs"},
                 //new {assembly = "twoparams", file = "10twoparams.cs"},
                 //new {assembly = "errors1", file = "11errors1.cs"},
             };

@@ -47,6 +47,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 "%"             { return (int)Token.PERCENT; }
 "this"          { return (int)Token.THIS; }
 "class"         { return (int)Token.CLASS; }
+"struct"        { return (int)Token.STRUCT; }
 "namespace"     { return (int)Token.NAMESPACE; }
 "|"             { return (int)Token.B_OR; }
 "public"        { return (int)Token.PUBLIC; }

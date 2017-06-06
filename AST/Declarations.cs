@@ -172,6 +172,14 @@ namespace Proj3Semantics.AST
 
     }
 
+    public class StructDeclaration : ClassDeclaration
+    {
+        public StructDeclaration(Modifiers modifiers, Identifier identifier, ClassBody classBody)
+            : base(modifiers, identifier, classBody)
+        {
+        }
+    }
+
     public class ClassMethodDecl : FuncDecl, IClassMember
     {
         public AccessorType AccessorType { get; set; }
@@ -193,45 +201,20 @@ namespace Proj3Semantics.AST
 
 
 
-
-    public class FieldVarDecl : Node, IClassMember
-    {
-        public FieldVarDecl(Node identifier)
-        {
-            Name = (identifier as Identifier)?.Name;
-            if (Name == null) throw new ArgumentException("Field variable decl without an identifier.");
-        }
-
-        public NodeTypeCategory NodeTypeCategory
-        {
-            get { return NodeTypeCategory.ClassFieldDef; }
-            set
-            {
-                throw new AccessViolationException(
-                    "unable to set class field type");
-            }
-        }
-
-        public AccessorType AccessorType { get; set; }
-        public bool IsStatic { get; set; }
-        public ClassDeclaration ParentClass { get; set; }
-        public string Name { get; set; }
-    }
-
     public class ClassFieldDeclStatement : Node
     {
         public Modifiers Modifiers { get; set; }
-        public LocalVarDecl VarDeclList { get; set; }
+        public LocalVarDecl LocalVarDecl { get; set; }
 
         public ClassFieldDeclStatement(
             Node modifiers,
-            LocalVarDecl varDeclList)
+            LocalVarDecl localVarDecl)
         {
             Modifiers = modifiers as Modifiers;
-            VarDeclList = varDeclList;
+            LocalVarDecl = localVarDecl;
 
             AddChild(modifiers);
-            AddChild(VarDeclList);
+            AddChild(LocalVarDecl);
         }
 
         public AccessorType AccessorType { get; set; }
@@ -399,10 +382,10 @@ namespace Proj3Semantics.AST
     {
         public VarDecl(Identifier id) : base(id) { }
         public override TypeRefNode DeclTypeNode { get; set; } = null;
-        public override string ToString()
-        {
-            return this.DeclTypeNode.ToString();
-        }
+        //public override string ToString()
+        //{
+        //    return this.DeclTypeNode?.ToString() ?? "null";
+        //}
     }
 
 }
