@@ -1,5 +1,6 @@
 /* Tests calls to methods with no parameters */
 
+public class twomethods0 {
 
 	public static void check ()
 	{
@@ -11,3 +12,4 @@
 		check();
 		WriteLine("Back in main");
 	}
+}

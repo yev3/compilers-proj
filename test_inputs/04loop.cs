@@ -1,5 +1,7 @@
 /* Computes factorials:  tests method calls, while, assignment */
 
+public class loop {
+
   public static void main() {
      int i, gobble;
      i = 0;
@@ -11,4 +13,4 @@
         gobble = gobble * i;
      }   
    }
-
+}

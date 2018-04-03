@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NLog;
-using Proj3Semantics.AST;
+﻿// First pass declaration visitors
 
-namespace Proj3Semantics
+using System.Linq;
+using CompilerILGen.AST;
+using NLog;
+
+namespace CompilerILGen
 {
     using IEnv = ISymbolTable<Symbol>;
 
     public class DeclarationVisitor : IReflectiveVisitor
     {
-
         protected static Logger Log = LogManager.GetCurrentClassLogger();
         private IEnv Env { get; set; }
 
@@ -69,9 +65,9 @@ namespace Proj3Semantics
             string fname = fdecl.Identifier.Name;
 
             var localFunctions = from s in Env.LookupLocalEntriesByType(fname, SymbolType.Function)
-                                 let f = s.DeclNode as AbstractFuncDecl
-                                 where f != null
-                                 select f;
+                let f = s.DeclNode as AbstractFuncDecl
+                where f != null
+                select f;
 
             // check if any other functions have the same signature as me
             foreach (AbstractFuncDecl declared in localFunctions)
@@ -128,6 +124,7 @@ namespace Proj3Semantics
             Log.Trace("Visiting VarDeclList");
 
             var typeNode = declVars.TypeSpecifier;
+
             foreach (VarDecl decl in declVars.VarDeclList.Children.Cast<VarDecl>())
             {
                 decl.DeclTypeNode = typeNode;
@@ -143,42 +140,15 @@ namespace Proj3Semantics
                 }
             }
         }
-        private void VisitNode(ClassFieldDeclStatement fieldDecl)
-        {
-            Log.Trace("Checking fields declaration in env: " + Env);
-            Visit(fieldDecl.LocalVarDecl);
-        }
 
         private void VisitNode(MethodCall call)
         {
             // do nothing
         }
 
-
-
-        // TODO BELOW
-        // ------------------------------------------------------------
-
         private void VisitNode(NamespaceDecl nsdecl)
         {
-            //_log.Trace("Checking Namespace declaration in env: " + TypeEnv);
-            //string name = nsdecl.Name;
-            //ITypeDescriptor entry = TypeEnv.Lookup(name);
-            //if (entry != null)
-            //{
-            //    CompilerErrors.Add(SemanticErrorTypes.DuplicateNamespaceDef, name);
-            //    nsdecl.NodeTypeCategory = NodeTypeCategory.Error;
-            //}
-            //else
-            //{
-            //    TypeEnv.EnterInfo(name, nsdecl);
-            //    var nsTypeEnv = TypeEnv.GetNewLevel(name);
-            //    var nsNameEnv = NameEnv.GetNewLevel(name);
-            //    nsdecl.TypeEnv = nsTypeEnv;
-            //    nsdecl.NameEnv = nsNameEnv;
-            //    var visitor = new FirstPassDeclVisitor(nsTypeEnv, nsNameEnv);
-            //    visitor.Visit(nsdecl.NamespaceBody);
-            //}
+            // do nothing
         }
 
         private void VisitNode(NamespaceBody namespaceBody)
@@ -188,6 +158,9 @@ namespace Proj3Semantics
                 Visit(node);
         }
 
+        private void VisitNode(ClassFieldDeclStatement fieldDecl)
+        {
+            // do nothing
+        }
     }
-
 }

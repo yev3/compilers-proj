@@ -1,5 +1,5 @@
-%namespace Proj3Semantics
-%using Proj3Semantics.AST;
+%namespace CompilerILGen
+%using CompilerILGen.AST;
 %partial
 %parsertype TCCLParser
 %visibility public
@@ -25,24 +25,20 @@
 %token RPAREN RSLASH SEMICOLON STATIC STRUCT
 %token SUPER THIS TILDE VOID WHILE
 
-%nonassoc THEN
+%nonassoc RP
 %nonassoc ELSE
 
-%right  EQUALS
-%left   OP_LOR
-%left   OP_LAND
-%left   B_OR
-%left   B_XOR
-%left   B_AND
-%left   OP_EQ, OP_NE
-%left   OP_GT, OP_LT, OP_LE, OP_GE
-%left   PLUSOP, MINUSOP
-%left   ASTERISK, RSLASH, PERCENT
-%left   UNARY
-%left   PERIOD
-%left   LPAREN
-
-
+%right EQUALS
+%left  OP_LOR
+%left  OP_LAND
+%left  B_OR
+%left  B_XOR
+%left  B_AND
+%left  OP_EQ, OP_NE
+%left  OP_GT, OP_LT, OP_LE, OP_GE
+%left  PLUSOP, MINUSOP
+%left  ASTERISK, RSLASH, PERCENT
+%left  UNARY
 
 %%
 
@@ -59,8 +55,7 @@ DeclarationList
 Declaration
     :   NamespaceDecl       { $$ = $1; }
     |   ClassDecl           { $$ = $1; }
-    |   StructDecl          { $$ = $1; }
-    |   FuncDecl            { $$ = $1; }    
+    |   FuncDecl            { $$ = $1; }    // done
     |   LocalDecl           { $$ = $1; }
     ;
 
@@ -109,11 +104,6 @@ Modifiers
 ClassDecl    
     :   Modifiers CLASS Identifier ClassBody 
                             { $$ = new ClassDeclaration($1 as Modifiers, $3 as Identifier, $4 as ClassBody);}
-    ;
-
-StructDecl   
-    :   Modifiers STRUCT Identifier ClassBody   
-                            { $$ = new StructDeclaration($1 as Modifiers, $3 as Identifier, $4 as ClassBody);}
     ;
 
 //  ClassDecl -> ClassBody    
@@ -172,8 +162,11 @@ StaticInitializer
     :   STATIC Block                { $$ = new StaticInitializer($2); }
     ;
 
-
-
+// ClassDecl -> ClassBody -> ClassBodyDecl -> StructDecl    (Can also be local)
+StructDecl   
+    :   Modifiers STRUCT Identifier ClassBody   
+                                    { $$ = new NotImplemented("StructDeclaration"); }
+    ;
 
 
 
@@ -203,8 +196,7 @@ PrimitiveType
 // TypeRef -> TypeName -> QualifiedType
 QualifiedType               
     :   Identifier                      { $$ = new QualifiedType($1 as Identifier);}
-// reduce-reduce conflict
-//    |   QualifiedType PERIOD Identifier { ($$ as QualifiedType).AddChild($3 as Identifier); $$ = $1; }
+    |   QualifiedType PERIOD Identifier { ($$ as QualifiedType).AddChild($3 as Identifier); $$ = $1; }
     ;
 
 // TypeRef -> ArraySpecifier
@@ -261,7 +253,7 @@ LocalDeclOrStmt
 // LocalDeclOrStmt -> LocalDecl
 LocalDecl       
     :   TypeRef VarDeclList SEMICOLON  { $$ = new LocalVarDecl($1 as TypeRefNode, $2 as VarDeclList);}
-//    |   StructDecl                      { $$ = new NotImplemented("struct decl not supported");}
+    |   StructDecl                      { $$ = new NotImplemented("struct decl not supported");}
     ;
 
 // LocalDeclOrStmt -> LocalDecl -> VarDeclList
@@ -294,9 +286,8 @@ ExpressionStmt  :   Expr            { $$ = $1; } ;
 
 // Stmt -> IfStmt
 IfStmt          
-    :   IF LPAREN Expr RPAREN Stmt ELSE Stmt 
-                                    { $$ = new IfStatementElse($3,$5,$7); }
-    |   IF LPAREN Expr RPAREN Stmt  { $$ = new IfStatement($3,$5); }
+    :   IF LPAREN Expr RPAREN Stmt ELSE Stmt    { $$ = new IfStatementElse($3,$5,$7); }
+    |   IF LPAREN Expr RPAREN Stmt              { $$ = new IfStatement($3,$5); }
     ;
 
 // Stmt -> WhileStmt
@@ -344,18 +335,16 @@ Expr
     |   Expr RSLASH Expr        { $$ = new BinaryExpr($1, ExprType.RSLASH, $3); }                
     |   Expr PERCENT Expr       { $$ = new BinaryExpr($1, ExprType.PERCENT, $3); }   /* remainder */
     |   ArithmeticUnaryOperator Expr  %prec UNARY { $$ = new NotImplemented("ArithmeticUnaryOperator Expr  %prec UNARY"); }
-    |   LValue                  { $$ = $1; }   
-    |   QualPriExpr             { $$ = $1; }
+    |   LValue                  { $$ = new EvalExpr($1 as ExprNode);}   
+    |   SpecialBuiltin          { $$ = new TypeExpr($1 as TypeRefNode);}
+    |   LPAREN Expr RPAREN      { $$ = new EvalExpr($2 as ExprNode);}
+    |   CxEvalExpr              { $$ = new EvalExpr($1 as ExprNode);}
     ;
 
 LValue               
-    :   Identifier              { $$ = new LValueNode($1 as Identifier);}
-    |   FieldAccess             { $$ = $1; }
+    :   Identifier                  { $$ = new LValueNode($1 as Identifier);}
+    |   Expr PERIOD Identifier      { $$ = new LValueNode($1 as ExprNode, $3 as Identifier); }
     ;
-
-FieldAccess                 
-    :   Expr PERIOD Identifier  { $$ = new LValueNode($1 as ExprNode, $3 as Identifier); }   
-    ;       
 
 ArithmeticUnaryOperator     
     :   PLUSOP                  { $$ = new NotImplemented("ArithmeticUnaryOperator"); }
@@ -364,9 +353,9 @@ ArithmeticUnaryOperator
                             
 // Expr -> QualPriExpr
 QualPriExpr                 
-    :   SpecialBuiltin          { $$ = new TypeExpr($1 as TypeRefNode);}
-    |   LPAREN Expr RPAREN      { $$ = new EvalExpr($2 as ExprNode);}
-    |   CxEvalExpr              { $$ = new EvalExpr($1 as ExprNode);}
+    :   SpecialBuiltin          { $$ = $1; }
+    |   LPAREN Expr RPAREN      { $$ = $2; }
+    |   CxEvalExpr              { $$ = $1;}
     ;
 
 // Expr -> QualPriExpr -> SpecialBuiltin
@@ -379,15 +368,20 @@ SpecialBuiltin
 CxEvalExpr 
     :   STR_LITERAL             { $$ = $1; }
     |   Number                  { $$ = $1; }
+    |   FieldAccess             { $$ = $1; }    
     |   MethodCall              { $$ = $1; }    
     ;
 
 // Expr -> QualPriExpr -> CxEvalExpr -> FieldAccess
+FieldAccess                 
+    :   QualPriExpr PERIOD Identifier   
+                                { $$ = new NotImplemented("FieldAccess");}   
+    ;       
 
 // Expr -> QualPriExpr -> CxEvalExpr -> MethodCall
 MethodCall                  
-    :   MethodRef LPAREN CallArgList RPAREN     { $$ = new MethodCall($1 as MethodRef, $3 as ArgumentList); }
-    |   MethodRef LPAREN RPAREN                 { $$ = new MethodCall($1 as MethodRef); }
+    :   MethodRef LPAREN CallArgList RPAREN     { $$ = new MethodCall($1 as QualifiedType, $3 as ArgumentList); }
+    |   MethodRef LPAREN RPAREN                 { $$ = new MethodCall($1 as QualifiedType); }
     ;
 
 CallArgList            
@@ -395,10 +389,13 @@ CallArgList
     |   CallArgList COMMA Expr  { $1.AddChild($3); $$ = $1; }
     ;
 
+// Expr -> QualPriExpr -> CxEvalExpr -> MethodCall -> MethodRef
 MethodRef             
-    :   Identifier              { $$ = new MethodRef($1 as Identifier);}
-    |   Expr PERIOD Identifier  { $$ = new MethodRef($1 as ExprNode, $3 as Identifier);} 
+    :   CxEvalExpr              { $$ = $1;}
+    |   QualifiedType           { $$ = $1;} // This can only be a type!
+    |   SpecialBuiltin          { $$ = $1;} 
     ;
+
 
 Identifier  :   IDENTIFIER      { $$ = $1; } ;
 Number      :   INT_NUMBER      { $$ = $1;} ;

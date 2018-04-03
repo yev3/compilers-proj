@@ -1,5 +1,7 @@
 /* Tests simple comparisons and if statements */
 
+public class iftest {
+
     public static void main() {
         int i, j;
         i = 0;
@@ -11,5 +13,5 @@
         if ( i == 10 ) j = i;
         else  WriteLine("In else part"); 
     }
-
+}
 

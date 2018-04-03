@@ -1,17 +1,15 @@
-﻿using System;
+﻿// Visitors for checking language semantics
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CompilerILGen.AST;
 using NLog;
-using Proj3Semantics.AST;
 
-namespace Proj3Semantics
+namespace CompilerILGen
 {
-
     using IEnv = ISymbolTable<Symbol>;
-
 
     public class SemanticsVisitor
     {
@@ -19,7 +17,10 @@ namespace Proj3Semantics
 
         public IEnv Env { get; set; }
 
-        public SemanticsVisitor(IEnv env) { Env = env; }
+        public SemanticsVisitor(IEnv env)
+        {
+            Env = env;
+        }
 
         public void Visit(dynamic node)
         {
@@ -66,6 +67,7 @@ namespace Proj3Semantics
         {
             Log.Trace("Type checking a literal, no action.");
         }
+
         private void VisitNode(BuiltinType builtin)
         {
             Log.Trace("Type checking builtin, no action.");
@@ -89,12 +91,13 @@ namespace Proj3Semantics
                     CompilerErrors.Add(SemanticErrorTypes.UndeclaredIdentifier, errMsg);
                     qnode.NodeTypeCategory = NodeTypeCategory.ErrorType;
                     return;
-
                 }
+
                 curSymbol = results.First();
                 curEnv = curSymbol.Env;
                 curScopeName = curIdStr;
             }
+
             if (curSymbol != null)
             {
                 qnode.SymbolRef = curSymbol;
@@ -104,38 +107,19 @@ namespace Proj3Semantics
 
         private void VisitNode(LValueNode lval)
         {
-            IEnv env;
-
-            if (lval.LeftOfPeriodExpr != null)
+            // for lvalue, we want to recursively figure out the types
+            var lft = lval.LeftOfPeriodExpr;
+            if (lft != null)
             {
-                LValueNode lft = lval.LeftOfPeriodExpr as LValueNode;
-                if (lft == null)
-                {
-                    CompilerErrors.Add(SemanticErrorTypes.FeatureNotImplemented, "only support field access on named expressions");
-                    lval.EvalType = TypeRefNode.TypeNodeError;
-                    return;
-                }
-
-                Visit(lft);
-                var declNode = lft.SymbolRef?.DeclNode;
-                var declSymbol = declNode?.DeclTypeNode as QualifiedType;
-                env = declSymbol?.SymbolRef?.Env;
-                if (env == null)
-                {
-                    throw new NullReferenceException();
-                }
-            }
-            else
-            {
-                env = Env;
+                CompilerErrors.Add(SemanticErrorTypes.FeatureNotImplemented, "do not support field access.. yet.");
+                lval.EvalType = TypeRefNode.TypeNodeError;
+                return;
             }
 
-
-            string name = lval.Identifier.Name;
-            var symbols = env.Lookup(name);
-            if (symbols == null || symbols.Count != 1)
+            var symbols = Env.Lookup(lval.Identifier.Name);
+            if (symbols.Count != 1)
             {
-                CompilerErrors.Add(SemanticErrorTypes.UndeclaredIdentifier, "Invalid variable reference " + name);
+                CompilerErrors.Add(SemanticErrorTypes.UndeclaredIdentifier, "Invalid variable reference");
                 lval.EvalType = TypeRefNode.TypeNodeError;
                 return;
             }
@@ -180,9 +164,7 @@ namespace Proj3Semantics
             {
                 assn.EvalType = TypeRefNode.TypeNodeError;
                 CompilerErrors.Add(SemanticErrorTypes.IncompatibleAssignment, rtype + " to " + ltype);
-                return;
             }
-
         }
 
 
@@ -265,43 +247,39 @@ namespace Proj3Semantics
             Debug.Assert(expr.EvalType != null);
         }
 
-        private List<Symbol> GetMethodOverloads(MethodRef mref)
+        private List<Symbol> GetMethodOverloads(QualifiedType qnode)
         {
-            Log.Trace("Looking up method overloads for " + mref.ToString());
-            IEnv curEnv;
+            Log.Trace("Looking up method overloads for " + qnode.ToString());
+            var curEnv = Env;
+            string curScopeName = "";
+            Symbol curSymbol = null;
 
-            if (mref.ExprNode != null)
+            var identifiers = qnode.IdentifierList;
+            int num_levels = identifiers.Count;
+            if (num_levels > 1)
             {
-                // figure out the env we are looking up the functions in
-                Visit(mref.ExprNode);
-
-                var symRef = (mref.ExprNode as LValueNode)?.SymbolRef;
-                curEnv = symRef?.Env;
-
-                if (curEnv == null)
+                for (int i = 0; i < num_levels - 1; i++)
                 {
-                    // looking up an instance of an object
-                    var varDecl = symRef?.DeclNode as VarDecl;
-                    if (varDecl != null)
+                    string curIdStr = identifiers[i];
+                    var results = curEnv.Lookup(curIdStr);
+                    if (results == null || results.Count != 1)
                     {
-                        var qType = varDecl.DeclTypeNode as QualifiedType;
-                        curEnv = qType?.SymbolRef?.Env;
+                        string errMsg = curIdStr;
+                        if (curScopeName != "")
+                            errMsg += " in " + curScopeName;
+                        CompilerErrors.Add(SemanticErrorTypes.UndeclaredIdentifier, errMsg);
+                        qnode.NodeTypeCategory = NodeTypeCategory.ErrorType;
+                        return new List<Symbol>();
                     }
-                }
 
-                if (curEnv == null)
-                {
-                    CompilerErrors.Add(SemanticErrorTypes.IdentifierNotTypeName, mref.ExprNode.ToString());
-                    return new List<Symbol>();
+                    curSymbol = results.First();
+                    curEnv = curSymbol.Env;
+                    curScopeName = curIdStr;
                 }
             }
-            else
-            {
-                curEnv = Env;
-            }
 
-            string fname = mref.Identifier.Name;
-            Log.Trace("Looking up method overload set for " + fname + " in " + mref);
+            string fname = identifiers[num_levels - 1];
+            Log.Trace("Looking up method overload set for " + fname + " in " + qnode);
             return curEnv
                 .Lookup(fname)
                 .Where(sym => sym.SymbolType == SymbolType.Function)
@@ -322,13 +300,27 @@ namespace Proj3Semantics
                 if (t.Item1.DeclTypeNode != t.Item2.EvalType)
                     return false;
             }
+
             return true;
         }
 
+        // MethodReference             
+        //       :   ComplexPrimaryNoParenthesis     { $$ = $1;}
+        //       |   QualifiedName                   { $$ = $1;}
+        //       |   SpecialBuiltinName              { $$ = $1;}
+        //       |   BuiltinSystemCall               { $$ = $1;}
+
+        // just checking the qualifiednamenode and SystemCall for now
 
         private void VisitNode(MethodCall call)
         {
             Log.Trace("Start checking MethodCall " + call.ToDebugString());
+
+            QualifiedType qualType = call.MethodReference as QualifiedType;
+            if (qualType == null)
+                CompilerErrors.Add(SemanticErrorTypes.FeatureNotImplemented,
+                    "Only support calling user-defined functions.");
+
 
             // evaluate the arguments
             List<ExprNode> argExpressions
@@ -344,8 +336,9 @@ namespace Proj3Semantics
             }
 
 
-            var candidateSet = GetMethodOverloads(call.MethodRef);
-            var matchedSet = candidateSet.Where(f => ArgumentsCompatible((f.DeclNode as AbstractFuncDecl)?.ParamList, argExpressions)).ToList();
+            var candidateSet = GetMethodOverloads(qualType);
+            var matchedSet = candidateSet
+                .Where(f => ArgumentsCompatible((f.DeclNode as AbstractFuncDecl)?.ParamList, argExpressions)).ToList();
             var numMatched = matchedSet.Count;
 
             if (numMatched == 0)
@@ -364,12 +357,9 @@ namespace Proj3Semantics
                 return;
             }
 
-            var symRef = matchedSet.First();
-            var funcDecl = symRef.DeclNode as AbstractFuncDecl;
-            if (funcDecl == null) throw new ArgumentNullException(nameof(funcDecl));
-
-            call.MethodRef.AbstractFuncDecl = funcDecl;
-            call.EvalType = funcDecl.ReturnTypeSpecifier;
+            var funcSymbol = matchedSet.First();
+            call.MethodReference.SymbolRef = funcSymbol;
+            call.EvalType = funcSymbol.DeclNode.DeclTypeNode;
         }
 
 
@@ -392,56 +382,6 @@ namespace Proj3Semantics
             Visit(loop.BodyStatement);
         }
 
-        // HELPERS
-        // ------------------------------------------------------------
-        // ------------------------------------------------------------
-
-        public bool IsAssignable(Object dst, Object src)
-        {
-            //if (dst == null || src == null) return false;
-
-            //switch (src.NodeTypeCategory)
-
-            //{
-            //    //case NodeTypeCategory.Primitive:
-            //    //    // for now, only can assign things from primitives
-            //    //    break;
-            //    //case NodeTypeCategory.NOT_SET:
-            //    //    return false;
-            //    //case NodeTypeCategory.Void:
-            //    //    return false;
-            //    //default:
-            //    //    _log.Warn("RHS in IsAssignable is not implemented " + src.NodeTypeCategory.ToString());
-            //    //    return false;
-            //}
-
-
-            //switch (dst.NodeTypeCategory)
-            //{
-            //    //case NodeTypeCategory.NOT_SET:
-            //    //    throw new NotImplementedException("???");
-            //    //case NodeTypeCategory.Primitive:
-            //    //    return IsPrimitiveAssignable(dst.TypeDescriptorRef as IPrimitiveTypeDescriptor, src.TypeDescriptorRef);
-            //    //case NodeTypeCategory.Null:
-            //    //    CompilerErrors.Add(SemanticErrorTypes.BuiltinNotAssignable, "null");
-            //    //    return false;
-            //    //case NodeTypeCategory.Void:
-            //    //    CompilerErrors.Add(SemanticErrorTypes.BuiltinNotAssignable, "void");
-            //    //    return false;
-            //    //case NodeTypeCategory.This:
-            //    //    CompilerErrors.Add(SemanticErrorTypes.BuiltinNotAssignable, "this");
-            //    //    return false;
-            //    //case NodeTypeCategory.Error:
-            //    //    return true;    // can always assign to an error type
-            //    //default:
-            //    //    CompilerErrors.Add(SemanticErrorTypes.FeatureNotImplemented, dst.NodeTypeCategory.ToString());
-            //    //    return false;
-            //}
-
-            //// TODO: fix
-            return false;
-        }
-
         private void CheckBoolean(ExprNode expr)
         {
             Visit(expr);
@@ -455,54 +395,10 @@ namespace Proj3Semantics
             }
         }
 
-        private bool IsPrimitiveAssignable(Object dst, Object src)
-        {
-            //if (dst == null || src == null) return false;
-
-            //IPrimitiveTypeDescriptor srcPrimitive = src.TypeDescriptorRef as IPrimitiveTypeDescriptor;
-            //if (srcPrimitive == null) throw new NotImplementedException("Assignment from non-primitives is not implemented");
-
-            //var tdst = dst.VariablePrimitiveType;
-            //var tsrc = srcPrimitive.VariablePrimitiveType;
-
-            //switch (tdst)
-            //{
-            //    case VariablePrimitiveType.Object:
-            //        return true;    // object is the lowest
-            //    default:
-            //        return tdst == tsrc;
-            //}
-
-
-            // TODO
-            return false;
-        }
-
         private bool IsArithmeticCompatible(TypeRefNode arg1, TypeRefNode arg2)
         {
             if (arg1 == null || arg2 == null) return false;
             return arg1.NodeTypeCategory == arg2.NodeTypeCategory;
         }
-
-
-        // Not doing classes anymore
-        // =========================
-
-        //private void VisitNode(ClassDeclaration cdecl)
-        //{
-        //    Log.Info("Found a class, visiting Methods of" + (cdecl as Node)?.ToDebugString());
-        //    Visit(cdecl.Methods);
-        //}
-
-        //private void VisitNode(MethodDeclaration mdecl)
-        //{
-        //    //_log.Info("Found a class method body, visiting block " + (mdecl as Node)?.ToDebugString());
-        //    //var blockVisitor = new TypeCheckingVisitor(mdecl);
-        //    //blockVisitor.Visit(mdecl.MethodBody);
-        //}
-
-
-
-
     }
 }

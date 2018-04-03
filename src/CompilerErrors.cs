@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NLog;
 
-namespace Proj3Semantics
+namespace CompilerILGen
 {
     using static SemanticErrorTypes;
     using ErrList = List<CompilerError>;
+
     public enum SemanticErrorTypes
     {
         FeatureNotImplemented,
@@ -72,8 +70,8 @@ namespace Proj3Semantics
 
     public class CompilerError
     {
-
     }
+
     public class SemanticError : CompilerError
     {
         public SemanticErrorTypes Type { get; set; }

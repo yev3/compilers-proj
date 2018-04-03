@@ -1,28 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.ModelBinding;
-using Proj3Semantics.AST;
+﻿// Node interfaces
 
-// found here:
+using CompilerILGen.AST;
+
+// Ideas for the type system implementation from here:
 // http://www.ccs.neu.edu/home/riccardo/courses/csu370-fa07/lect4.pdf
 
-namespace Proj3Semantics
+namespace CompilerILGen
 {
-	public interface IVisitableNode
-	{
-	   void Accept(IReflectiveVisitor rv);
-	}
+    public interface IVisitableNode
+    {
+        void Accept(IReflectiveVisitor rv);
+    }
 
     public interface IReflectiveVisitor
     {
         void Visit(dynamic node);
-        
     }
-
-
 
     public interface INamedType
     {
@@ -34,7 +27,5 @@ namespace Proj3Semantics
         AccessorType AccessorType { get; set; }
         bool IsStatic { get; set; }
         ClassDeclaration ParentClass { get; set; }
-
     }
-
 }

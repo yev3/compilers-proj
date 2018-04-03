@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Proj3Semantics.AST;
+using CompilerILGen.AST;
 
-namespace Proj3Semantics
+namespace CompilerILGen
 {
     public partial class TCCLParser
     {

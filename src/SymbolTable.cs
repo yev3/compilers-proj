@@ -4,10 +4,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CompilerILGen.AST;
 using NLog;
-using Proj3Semantics.AST;
 
-namespace Proj3Semantics
+namespace CompilerILGen
 {
     using IEnv = ISymbolTable<Symbol>;
     public enum SymbolType

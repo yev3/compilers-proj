@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Proj3Semantics;
-using Proj3Semantics.AST;
+using CompilerILGen.AST;
 
-namespace Proj3Semantics
+namespace CompilerILGen
 {
     public class NodePrintingVisitor : IReflectiveVisitor
     {
@@ -58,7 +54,6 @@ namespace Proj3Semantics
         // ============================================================
 
 
-
         private static void PrintModifiers(Node node, TextWriter cout = null)
         {
             if (cout == null) cout = Console.Out;
@@ -73,25 +68,6 @@ namespace Proj3Semantics
 
         private static void PrintTypeDescr(Node node, TextWriter cout = null)
         {
-            //if (cout == null) cout = Console.Out;
-
-            //ITypeDescriptor typeDescriptor = node as ITypeDescriptor;
-            //if (typeDescriptor == null) return;
-
-            //var typeStrings = new List<string>();
-            //typeStrings.Add(typeDescriptor.NodeTypeCategory.ToString());
-
-            //var primitiveDescriptor = node as IPrimitiveTypeDescriptor;
-            //if (primitiveDescriptor != null)
-            //    typeStrings.Add(primitiveDescriptor.VariablePrimitiveType.ToString());
-
-            //ITypeDescriptor typeRef = typeDescriptor?.TypeDescriptorRef;
-            //typeStrings.Add("tref=" + (typeRef?.ToString() ?? "**NULL**"));
-
-            //var typeStr = "{" + string.Join(", ", typeStrings) + "}";
-            //using (OutColor.Magenta)
-            //    cout.Write(typeStr);
-
         }
 
         private static void PrintName(Node node, TextWriter cout = null)
@@ -104,9 +80,7 @@ namespace Proj3Semantics
                 using (OutColor.Cyan)
                     cout.Write(nodeName);
             }
-
         }
-
 
 
         // ============================================================
@@ -114,7 +88,6 @@ namespace Proj3Semantics
         // ============================================================
         public void VisitNode(Node node)
         {
-
             Console.Write("<" + node.GetType().Name + "> ");
             PrintName(node);
             Console.Write(" ");
@@ -131,14 +104,14 @@ namespace Proj3Semantics
             {
                 Console.Write(decl.Name ?? "null_name");
             }
+
             Console.Write(" ");
             using (OutColor.Magenta)
             {
                 Console.Write("t:");
                 Console.Write(decl.DeclTypeNode?.ToString() ?? "null_tnode");
-
-
             }
+
             var mods = decl as IClassMember;
             if (mods != null)
             {
@@ -148,8 +121,8 @@ namespace Proj3Semantics
                     Console.Write(" " + mods.AccessorType);
                 }
             }
-            Console.WriteLine();
 
+            Console.WriteLine();
         }
 
         private void VisitNode(Identifier id)
@@ -188,6 +161,7 @@ namespace Proj3Semantics
             using (OutColor.Yellow)
                 Console.WriteLine(node.IntegerValue);
         }
+
         private void VisitNode(StringLiteralExpr node)
         {
             Console.Write(node + ": ");
@@ -206,17 +180,10 @@ namespace Proj3Semantics
             Console.WriteLine();
         }
 
-        //private void VisitNode(ClassVarDecl node)
-        //{
-        //    using (new WithColor(ConsoleColor.Red))
-        //        Console.WriteLine("<NOT IMPLEMENTED " + node.Msg + ">");
-        //}
         private void VisitNode(NotImplemented node)
         {
             using (OutColor.Red)
                 Console.WriteLine("<NOT IMPLEMENTED " + node.Msg + ">");
         }
-
-
     }
 }

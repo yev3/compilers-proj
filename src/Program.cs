@@ -4,15 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CompilerILGen.AST;
 using NLog;
-using Proj3Semantics.AST;
 
-namespace Proj3Semantics
+namespace CompilerILGen
 {
     class Program
     {
         private static TCCLParser Parser { get; } = new TCCLParser();
-
 
         static void Main(string[] args)
         {
@@ -49,11 +48,7 @@ namespace Proj3Semantics
                         Console.WriteLine("Current directory: {0}", Directory.GetCurrentDirectory());
                     }
                 }
-
             }
-
-            //Console.WriteLine("Press any key to continue..");
-            //Console.ReadKey();
         }
 
         static void RunFile(string ass, string fname)
@@ -95,25 +90,21 @@ namespace Proj3Semantics
             Console.WriteLine("==============================\n");
             ILCodeGeneration codeGen = new ILCodeGeneration(Parser.Root, ass);
             codeGen.GenerateCompileAndRun();
-
         }
 
         private static void TestAll()
         {
-            var testCases = new[] {
-                //new {assembly = "scratch", file = "00scratch.cs"},
-                //new {assembly = "writenums", file = "00writenums.cs"},
-                //new {assembly = "hello", file = "01hello.cs"},
-                //new {assembly = "compute", file = "02compute.cs"},
-                //new {assembly = "iftest", file = "03iftest.cs"},
-                //new {assembly = "loop", file = "04loop.cs"},
-                //new {assembly = "twomethods0", file = "05twomethods0.cs"},
-                //new {assembly = "twomethods1", file = "06twomethods1.cs"},
-                //new {assembly = "fact2", file = "07fact2.cs"},
-                //new {assembly = "logictest", file = "08logictest.cs"},
-                new {assembly = "struct1", file = "09struct1.cs"},
-                //new {assembly = "twoparams", file = "10twoparams.cs"},
-                //new {assembly = "errors1", file = "11errors1.cs"},
+            var testCases = new[]
+            {
+                new {assembly = "hello", file = "01hello.cs"},
+                new {assembly = "compute", file = "02compute.cs"},
+                new {assembly = "iftest", file = "03iftest.cs"},
+                new {assembly = "loop", file = "04loop.cs"},
+                new {assembly = "twomethods0", file = "05twomethods0.cs"},
+                new {assembly = "twomethods1", file = "06twomethods1.cs"},
+                new {assembly = "fact2", file = "07fact2.cs"},
+                new {assembly = "logictest", file = "08logictest.cs"},
+                new {assembly = "twoparams", file = "10twoparams.cs"},
             };
 
             foreach (var entry in testCases)
@@ -122,9 +113,6 @@ namespace Proj3Semantics
                 Console.WriteLine("========================================\n");
                 RunFile(entry.assembly, entry.file);
             }
-
         }
-
-
     }
 }

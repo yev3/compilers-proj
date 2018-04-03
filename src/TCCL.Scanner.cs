@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using QUT.GplexBuffers;
 
-namespace Proj3Semantics
+namespace CompilerILGen
 {
     public partial class TCCLScanner
     {
