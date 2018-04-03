@@ -4,15 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CompilerILGen.AST;
 using NLog;
-using Proj3Semantics.ASTNodes;
 
-namespace Proj3Semantics
+namespace CompilerILGen
 {
     class Program
     {
         private static TCCLParser Parser { get; } = new TCCLParser();
-
 
         static void Main(string[] args)
         {
@@ -25,17 +24,21 @@ namespace Proj3Semantics
             while (true)
             {
                 Console.Write("Enter a file name: ");
-
                 string input = Console.ReadLine();
-                if (input == null) continue;
+                if (string.IsNullOrEmpty(input)) continue;
+
+                Console.Write("Enter an assembly name: ");
+                string ass = Console.ReadLine();
+                if (string.IsNullOrEmpty(ass)) continue;
+
                 string cmd = input.ToLower().Trim();
                 if (cmd == "exit" || cmd == "quit") return;
                 string fname = input + ".txt";
 
                 if (System.IO.File.Exists(fname))
                 {
-                    RunFile(fname);
-                    Console.WriteLine("Parsing complete");
+                    RunFile(ass, fname);
+                    Console.WriteLine("Finished with " + ass);
                 }
                 else
                 {
@@ -46,12 +49,9 @@ namespace Proj3Semantics
                     }
                 }
             }
-
-            //Console.WriteLine("Press any key to continue..");
-            //Console.ReadKey();
         }
 
-        static void RunFile(string fname)
+        static void RunFile(string ass, string fname)
         {
             using (OutColor.Cyan)
                 Console.WriteLine(File.ReadAllText(fname));
@@ -64,7 +64,7 @@ namespace Proj3Semantics
 
 
             CompilerErrors.ClearAll();
-            SemanticAnalysis.Run(Parser.Root as CompilationUnit);
+            RunSemanticAnalysis.Run(Parser.Root as CompilationUnit);
             if (CompilerErrors.ErrList.Count > 0)
             {
                 using (OutColor.Red)
@@ -86,33 +86,33 @@ namespace Proj3Semantics
             var nodeVisitor = new NodePrintingVisitor();
             nodeVisitor.PreorderTraverseRoot(Parser.Root);
 
+            Console.WriteLine("\nStart Code Generation Phase:");
+            Console.WriteLine("==============================\n");
+            ILCodeGeneration codeGen = new ILCodeGeneration(Parser.Root, ass);
+            codeGen.GenerateCompileAndRun();
         }
 
         private static void TestAll()
         {
-
-            List<string> testFiles = new List<string>()
+            var testCases = new[]
             {
-                "01hello.txt",
-                "02errors1.txt",
-                "03compute.txt",
-                "04twomethods0.txt",
-                "05twomethods1.txt",
-                "06writenums.txt",
-                "07iftest.txt",
-                "08loop.txt",
+                new {assembly = "hello", file = "01hello.cs"},
+                new {assembly = "compute", file = "02compute.cs"},
+                new {assembly = "iftest", file = "03iftest.cs"},
+                new {assembly = "loop", file = "04loop.cs"},
+                new {assembly = "twomethods0", file = "05twomethods0.cs"},
+                new {assembly = "twomethods1", file = "06twomethods1.cs"},
+                new {assembly = "fact2", file = "07fact2.cs"},
+                new {assembly = "logictest", file = "08logictest.cs"},
+                new {assembly = "twoparams", file = "10twoparams.cs"},
             };
 
-            var testNbr = 1;
-            foreach (var file in testFiles)
+            foreach (var entry in testCases)
             {
-                Console.WriteLine("Test case {0}: {1}", testNbr++, file);
+                Console.WriteLine("Test assembly {0}: {1}", entry.assembly, entry.file);
                 Console.WriteLine("========================================\n");
-                RunFile(file);
+                RunFile(entry.assembly, entry.file);
             }
-
         }
-
-
     }
 }

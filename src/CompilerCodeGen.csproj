@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{82DC719C-48C3-4F6D-B2F3-4C1356785264}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CompilerILGen</RootNamespace>
+    <AssemblyName>CompilerILGen</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;EXPORT_GPPG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>EXPORT_GPPG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Label="YltParsers">
+    <Names>TCCL</Names>
+    <Names>TCCLScanner</Names>
+  </PropertyGroup>
+  <PropertyGroup Label="YltProperties">
+    <YltTools>$(SolutionDir)packages\YaccLexTools.0.2.2\tools\</YltTools>
+    <GplexTool>"$(YltTools)gplex.exe"</GplexTool>
+    <GppgTool>"$(YltTools)gppg.exe"</GppgTool>
+  </PropertyGroup>
+  <PropertyGroup Label="GenerateTCCLProperties">
+    <TCCLParser>TCCL</TCCLParser>
+    <TCCLGrammarPath>$(ProjectDir)TCCL</TCCLGrammarPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>CompilerILGen.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Build.Utilities.v12.0, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>packages\NLog.4.4.9\lib\net45\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ASTNodes\AllNodes.cs" />
+    <Compile Include="ASTNodes\BuiltinMethodRefs.cs" />
+    <Compile Include="ASTNodes\ControlStatementNodes.cs" />
+    <Compile Include="ASTNodes\Declarations.cs" />
+    <Compile Include="ASTNodes\Expressions.cs" />
+    <Compile Include="ASTNodes\Node.cs" />
+    <Compile Include="ASTNodes\TypeNodes.cs" />
+    <Compile Include="CompilerErrors.cs" />
+    <Compile Include="ConsoleColors.cs" />
+    <Compile Include="ILCodeGeneration.cs" />
+    <Compile Include="Visitors\CodeGenVisitor.cs" />
+    <Compile Include="Visitors\DeclarationVisitor.cs" />
+    <Compile Include="GplexBuffers.cs" />
+    <Compile Include="NodePrintingVisitor.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RunSemanticAnalysis.cs" />
+    <Compile Include="Visitors\SemanticsVisitor.cs" />
+    <Compile Include="ShiftReduceParserCode.cs" />
+    <Compile Include="Visitors\Interfaces.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <Content Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="NLog.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup Label="TCCLFiles">
+    <Compile Include="SymbolTable.cs" />
+    <Compile Include="TCCL.Parser.cs">
+      <DependentUpon>TCCL.parser</DependentUpon>
+    </Compile>
+    <Compile Include="TCCL.Scanner.cs">
+      <DependentUpon>TCCL.parser</DependentUpon>
+    </Compile>
+    <None Include="TCCL.analyzer.lex">
+      <DependentUpon>TCCL.parser</DependentUpon>
+    </None>
+    <Compile Include="TCCL.Scanner.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TCCL.analyzer.lex</DependentUpon>
+    </Compile>
+    <None Include="$(TCCLParser).grammar.y">
+      <DependentUpon>TCCL.parser</DependentUpon>
+    </None>
+    <Compile Include="$(TCCLParser).Parser.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>$(TCCLParser).grammar.y</DependentUpon>
+    </Compile>
+    <None Include="TCCL.parser" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.6">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.6 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="BeforeBuild" DependsOnTargets="YltBuildGen" />
+  <Target Name="YltBuildGen" DependsOnTargets="GenerateTCCL" />
+  <Target Name="GenerateTCCL" Inputs="TCCL.analyzer.lex;$(TCCLGrammarPath).grammar.y" Outputs="TCCL.Scanner.Generated.cs;$(TCCLParser).Parser.Generated.cs">
+    <Message Text="Generating scanner for TCCL ..." />
+    <Exec Command="$(GplexTool) &quot;/out:TCCL.Scanner.Generated.cs&quot; &quot;TCCL.analyzer.lex&quot;" WorkingDirectory="$(ProjectDir)" Outputs="TCCL.Scanner.cs">
+      <Output TaskParameter="Outputs" ItemName="TCCLScanner" />
+    </Exec>
+    <Message Text="Generating parser for TCCLParser ..." />
+    <Exec Command="$(GppgTool) /no-lines /gplex /verbose &quot;$(TCCLGrammarPath).grammar.y&quot; &gt; &quot;$(TCCLParser).Parser.Generated.cs&quot;" WorkingDirectory="$(ProjectDir)" Outputs="$(TCCLParser).Parser.Generated.cs">
+      <Output TaskParameter="Outputs" ItemName="TCCL" />
+    </Exec>
+  </Target>
+  <Target Name="AfterClean">
+    <Delete Files="$(TCCLParser).Parser.Generated.cs" ContinueOnError="true" />
+    <Delete Files="TCCL.Scanner.Generated.cs" ContinueOnError="true" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

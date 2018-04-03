@@ -1,19 +1,25 @@
-﻿using System;
+﻿// Parsed Abstract Syntax Tree nodes
+
+using System;
 using System.Diagnostics;
+using QUT.Gppg;
 
-namespace Proj3Semantics.ASTNodes
+namespace CompilerILGen.AST
 {
-    public class CompilationUnit : AbstractNode
+    public class CompilationUnit : Node
     {
-        // just for the compilation unit because it's the top node
-        //public override AbstractNode LeftMostSibling => this;
-        public override AbstractNode NextSibling => null;
+        public LexLocation Location { get; }
 
-        public CompilationUnit(AbstractNode classDecl)
+        public CompilationUnit(Node classDecl)
         {
             AddChild(classDecl);
         }
 
+        public CompilationUnit(LexLocation lexLocation, Node classDecl)
+        {
+            this.Location = lexLocation;
+            AddChild(classDecl);
+        }
     }
 
 
@@ -21,13 +27,13 @@ namespace Proj3Semantics.ASTNodes
     public class Block : Statement
     {
         public Block() { }
-        public Block(AbstractNode child)
+        public Block(Node child)
         {
             AddChild(child);
         }
     }
 
-
+    public class LocalVarDeclOrStatement : Node { }
 
     public class Statement : LocalVarDeclOrStatement { }
 
@@ -35,31 +41,18 @@ namespace Proj3Semantics.ASTNodes
 
     public class EmptyStatement : Statement { }
 
-    public enum ExprType
-    {
-        ASSIGNMENT, LOGICAL_OR, LOGICAL_AND, PIPE, HAT, AND, EQUALS,
-        NOT_EQUALS, GREATER_THAN, LESS_THAN, LESS_EQUAL, GREATER_EQUAL, PLUSOP, MINUSOP,
-        ASTERISK, RSLASH, PERCENT, UNARY, EVALUATION
-    }
-    public abstract class Expression : ExpressionStatement, ITypeDescriptor
-    {
-        public abstract ExprType ExprType { get; set; }
 
-        public NodeTypeCategory NodeTypeCategory { get; set; }
-        public ITypeDescriptor TypeDescriptorRef { get; set; }
-    }
-
-    public class BinaryExpr : Expression
+    public class BinaryExpr : ExprNode
     {
         public sealed override ExprType ExprType { get; set; }
-        public Expression LhsExpression { get; set; }
-        public Expression RhsExpression { get; set; }
-        public BinaryExpr(AbstractNode lhs, ExprType exprType, AbstractNode rhs)
+        public ExprNode LhsExprNode { get; set; }
+        public ExprNode RhsExprNode { get; set; }
+        public BinaryExpr(Node lhs, ExprType exprType, Node rhs)
         {
-            LhsExpression = lhs as Expression;
-            RhsExpression = rhs as Expression;
-            Debug.Assert(LhsExpression != null);
-            Debug.Assert(RhsExpression != null);
+            LhsExprNode = lhs as ExprNode;
+            RhsExprNode = rhs as ExprNode;
+            Debug.Assert(LhsExprNode != null);
+            Debug.Assert(RhsExprNode != null);
             ExprType = exprType;
 
             AddChild(lhs);
@@ -67,110 +60,82 @@ namespace Proj3Semantics.ASTNodes
         }
     }
 
-    public class AssignExpr : Expression
-    {
-        public override ExprType ExprType
+    public class CompExpr : BinaryExpr {
+        public CompExpr(Node lhs, ExprType exprType, Node rhs) : base(lhs, exprType, rhs)
         {
-            get { return ExprType.ASSIGNMENT; }
-            set { throw new AccessViolationException(); }
-        }
-
-        public QualifiedName LhsQualName { get; set; }
-        public Expression RhsExpression { get; set; }
-
-        public AssignExpr(AbstractNode lhs, AbstractNode rhs)
-        {
-            LhsQualName = lhs as QualifiedName;
-            RhsExpression = rhs as Expression;
-            Debug.Assert(LhsQualName != null);
-            Debug.Assert(RhsExpression != null);
-
-            AddChild(LhsQualName);
-            AddChild(RhsExpression);
         }
     }
 
 
 
 
-    public abstract class QualifiedPrimaryExpr : AbstractNode, ITypeDescriptor
+    public class MethodCall : EvalExpr
     {
-        public NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.NOT_SET;
-        public abstract ITypeDescriptor TypeDescriptorRef { get; set; }
-    }
-
-    public abstract class ComplexPrimary : QualifiedPrimaryExpr { }
-
-    public class MethodCall : ComplexPrimary
-    {
-        public AbstractNode MethodReference { get; set; }
+        public QualifiedType MethodReference { get; set; }
         public ArgumentList ArgumentList { get; set; } = null;
-        public bool HasArguments => ArgumentList == null;
 
-        public MethodCall(AbstractNode methodReference)
+        public MethodCall(QualifiedType methodReference)  
         {
             MethodReference = methodReference;
+            if (MethodReference == null) throw new NullReferenceException(typeof(QualifiedType).ToString());
             AddChild(MethodReference);
         }
 
-        public MethodCall(AbstractNode methodRef, AbstractNode argList)
+        public MethodCall(QualifiedType methodRef, ArgumentList argList) : this(methodRef)
         {
-            MethodReference = methodRef;
-            ArgumentList = argList as ArgumentList;
+            ArgumentList = argList;
             if (ArgumentList == null) throw new NullReferenceException(typeof(ArgumentList).ToString());
-            AddChild(MethodReference);
             AddChild(ArgumentList);
         }
 
-        public override ITypeDescriptor TypeDescriptorRef { get; set; }
     }
 
     public class ReturnStatement : Statement
     {
         public ReturnStatement() { }
 
-        public ReturnStatement(AbstractNode abstractNode)
+        public ReturnStatement(Node node)
         {
-            AddChild(abstractNode);
+            AddChild(node);
         }
     }
 
-    public class StaticInitializer : AbstractNode
+    public class StaticInitializer : Node
     {
-        public StaticInitializer(AbstractNode abstractNode)
+        public StaticInitializer(Node node)
         {
-            AddChild(abstractNode);
+            AddChild(node);
         }
     }
 
 
-    public class ArgumentList : AbstractNode
+    public class ArgumentList : Node
     {
-        public ArgumentList(AbstractNode abstractNode)
+        public ArgumentList(ExprNode node)
         {
-            AddChild(abstractNode);
+            AddChild(node);
         }
+
     }
 
-    public class NamespaceBody : AbstractNode
+    public class NamespaceBody : Node
     {
         public NamespaceBody() { }
 
-        public NamespaceBody(AbstractNode singleItem)
+        public NamespaceBody(Node singleItem)
         {
             AddChild(singleItem);
         }
     }
 
-    public class NamespaceDecl : AbstractNode, ITypeDescriptor, IHasOwnScope, INamedType
+    public class NamespaceDecl : Node
     {
 
-        public ISymbolTable<ITypeDescriptor> NameEnv { get; set; } = null;
-        public ISymbolTable<ITypeDescriptor> TypeEnv { get; set; } = null;
+        public ISymbolTable<Symbol> Env { get; set; } = null;
         public string Name { get; set; }
         public NamespaceBody NamespaceBody { get; set; }
 
-        public NamespaceDecl(AbstractNode identifier, AbstractNode body)
+        public NamespaceDecl(Node identifier, Node body)
         {
             Identifier id = identifier as Identifier;
             if (id == null) throw new ArgumentNullException(nameof(id));
@@ -182,7 +147,7 @@ namespace Proj3Semantics.ASTNodes
             AddChild(NamespaceBody);
         }
 
-        public NamespaceDecl(AbstractNode body)
+        public NamespaceDecl(Node body)
         {
             Name = "";
             NamespaceBody = body as NamespaceBody;
@@ -192,14 +157,9 @@ namespace Proj3Semantics.ASTNodes
         }
 
         public NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.NamespaceDecl;
-        public ITypeDescriptor TypeDescriptorRef
-        {
-            get { return this; }
-            set { throw new AccessViolationException(); }
-        }
     }
 
-    public class NotImplemented : AbstractNode
+    public class NotImplemented : Node
     {
         public string Msg { get; set; }
         public NotImplemented(string msg)

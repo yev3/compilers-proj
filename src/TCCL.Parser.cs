@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Proj3Semantics.ASTNodes;
+using CompilerILGen.AST;
 
-namespace Proj3Semantics
+namespace CompilerILGen
 {
     public partial class TCCLParser
     {
-        public AbstractNode Root => CurrentSemanticValue;
+        public Node Root => CurrentSemanticValue;
         public TCCLParser() : base(null) { }
 
         public void Parse(string filename)

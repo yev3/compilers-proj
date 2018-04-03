@@ -1,5 +1,6 @@
-%namespace Proj3Semantics
-%using Proj3Semantics.ASTNodes;
+%namespace CompilerILGen
+%using CompilerILGen.AST;
+%using QUT.Gppg;
 %scannertype TCCLScanner
 %visibility public
 %tokentype Token 
@@ -37,7 +38,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 "-"             { return (int)Token.MINUSOP; }
 "null"          { return (int)Token.NULL; }
 "int"           { return (int)Token.INT; }
-"string"        { return (int)Token.STRING; }
+[Ss]"tring"     { return (int)Token.STRING; }
 "=="            { return (int)Token.OP_EQ; }
 "<"             { return (int)Token.OP_LT; }
 ":"             { return (int)Token.COLON; }
@@ -47,10 +48,10 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 "this"          { return (int)Token.THIS; }
 "class"         { return (int)Token.CLASS; }
 "namespace"     { return (int)Token.NAMESPACE; }
-"|"             { return (int)Token.PIPE; }
+"|"             { return (int)Token.B_OR; }
 "public"        { return (int)Token.PUBLIC; }
 [\.]            { return (int)Token.PERIOD; }
-"\^"            { return (int)Token.HAT; }
+"\^"            { return (int)Token.B_XOR; }
 ","             { return (int)Token.COMMA; }
 "void"          { return (int)Token.VOID; }
 "~"             { return (int)Token.TILDE; }
@@ -64,7 +65,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 "private"       { return (int)Token.PRIVATE; }
 "!"             { return (int)Token.BANG; }
 "<="            { return (int)Token.OP_LE; }
-"&"             { return (int)Token.AND; }
+"&"             { return (int)Token.B_AND; }
 [\{]            { return (int)Token.LBRACE; }
 [\}]            { return (int)Token.RBRACE; }
 [\[]            { return (int)Token.LBRACKET; }
@@ -78,8 +79,8 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 ">"             { return (int)Token.OP_GT; }
 "!="            { return (int)Token.OP_NE; }
 "&&"            { return (int)Token.OP_LAND; }
-"Write"         { yylval = new BuiltinCallWrite(); return (int)Token.WRITE; }
-"WriteLine"     { yylval = new BuiltinCallWriteLine(); return (int)Token.WRITE_LINE; } 
+"Write"         { return (int)Token.WRITE; }
+"WriteLine"     { return (int)Token.WRITE_LINE; } 
 
 
 }
@@ -88,7 +89,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 <INITIAL> {
 {Identifier}        { yylval = new Identifier(yytext); return (int)Token.IDENTIFIER; }
 
-{DecIntegerLiteral} { yylval = new NumberLiteral(int.Parse(yytext)); return (int)Token.INT_NUMBER; }
+{DecIntegerLiteral} { yylval = new IntLiteralExpr(int.Parse(yytext)); return (int)Token.INT_NUMBER; }
 
 \"                  { stringval.Length = 0; BEGIN(STRING); }
 
@@ -104,7 +105,7 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 <STRING> {
   \"                { BEGIN(INITIAL); 
                       yystringval = stringval.ToString();
-                      yylval = new StringLiteral(yystringval);
+                      yylval = new StringLiteralExpr(yystringval);
                       return (int)Token.STR_LITERAL; }
   [^\n\r\"\\]+      { stringval.Append(yytext); }
   \\t               { stringval.Append('\t'); }
@@ -117,6 +118,10 @@ DecIntegerLiteral (0|[1-9][0-9]*)
 
 
 
-/* error fallback */
-.|\n                             { Console.WriteLine("Illegal character <"+
-                                                    yytext+">"); }
+.|\n                { Console.WriteLine("Illegal character <" + yytext + ">"); }
+
+%{
+	yylloc = new LexLocation(tokLin, tokCol, tokELin, tokECol, tokPos, tokEPos, buffer);
+	// yylloc = new LexLocation(tokLin, tokCol, tokELin, tokECol);
+%}
+

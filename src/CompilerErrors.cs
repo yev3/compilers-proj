@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NLog;
 
-namespace Proj3Semantics
+namespace CompilerILGen
 {
     using static SemanticErrorTypes;
     using ErrList = List<CompilerError>;
+
     public enum SemanticErrorTypes
     {
         FeatureNotImplemented,
@@ -24,7 +22,8 @@ namespace Proj3Semantics
         InvalidFuncArg,
         IncompatibleAssignment,
         IncompatibleOperands,
-        BooleanExpected
+        BooleanExpected,
+        DuplicateFunctionDecl
     }
 
     public static class SemanticErrorTypeMessages
@@ -61,6 +60,8 @@ namespace Proj3Semantics
                     return "Incompatible operands";
                 case BooleanExpected:
                     return "Boolean expected";
+                case DuplicateFunctionDecl:
+                    return "Duplicate function declaration";
                 default:
                     throw new NotImplementedException("TODO: add a text message for the error type");
             }
@@ -69,8 +70,8 @@ namespace Proj3Semantics
 
     public class CompilerError
     {
-
     }
+
     public class SemanticError : CompilerError
     {
         public SemanticErrorTypes Type { get; set; }

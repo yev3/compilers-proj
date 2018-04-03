@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Proj3Semantics
+namespace CompilerILGen
 {
     public partial class TCCLScanner
     {

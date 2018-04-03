@@ -1,6 +1,7 @@
 /* Tests simple comparisons and if statements */
 
 public class iftest {
+
     public static void main() {
         int i, j;
         i = 0;

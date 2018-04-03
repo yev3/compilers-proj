@@ -1,132 +1,180 @@
-﻿using System;
+﻿// Nodes that carry type information
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Proj3Semantics.ASTNodes
+namespace CompilerILGen.AST
 {
-    // TYPE DECLARATIONS
-
-    public class VariableListDeclaring : AbstractNode
+    public enum NodeTypeCategory
     {
-        public TypeDescriptor FieldTypeDescriptor { get; set; }
-        public DeclaredVars ItemIdList { get; set; }
-        public Expression Initialization { get; set; }
-        public VariableListDeclaring(
-            AbstractNode typeSpecifier,
-            AbstractNode itemIdList,
-            AbstractNode init = null)
-        {
-            // adding children for printing
-            AddChild(typeSpecifier);
-            AddChild(itemIdList);
-            if (init != null) AddChild(init);
-
-            // check that the parser assigned some type of a node with type info
-            var decl = typeSpecifier as ITypeDescriptor;
-            Debug.Assert(decl != null);
-            FieldTypeDescriptor = typeSpecifier as TypeDescriptor;
-
-            ItemIdList = itemIdList as DeclaredVars;
-            Debug.Assert(itemIdList != null);
-
-            Initialization = init as Expression;
-        }
+        Int,
+        String,
+        Object,
+        Null,
+        Boolean,
+        Class,
+        Void,
+        This,
+        ErrorType,
+        ClassFieldDef,
+        ClassMethodDef,
+        NamespaceDecl,
+        Declaration,
+        Unknown
     }
-
-
-    public class DeclaredVars : AbstractNode
+    public static class Extensions
     {
-        public DeclaredVars(AbstractNode abstractNode)
+        public static string GetIlName(this NodeTypeCategory cat)
         {
-            AddChild(abstractNode);
-        }
-    }
-
-
-
-
-    public abstract class TypeDescriptor : AbstractNode, ITypeDescriptor
-    {
-        public abstract NodeTypeCategory NodeTypeCategory { get; set; }
-        public abstract ITypeDescriptor TypeDescriptorRef { get; set; }
-        public ISymbolTable<ITypeDescriptor> TypeEnv { get; set; } = null;
-        public ISymbolTable<ITypeDescriptor> NameEnv { get; set; } = null;
-    }
-
-    public abstract class TypeName : TypeDescriptor { }
-
-    public class ArraySpecifier : TypeDescriptor
-    {
-        public ArraySpecifier(AbstractNode abstractNode)
-        {
-            AddChild(abstractNode);
-        }
-
-        public override NodeTypeCategory NodeTypeCategory
-        {
-            get { return NodeTypeCategory.Array; }
-            set
+            switch (cat)
             {
-                throw new InvalidOperationException(
-                    "unable to set node type cat");
+                case NodeTypeCategory.Int:
+                    return "int32";
+                case NodeTypeCategory.String:
+                    return "string";
+                case NodeTypeCategory.Object:
+                    return "object";
+                case NodeTypeCategory.Boolean:
+                    return "bool";
+                case NodeTypeCategory.Void:
+                    return "void";
+                case NodeTypeCategory.This:
+                    return "this";
+                default:
+                    throw new NotImplementedException("Unsupported ToString of NodeTypeCategory: " + cat.GetType().Name.ToString());
             }
         }
-
-        public override ITypeDescriptor TypeDescriptorRef { get; set; } = null;
     }
 
-    public class QualifiedName : TypeName
+    public abstract class TypeRefNode : Node, IEquatable<TypeRefNode>
     {
-        public List<string> IdentifierList { get; set; } = new List<string>();
+        public static TypeRefNode TypeNodeInt { get; } = new BuiltinType(NodeTypeCategory.Int);
+        public static TypeRefNode TypeNodeString { get; } = new BuiltinType(NodeTypeCategory.String);
+        public static TypeRefNode TypeNodeObject { get; } = new BuiltinType(NodeTypeCategory.Object);
+        public static TypeRefNode TypeNodeNull { get; } = new BuiltinType(NodeTypeCategory.Null);
+        public static TypeRefNode TypeNodeBoolean { get; } = new BuiltinType(NodeTypeCategory.Boolean);
+        public static TypeRefNode TypeNodeVoid { get; } = new BuiltinType(NodeTypeCategory.Void);
 
-        public QualifiedName(AbstractNode node)
+        public static TypeRefNode TypeNodeThis { get; } = new BuiltinType(NodeTypeCategory.This);
+
+        // Generic declaration node
+        public static TypeRefNode TypeNodeDeclaration { get; } = new BuiltinType(NodeTypeCategory.Declaration);
+        public static TypeRefNode TypeNodeError { get; } = new BuiltinType(NodeTypeCategory.ErrorType);
+        public NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.Unknown;
+
+        public abstract bool Equals(TypeRefNode other);
+
+
+        public abstract override bool Equals(object obj);
+
+        public abstract override int GetHashCode();
+
+        public static bool operator ==(TypeRefNode left, TypeRefNode right)
         {
-            AppendIdentifier(node);
+            return Equals(left, right);
         }
 
-        private void AppendIdentifier(AbstractNode child)
+        public static bool operator !=(TypeRefNode left, TypeRefNode right)
+        {
+            return !Equals(left, right);
+        }
+
+        public bool CanConvertTo(TypeRefNode other)
+        {
+            return other.Equals(this);
+        }
+    }
+
+    public class BuiltinType : TypeRefNode
+    {
+        public BuiltinType(NodeTypeCategory type)
+        {
+            NodeTypeCategory = type;
+        }
+
+        public override bool Equals(TypeRefNode other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return NodeTypeCategory == other.NodeTypeCategory;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((TypeRefNode) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (int) NodeTypeCategory;
+        }
+
+        public override string ToString()
+        {
+            return NodeTypeCategory.ToString() + "/builtin";
+        }
+    }
+
+    public class QualifiedType : TypeRefNode
+    {
+        public List<string> IdentifierList { get; set; } = new List<string>();
+        public Symbol SymbolRef { get; set; } = null;
+
+        public QualifiedType(Identifier id)
+        {
+            NodeTypeCategory = NodeTypeCategory.Unknown;
+            AddChild(id);
+        }
+
+        public void AddChild(Identifier child)
         {
             Identifier id = child as Identifier;
             if (id == null) throw new ArgumentNullException(nameof(id));
             IdentifierList.Add(id.Name);
-
         }
 
-        public override void AddChild(AbstractNode child)
+        public override bool Equals(TypeRefNode other)
         {
-            AppendIdentifier(child);
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            QualifiedType otherQ = other as QualifiedType;
+            if (otherQ == null) return false;
+            return SymbolRef == otherQ.SymbolRef;
         }
 
-        public override NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.NOT_SET;
-        public override ITypeDescriptor TypeDescriptorRef { get; set; }
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((QualifiedType) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ToString().GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            string details = SymbolRef?.DeclNode?.ToString() ?? "null";
+            return string.Join(".", IdentifierList) + "/" + details;
+        }
     }
 
 
-    /// <summary>
-    /// (Page 303)
-    /// </summary>
-    public class Identifier : TypeName
+    [DebuggerDisplay("Identifier: '{Name}'")]
+    public class Identifier : Node
     {
         public string Name { get; set; }
+
         public Identifier(string s)
         {
             Name = s;
         }
-
-        public override NodeTypeCategory NodeTypeCategory { get; set; } = NodeTypeCategory.NOT_SET;
-        public override ITypeDescriptor TypeDescriptorRef { get; set; } = null;
     }
-
-
-    public class StringLiteral : BuiltinTypeString
-    {
-        public string Name { get; set; }
-        public StringLiteral(string s)
-        {
-            Name = s;
-        }
-    }
-
-
-
 }
